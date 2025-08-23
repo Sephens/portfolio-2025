@@ -34,9 +34,9 @@ const About = () => {
           <div className="relative">
             <div className="w-full h-96 bg-gradient-to-br from-primary-100 to-blue-100 dark:from-dark-800 dark:to-dark-700 rounded-2xl overflow-hidden">
               <img 
-                src="/headshot-placeholder.jpg" 
+                src="/coding.svg" 
                 alt="Steven" 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-fit"
               />
             </div>
             <div className="absolute -bottom-6 -right-6 glass-effect p-6 rounded-xl shadow-lg">
@@ -58,16 +58,19 @@ const About = () => {
           </h3>
           
           <p className="text-dark-600 dark:text-dark-300">
-            With over 5 years of experience in the IT industry, I specialize in network engineering, 
-            system administration, and full-stack development. I'm passionate about creating 
-            efficient, scalable solutions that solve real-world problems.
+            I combine academic training in IT with hands-on skills earned through a wide range of global certifications:
+            <br />
+             <ui>
+                <br></br>
+                <i>📊 Data & AI: Python for automation, ML (Scikit-learn, TensorFlow), and analytics, Power BI & Tableau for crafting interactive, boardroom-ready dashboards.</i><br />
+                <i>☁️ Cloud & DevOPs: AWS Certified Cloud Practioner, KCNA, DevNet Associate.</i><br />
+                <i>🌐 Software & Development: ALX Software Engineering, Python, (HTML/CSS/JS + React) to design pixel-perfect UIs.</i><br />
+                <i>📡 Networking & Securit: CCNA, HCIA, Cisco Cybersecurity Analyst.</i><br />
+                <i>🐍 Professional Skills: Google IT Support, Google Project Management.</i><br />
+              </ui>
+
           </p>
           
-          <p className="text-dark-600 dark:text-dark-300">
-            My journey in technology started with a curiosity about how things work, which evolved 
-            into a career dedicated to building robust infrastructures and intuitive applications. 
-            I believe in continuous learning and staying updated with the latest industry trends.
-          </p>
           
           <div className="grid grid-cols-2 gap-4 pt-4">
             {stats.map((stat, index) => (

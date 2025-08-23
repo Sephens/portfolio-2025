@@ -42,8 +42,10 @@ const Hero = () => {
               transition={{ duration: 0.7, delay: 0.4 }}
             >
               <span className="font-medium">IT Professional</span> | 
-              <span className="font-medium"> Network Engineer</span> | 
-              <span className="font-medium"> Developer</span>
+              <span className="font-medium"> DevOps</span> | 
+              <span className="font-medium"> Cloud(AWS) </span> | 
+              <span className="font-medium"> Network Security </span> | 
+              <span className="font-medium"> Python & React Developer</span>
             </motion.div>
             
             <motion.p 
@@ -52,8 +54,10 @@ const Hero = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.6 }}
             >
-              I create seamless digital experiences and robust network infrastructures. 
-              Passionate about technology, innovation, and solving complex problems.
+              I am an ambitious and versatile IT Professional together with a strong foundation across cloud, networking, Software,
+              and data. With certifications spanning AWS, Google, Cisco, Huawei, and ALX, I bridge the gap between infrastructure,
+              development, and emerging technologies. My passion lies in leveraging technology, cloud computing, AI, and modern
+              development frameworks to design scalable solutions, secure systems, and impactful digital experience.
             </motion.p>
             
             <motion.div 
