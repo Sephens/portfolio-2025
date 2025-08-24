@@ -2,9 +2,29 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 
 const Skills = () => {
-  const [activeCategory, setActiveCategory] = useState('frontend')
+  const [activeCategory, setActiveCategory] = useState('cloud')
 
   const skillsData = {
+    cloud: [
+      { name: 'Cloud Platforms: AWS and Google Cloud', level: 90 },
+      { name: 'Infrastructure & Orchestration: Kubernetes (KCNA) & Docker', level: 85 },
+      { name: 'DevOps & Automation: CI/CD, Python scripting, IaC', level: 85 },
+    ],
+    ai: [
+      { name: 'Data Science Fundamentals: Data Analysis & Statistics', level: 90 },
+      { name: 'Machine Learning: Core Concepts & Models', level: 85 },
+      { name: 'Programming for Data: Python(Pandas, NumPy, Scikit-learn)', level: 85 },
+    ],
+    network: [
+      { name: 'Cisco Networking', level: 85 },
+      { name: 'Huawei HCIA', level: 80 },
+      { name: 'Network Security', level: 75 },
+      { name: 'Automation & APIs', level: 70 },
+      { name: 'TCP/IP', level: 95 },
+      { name: 'Firewall Configuration', level: 80 },
+      { name: 'VPN Setup', level: 85 },
+      { name: 'Wireless Networking', level: 95 },
+    ],
     frontend: [
       { name: 'React', level: 90 },
       { name: 'JavaScript', level: 85 },
@@ -21,28 +41,24 @@ const Skills = () => {
       { name: 'PostgreSQL', level: 75 },
       { name: 'REST APIs', level: 85 },
     ],
-    networking: [
-      { name: 'Cisco Networking', level: 90 },
-      { name: 'Network Security', level: 85 },
-      { name: 'TCP/IP', level: 95 },
-      { name: 'Firewall Configuration', level: 80 },
-      { name: 'VPN Setup', level: 85 },
-      { name: 'Wireless Networking', level: 75 },
-    ],
     tools: [
       { name: 'Git/GitHub', level: 90 },
-      { name: 'Docker', level: 70 },
-      { name: 'AWS', level: 65 },
-      { name: 'Figma', level: 75 },
+      { name: 'Docker', level: 80 },
+      { name: 'AWS', level: 95 },
+      { name: 'Jupyter', level: 95 },
       { name: 'Jira', level: 80 },
-      { name: 'VS Code', level: 95 },
+      { name: 'Tableau', level: 95 },
+      { name: 'Keras', level: 75 },
+      { name: 'TensorFlow', level: 75 },
     ],
   }
 
   const categories = [
-    { id: 'frontend', name: 'Frontend' },
-    { id: 'backend', name: 'Backend' },
-    { id: 'networking', name: 'Networking' },
+    { id: 'cloud', name: 'Cloud, DevOps & Automation' },
+    { id: 'ai', name: 'Data, AI & ML' },
+    { id: 'network', name: 'Network & Infrastructure' },
+    { id: 'frontend', name: 'Software Development(Frontend)' },
+    { id: 'backend', name: 'Software Development(Backend)' },
     { id: 'tools', name: 'Tools' },
   ]
 

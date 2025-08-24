@@ -92,18 +92,12 @@ const Hero = () => {
           >
             <div className="relative">
               <div className="w-64 h-64 md:w-80 md:h-80 bg-gradient-to-br from-primary-400 to-blue-500 rounded-full overflow-hidden border-4 border-white dark:border-dark-800 shadow-2xl">
-                {/* Solution 1: Use object-cover with adjusted positioning */}
                 <img 
                   src="/headshot.jpg" 
                   alt="Steven" 
-                  className="w-full h-full object-cover object-top" // Added object-center
+                  className="w-full h-full object-cover object-top"
                 />
                 
-                {/* Solution 2: Alternatively, use a background image approach */}
-                {/* <div 
-                  className="w-full h-full bg-cover bg-center"
-                  style={{ backgroundImage: "url('/headshot.jpg')" }}
-                /> */}
               </div>
               <div className="absolute -bottom-4 -right-4 glass-effect p-4 rounded-xl shadow-lg">
                 <div className="text-sm font-medium text-dark-700 dark:text-dark-200">Available for work</div>
