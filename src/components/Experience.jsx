@@ -4,69 +4,142 @@ import { Calendar, MapPin, Download } from 'lucide-react'
 const Experience = () => {
   const experiences = [
     {
-      id: 1,
-      role: 'Senior Network Engineer',
-      company: 'Tech Solutions Inc.',
-      period: '2021 - Present',
-      location: 'San Francisco, CA',
-      description: 'Lead network infrastructure projects, design and implement secure network solutions, and mentor junior engineers. Reduced network downtime by 30% through proactive monitoring and optimization.',
-      technologies: ['Cisco', 'Juniper', 'Python', 'Ansible', 'AWS']
-    },
+    id: 1,
+    role: 'ICT Support Intern',
+    company: 'Kenya Revenue Authority (Deployed by ICT Authority PDTP Cohort 8)',
+    period: 'Dec 2023 - Dec 2024',
+    location: 'Kenya',
+    description: 'Provided technical support and troubleshooting for hardware, software, and network issues. Assisted in maintaining IT infrastructure and implemented security protocols. Supported system upgrades and helped reduce technical issues by 25% through proactive maintenance.',
+    technologies: ['Technical Support', 'Hardware Maintenance', 'Network Troubleshooting', 'System Administration', 'Security Protocols']
+  },
+  {
+    id: 2,
+    role: 'ISP Technician',
+    company: 'Northstar Mandera',
+    period: 'May 2023 - Nov 2023',
+    location: 'Mandera, Kenya',
+    description: 'Installed, maintained, and repaired internet service provider infrastructure. Conducted customer installations and resolved connectivity issues. Improved network reliability by 30% through optimized configurations and preventive maintenance.',
+    technologies: ['Network Installation', 'Fiber Optics', 'Wireless Technologies', 'Customer Support', 'Network Diagnostics']
+  },
+  {
+    id: 3,
+    role: 'Software Developer Attachee',
+    company: 'Lakehub Foundation',
+    period: 'Aug 2022 - Jan 2023',
+    location: 'Kisumu, Kenya',
+    description: 'Developed and maintained web applications using modern frameworks. Collaborated with cross-functional teams to deliver software solutions. Contributed to projects that improved operational efficiency by 20%.',
+    technologies: ['JavaScript', 'React', 'Node.js', 'API Development', 'Database Management']
+  },
     {
-      id: 2,
-      role: 'Full Stack Developer',
-      company: 'Digital Innovations LLC',
-      period: '2019 - 2021',
-      location: 'Remote',
-      description: 'Developed and maintained web applications using React and Node.js. Collaborated with cross-functional teams to deliver high-quality software solutions. Improved application performance by 40%.',
-      technologies: ['React', 'Node.js', 'MongoDB', 'Express', 'Docker']
-    },
-    {
-      id: 3,
-      role: 'IT Support Specialist',
-      company: 'Global Services Corp',
-      period: '2017 - 2019',
-      location: 'New York, NY',
-      description: 'Provided technical support to employees, managed IT infrastructure, and implemented security protocols. Reduced support tickets by 25% through documentation and training.',
-      technologies: ['Windows Server', 'Active Directory', 'VMware', 'Office 365']
-    },
-    {
-      id: 4,
-      role: 'Computer Science Degree',
-      company: 'University of Technology',
-      period: '2013 - 2017',
-      location: 'Boston, MA',
-      description: 'Bachelor of Science in Computer Science with a focus on networking and security. Graduated with honors and completed relevant certifications.',
+    id: 4,
+    role: 'FRONTEND DEVELOPER INTERN',
+    company: 'Penni',
+    period: 'March 2022 - August 2022',
+    location: 'Remote',
+    description: ' Developed an e-commerce website and created features that improved user experience on smartphones, resulting in increased mobile engagement. Translated designs and wireframes into responsive user interfaces and reusable components using React.js, enhancing application performance and user satisfaction. Connected back-end APIs to display data using custom components, library components, and Redux, improving data accessibility and user interaction',
+    technologies: ['JavaScript', 'React', 'Node.js', 'API Development', 'Database Management']
+  },
+  {
+      id: 5,
+      role: 'Information Technology Degree',
+      company: 'Kibabii University',
+      period: '2018 - 2023',
+      location: 'Bungoma, Kenya',
+      description: 'Bachelor of Science in Information Technology with a focus on networking and security. Graduated with Second Class Upper honors and completed relevant certifications.',
       technologies: ['Networking', 'Security', 'Programming', 'Databases']
     },
   ]
 
   const certifications = [
+  {
+    id: 1,
+    name: 'Cybershujaa Data and AI',
+    issuer: 'Cybershujaa',
+    date: 'Aug 2025'
+  },
+  {
+    id: 2,
+    name: 'AWS Certified Cloud Practitioner (CCP)',
+    issuer: 'Amazon Web Services',
+    date: 'May 2025'
+  },
+  {
+    id: 3,
+    name: 'Kubernetes and Cloud Native Associate (KCNA)',
+    issuer: 'Cloud Native Computing Foundation',
+    date: 'June 2025'
+  },
+  {
+    id: 4,
+    name: 'Cisco DevNet Associate',
+    issuer: 'Cisco',
+    date: 'Jan 2025'
+  },
+  {
+    id: 5,
+    name: 'Cisco Certified CyberOps Associate',
+    issuer: 'Cisco',
+    date: 'Jan 2025'
+  },
+  {
+    id: 6,
+    name: 'Cisco Certified Network Associate (CCNA)',
+    issuer: 'Cisco',
+    date: 'Oct 2024'
+  },
+  {
+    id: 7,
+    name: 'Google Project Management',
+    issuer: 'Google',
+    date: 'Jul 2024'
+  },
+  {
+    id: 8,
+    name: 'Google IT Support',
+    issuer: 'Google',
+    date: 'Jun 2024'
+  },
+  {
+    id: 9,
+    name: 'Cisco Junior Cybersecurity Analyst',
+    issuer: 'Cisco',
+    date: 'Apr 2024'
+  },
+  {
+    id: 10,
+    name: 'Google Cybersecurity',
+    issuer: 'Google',
+    date: 'Mar 2024'
+  },
+  {
+    id: 11,
+    name: 'ALX Software Engineering',
+    issuer: 'ALX Africa',
+    date: 'Dec 2022'
+  },
     {
-      id: 1,
-      name: 'Cisco Certified Network Professional (CCNP)',
-      issuer: 'Cisco',
-      date: '2022'
-    },
-    {
-      id: 2,
-      name: 'AWS Certified Solutions Architect',
-      issuer: 'Amazon Web Services',
-      date: '2021'
-    },
-    {
-      id: 3,
-      name: 'CompTIA Security+',
-      issuer: 'CompTIA',
-      date: '2020'
-    },
-    {
-      id: 4,
+      id: 12,
       name: 'React Developer Certification',
       issuer: 'Meta',
       date: '2019'
     },
   ]
+
+  // Function to handle PDF download
+  const handleDownload = () => {
+    // Using a direct link to a PDF file
+    const pdfUrl = '/Steven_Odhiambo_CV.pdf'
+    
+    // Create an anchor element
+    const link = document.createElement('a')
+    link.href = pdfUrl
+    link.download = 'Steven_Odhiambo_Resume.pdf' // Specify the filename for download
+    
+    // Append to body, click, and remove
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   return (
     <section id="experience" className="section-container">
@@ -177,14 +250,13 @@ const Experience = () => {
           transition={{ duration: 0.7, delay: 0.6 }}
           className="text-center mt-12"
         >
-          <a
-            href="/resume-placeholder.pdf"
-            download
+          <button
+            onClick={handleDownload}
             className="btn-primary inline-flex items-center gap-2"
           >
             <Download size={20} />
             Download CV
-          </a>
+          </button>
         </motion.div>
       </div>
     </section>
