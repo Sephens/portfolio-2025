@@ -5,6 +5,6 @@ export default defineConfig({
   // base: '/portfolio-2025/',
   plugins: [react()],
   server: {
-    port: 3000,
+    port: 3001,
   },
 })

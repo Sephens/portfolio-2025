@@ -75,7 +75,7 @@ const Contact = () => {
               </div>
               <div>
                 <p className="text-dark-500 dark:text-dark-400 text-sm">Email</p>
-                <p className="text-dark-800 dark:text-white">steven@example.com</p>
+                <p className="text-dark-800 dark:text-white">ombamstephodhis@gmail.com</p>
               </div>
             </div>
 
@@ -85,7 +85,7 @@ const Contact = () => {
               </div>
               <div>
                 <p className="text-dark-500 dark:text-dark-400 text-sm">Phone</p>
-                <p className="text-dark-800 dark:text-white">+1 (555) 123-4567</p>
+                <p className="text-dark-800 dark:text-white">+254 748294085</p>
               </div>
             </div>
 
@@ -95,7 +95,7 @@ const Contact = () => {
               </div>
               <div>
                 <p className="text-dark-500 dark:text-dark-400 text-sm">Location</p>
-                <p className="text-dark-800 dark:text-white">San Francisco, CA</p>
+                <p className="text-dark-800 dark:text-white">Nairobi, KE</p>
               </div>
             </div>
           </div>
@@ -105,7 +105,7 @@ const Contact = () => {
             <p className="text-dark-600 dark:text-dark-300 mb-4">Follow me on</p>
             <div className="flex space-x-4">
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/in/steven-adenux/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-dark-100 dark:bg-dark-800 rounded-full flex items-center justify-center text-dark-600 dark:text-dark-300 hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-300"
@@ -114,7 +114,7 @@ const Contact = () => {
                 <Linkedin size={18} />
               </a>
               <a
-                href="https://github.com"
+                href="https://github.com/Sephens"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-dark-100 dark:bg-dark-800 rounded-full flex items-center justify-center text-dark-600 dark:text-dark-300 hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-300"
@@ -123,7 +123,7 @@ const Contact = () => {
                 <Github size={18} />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://x.com/_Sephens"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-dark-100 dark:bg-dark-800 rounded-full flex items-center justify-center text-dark-600 dark:text-dark-300 hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-300"

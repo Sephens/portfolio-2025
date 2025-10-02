@@ -41,9 +41,9 @@ const Footer = () => {
             <p className="text-dark-300">
               IT Professional, Network Engineer, and Developer passionate about creating innovative solutions.
             </p>
-            <p className="text-dark-300 flex items-center">
+            {/* <p className="text-dark-300 flex items-center">
               Made with <Heart size={16} className="mx-1 text-red-500" /> by Steven
-            </p>
+            </p> */}
           </motion.div>
 
           {/* Navigation */}
@@ -79,9 +79,9 @@ const Footer = () => {
           >
             <h4 className="text-lg font-semibold">Get In Touch</h4>
             <div className="space-y-2 text-dark-300">
-              <p>steven@example.com</p>
-              <p>+1 (555) 123-4567</p>
-              <p>San Francisco, CA</p>
+              <p>ombamstephodhis@gmail.com</p>
+              <p>+254 748294085</p>
+              <p>Nairobi, KE</p>
             </div>
           </motion.div>
         </div>
