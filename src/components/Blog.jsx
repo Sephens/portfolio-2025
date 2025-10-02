@@ -28,174 +28,174 @@ const Blog = () => {
     "readTime": "10 min read",
     "category": "General"
   },
-  {
-    "id": 4,
-    "title": "JavaScript Scope, Async/Defer & Event Handling",
-    "excerpt": "Explore global vs local scope, async vs defer, event bubbling, throttling and debouncing...",
-    "date": "2025-01-01",
-    "readTime": "1 min read",
-    "category": "General"
-  },
-  {
-    "id": 5,
-    "title": "JavaScript Promises Explained",
-    "excerpt": "A Promise is a special JavaScript object that produces a single value sometime in the future...",
-    "date": "2025-01-01",
-    "readTime": "3 min read",
-    "category": "General"
-  },
-  {
-    "id": 6,
-    "title": "New Features in ES6",
-    "excerpt": "Some of the new features of JavaScript introduced in ES6 are let/const, arrow functions, template literals...",
-    "date": "2025-01-01",
-    "readTime": "12 min read",
-    "category": "General"
-  },
-  {
-    "id": 7,
-    "title": "JavaScript Hoisting Explained",
-    "excerpt": "Hoisting is JavaScript's default behavior of moving declarations to the top of the scope...",
-    "date": "2025-01-01",
-    "readTime": "11 min read",
-    "category": "General"
-  },
-  {
-    "id": 8,
-    "title": "Understanding the JavaScript Event Loop",
-    "excerpt": "Browser JavaScript execution flow, as well as in Node.js, is based on an event loop...",
-    "date": "2025-01-01",
-    "readTime": "5 min read",
-    "category": "General"
-  },
-  {
-    "id": 9,
-    "title": "JavaScript Prototypes Explained",
-    "excerpt": "The prototype is an object that is associated with every function and object in JavaScript...",
-    "date": "2025-01-01",
-    "readTime": "3 min read",
-    "category": "General"
-  },
-  {
-    "id": 10,
-    "title": "React Component Lifecycle",
-    "excerpt": "A visual overview of the React component lifecycle and its different phases...",
-    "date": "2025-01-01",
-    "readTime": "5 min read",
-    "category": "General"
-  },
-  {
-    "id": 11,
-    "title": "What is Google Firebase?",
-    "excerpt": "Google Firebase is a Google-backed application development software platform...",
-    "date": "2025-01-01",
-    "readTime": "9 min read",
-    "category": "General"
-  },
-  {
-    "id": 12,
-    "title": "Getting Started with Tailwind CSS",
-    "excerpt": "Tailwind CSS works by scanning all of your HTML files for class names and generating styles...",
-    "date": "2025-01-01",
-    "readTime": "1 min read",
-    "category": "General"
-  },
-  {
-    "id": 13,
-    "title": "Introduction to Amazon EC2",
-    "excerpt": "Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides resizable compute capacity...",
-    "date": "2025-01-01",
-    "readTime": "10 min read",
-    "category": "General"
-  },
-  {
-    "id": 14,
-    "title": "Understanding Amazon Machine Images (AMI)",
-    "excerpt": "An Amazon Machine Image (AMI) is a template that contains a software configuration...",
-    "date": "2025-01-01",
-    "readTime": "4 min read",
-    "category": "General"
-  },
-  {
-    "id": 15,
-    "title": "Introduction to Linux",
-    "excerpt": "Linux is an open-source, Unix-like operating system based on the Linux kernel...",
-    "date": "2025-01-01",
-    "readTime": "5 min read",
-    "category": "General"
-  },
-  {
-    "id": 16,
-    "title": "Why Learn the Linux Command Line?",
-    "excerpt": "Before diving into the specifics, it’s important to understand why learning the command line matters...",
-    "date": "2025-01-01",
-    "readTime": "4 min read",
-    "category": "General"
-  },
-  {
-    "id": 17,
-    "title": "Static vs Dynamic IP Addresses",
-    "excerpt": "A static IP address does not change, while a dynamic IP address is assigned temporarily...",
-    "date": "2025-01-01",
-    "readTime": "6 min read",
-    "category": "General"
-  },
-  {
-    "id": 18,
-    "title": "Creating Subnets and Allocating IPs in AWS VPC",
-    "excerpt": "Learn how to create subnets and allocate IP addresses in an Amazon Virtual Private Cloud...",
-    "date": "2025-01-01",
-    "readTime": "9 min read",
-    "category": "General"
-  },
-  {
-    "id": 19,
-    "title": "Introduction to Amazon Inspector",
-    "excerpt": "In today’s cloud-first world, security is non-negotiable. Amazon Inspector is AWS’s automated security assessment service...",
-    "date": "2025-01-01",
-    "readTime": "3 min read",
-    "category": "General"
-  },
-  {
-    "id": 20,
-    "title": "What is AWS IAM?",
-    "excerpt": "IAM is a service that helps securely control access to AWS resources...",
-    "date": "2025-01-01",
-    "readTime": "6 min read",
-    "category": "General"
-  },
-  {
-    "id": 21,
-    "title": "Cloud Computing in Modern Business",
-    "excerpt": "In today’s rapidly evolving digital landscape, cloud computing has become the backbone of modern businesses...",
-    "date": "2025-01-01",
-    "readTime": "4 min read",
-    "category": "General"
-  },
-  {
-    "id": 22,
-    "title": "AWS Resource Management and Monitoring",
-    "excerpt": "Management and monitoring the resources on AWS is important to ensure performance and availability...",
-    "date": "2025-01-01",
-    "readTime": "12 min read",
-    "category": "General"
-  },
-  {
-    "id": 23,
-    "title": "Efficient Workload Administration on AWS",
-    "excerpt": "As part of your day-to-day administrative task in maintaining workloads, you need to effectively manage resources...",
-    "date": "2025-01-01",
-    "readTime": "13 min read",
-    "category": "General"
-  },
-  {
-    "id": 24,
-    "title": "Amazon Key Management Service (KMS): A Comprehensive Guide",
-    "excerpt": "Cryptography is the practice of converting information into secure formats. AWS KMS helps you manage encryption keys...",
-    "date": "2025-01-01",
-    "readTime": "11 min read",
-    "category": "General"
-  }
+  // {
+  //   "id": 4,
+  //   "title": "JavaScript Scope, Async/Defer & Event Handling",
+  //   "excerpt": "Explore global vs local scope, async vs defer, event bubbling, throttling and debouncing...",
+  //   "date": "2025-01-01",
+  //   "readTime": "1 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 5,
+  //   "title": "JavaScript Promises Explained",
+  //   "excerpt": "A Promise is a special JavaScript object that produces a single value sometime in the future...",
+  //   "date": "2025-01-01",
+  //   "readTime": "3 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 6,
+  //   "title": "New Features in ES6",
+  //   "excerpt": "Some of the new features of JavaScript introduced in ES6 are let/const, arrow functions, template literals...",
+  //   "date": "2025-01-01",
+  //   "readTime": "12 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 7,
+  //   "title": "JavaScript Hoisting Explained",
+  //   "excerpt": "Hoisting is JavaScript's default behavior of moving declarations to the top of the scope...",
+  //   "date": "2025-01-01",
+  //   "readTime": "11 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 8,
+  //   "title": "Understanding the JavaScript Event Loop",
+  //   "excerpt": "Browser JavaScript execution flow, as well as in Node.js, is based on an event loop...",
+  //   "date": "2025-01-01",
+  //   "readTime": "5 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 9,
+  //   "title": "JavaScript Prototypes Explained",
+  //   "excerpt": "The prototype is an object that is associated with every function and object in JavaScript...",
+  //   "date": "2025-01-01",
+  //   "readTime": "3 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 10,
+  //   "title": "React Component Lifecycle",
+  //   "excerpt": "A visual overview of the React component lifecycle and its different phases...",
+  //   "date": "2025-01-01",
+  //   "readTime": "5 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 11,
+  //   "title": "What is Google Firebase?",
+  //   "excerpt": "Google Firebase is a Google-backed application development software platform...",
+  //   "date": "2025-01-01",
+  //   "readTime": "9 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 12,
+  //   "title": "Getting Started with Tailwind CSS",
+  //   "excerpt": "Tailwind CSS works by scanning all of your HTML files for class names and generating styles...",
+  //   "date": "2025-01-01",
+  //   "readTime": "1 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 13,
+  //   "title": "Introduction to Amazon EC2",
+  //   "excerpt": "Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides resizable compute capacity...",
+  //   "date": "2025-01-01",
+  //   "readTime": "10 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 14,
+  //   "title": "Understanding Amazon Machine Images (AMI)",
+  //   "excerpt": "An Amazon Machine Image (AMI) is a template that contains a software configuration...",
+  //   "date": "2025-01-01",
+  //   "readTime": "4 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 15,
+  //   "title": "Introduction to Linux",
+  //   "excerpt": "Linux is an open-source, Unix-like operating system based on the Linux kernel...",
+  //   "date": "2025-01-01",
+  //   "readTime": "5 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 16,
+  //   "title": "Why Learn the Linux Command Line?",
+  //   "excerpt": "Before diving into the specifics, it’s important to understand why learning the command line matters...",
+  //   "date": "2025-01-01",
+  //   "readTime": "4 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 17,
+  //   "title": "Static vs Dynamic IP Addresses",
+  //   "excerpt": "A static IP address does not change, while a dynamic IP address is assigned temporarily...",
+  //   "date": "2025-01-01",
+  //   "readTime": "6 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 18,
+  //   "title": "Creating Subnets and Allocating IPs in AWS VPC",
+  //   "excerpt": "Learn how to create subnets and allocate IP addresses in an Amazon Virtual Private Cloud...",
+  //   "date": "2025-01-01",
+  //   "readTime": "9 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 19,
+  //   "title": "Introduction to Amazon Inspector",
+  //   "excerpt": "In today’s cloud-first world, security is non-negotiable. Amazon Inspector is AWS’s automated security assessment service...",
+  //   "date": "2025-01-01",
+  //   "readTime": "3 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 20,
+  //   "title": "What is AWS IAM?",
+  //   "excerpt": "IAM is a service that helps securely control access to AWS resources...",
+  //   "date": "2025-01-01",
+  //   "readTime": "6 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 21,
+  //   "title": "Cloud Computing in Modern Business",
+  //   "excerpt": "In today’s rapidly evolving digital landscape, cloud computing has become the backbone of modern businesses...",
+  //   "date": "2025-01-01",
+  //   "readTime": "4 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 22,
+  //   "title": "AWS Resource Management and Monitoring",
+  //   "excerpt": "Management and monitoring the resources on AWS is important to ensure performance and availability...",
+  //   "date": "2025-01-01",
+  //   "readTime": "12 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 23,
+  //   "title": "Efficient Workload Administration on AWS",
+  //   "excerpt": "As part of your day-to-day administrative task in maintaining workloads, you need to effectively manage resources...",
+  //   "date": "2025-01-01",
+  //   "readTime": "13 min read",
+  //   "category": "General"
+  // },
+  // {
+  //   "id": 24,
+  //   "title": "Amazon Key Management Service (KMS): A Comprehensive Guide",
+  //   "excerpt": "Cryptography is the practice of converting information into secure formats. AWS KMS helps you manage encryption keys...",
+  //   "date": "2025-01-01",
+  //   "readTime": "11 min read",
+  //   "category": "General"
+  // }
 ]
 
 
@@ -272,7 +272,7 @@ const Blog = () => {
         className="text-center mt-12"
       >
         <a
-          href="#"
+          href="https://code-crumbs.vercel.app/"
           className="btn-secondary"
         >
           View All Articles
