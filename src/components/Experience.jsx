@@ -7,7 +7,7 @@ const Experience = () => {
       id: 1,
       role: 'Data & AI Trainer (Data & AI Track)',
       company: 'Cyber Shujaa',
-      period: '2025 – Present',
+      period: 'Oct 2025 – Present',
       location: 'Kenya',
       description:
         'Leads training and mentorship for the Data & AI track of the Cyber Shujaa Programme, an initiative empowering African youth with in-demand digital skills in Data Analytics, Artificial Intelligence, and Machine Learning. Designs and deliveres practical sessions, guides trainee projects, and supported curriculum development to bridge the gap between academic learning and industry practice.',
