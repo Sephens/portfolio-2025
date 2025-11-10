@@ -10,7 +10,7 @@ const Experience = () => {
       period: 'Oct 2025 – Present',
       location: 'Kenya',
       description:
-        'Leads training and mentorship for the Data & AI track of the Cyber Shujaa Programme, an initiative empowering African youth with in-demand digital skills in Data Analytics, Artificial Intelligence, and Machine Learning. Designs and deliveres practical sessions, guides trainee projects, and supported curriculum development to bridge the gap between academic learning and industry practice.',
+        'Leads training and mentorship for the Data & AI track of the Cyber Shujaa Programme, an initiative empowering African youth with in-demand digital skills in Data Analytics, Artificial Intelligence, and Machine Learning. Designs and deliveres practical sessions, guides trainee projects, and supports curriculum development to bridge the gap between academic learning and industry practice.',
       technologies: [
         'Data Analytics',
         'Machine Learning',
