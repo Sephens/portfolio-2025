@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { Mail, Phone, MapPin, Send, Linkedin, Github, Twitter } from 'lucide-react'
+import emailjs from '@emailjs/browser'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -19,19 +20,48 @@ const Contact = () => {
     })
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setSubmitStatus('success')
-      setFormData({ name: '', email: '', subject: '', message: '' })
-      
-      // Reset status after 3 seconds
-      setTimeout(() => setSubmitStatus(null), 3000)
-    }, 2000)
+    setSubmitStatus(null)
+
+    // 1. Generate the current time for your email template
+    const currentTime = new Date().toLocaleString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    })
+
+    // 2. Prepare the data to match your HTML template variables: {{name}}, {{email}}, {{message}}, {{time}}
+    const templateParams = {
+      name: formData.name,
+      email: formData.email,
+      subject: formData.subject,
+      message: formData.message,
+      time: currentTime
+    }
+
+    // 3. Send using emailjs.send (Replace strings with your actual EmailJS keys)
+    const SERVICE_ID = 'service_shcmvyt'
+    const TEMPLATE_ID = 'template_arlll12'
+    const PUBLIC_KEY = 'mJBW7wDVHmU7bUYKj'
+
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
+      .then((result) => {
+          setIsSubmitting(false)
+          setSubmitStatus('success')
+          setFormData({ name: '', email: '', subject: '', message: '' })
+          
+          // Clear success message after 5 seconds
+          setTimeout(() => setSubmitStatus(null), 5000)
+      }, (error) => {
+          setIsSubmitting(false)
+          setSubmitStatus('error')
+          console.error('Email error:', error.text)
+      })
   }
 
   return (
@@ -75,7 +105,7 @@ const Contact = () => {
               </div>
               <div>
                 <p className="text-dark-500 dark:text-dark-400 text-sm">Email</p>
-                <p className="text-dark-800 dark:text-white">ombamstephodhis@gmail.com</p>
+                <p className="text-dark-800 dark:text-white">steven.ombam@gmail.com</p>
               </div>
             </div>
 
@@ -233,6 +263,16 @@ const Contact = () => {
                 className="p-4 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg"
               >
                 Thank you for your message! I'll get back to you soon.
+              </motion.div>
+            )}
+
+            {submitStatus === 'error' && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg"
+              >
+                Oops! Something went wrong. Please try again or email me directly.
               </motion.div>
             )}
           </form>
