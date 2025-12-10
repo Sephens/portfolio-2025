@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { Mail, Phone, MapPin, Send, Linkedin, Github, Twitter } from 'lucide-react'
+import { Mail, Phone, MapPin, Send, Linkedin, Github, Twitter, AlertCircle } from 'lucide-react'
 import emailjs from '@emailjs/browser'
 
 const Contact = () => {
@@ -10,30 +10,63 @@ const Contact = () => {
     subject: '',
     message: ''
   })
+  const [validationErrors, setValidationErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState(null)
+
+  // Strict Email Regex: Checks for anything@anything.anything
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return re.test(email)
+  }
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     })
+    
+    // Clear errors as user types
+    if (validationErrors[e.target.name]) {
+      setValidationErrors({
+        ...validationErrors,
+        [e.target.name]: null
+      })
+    }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    setIsSubmitting(true)
     setSubmitStatus(null)
+    const errors = {}
 
-    // 1. LOAD CONFIG FROM ENV
+    // 1. Strict Validation Checks
+    if (!formData.name.trim()) errors.name = "Name is required"
+    if (!formData.subject.trim()) errors.subject = "Subject is required"
+    if (!formData.message.trim()) errors.message = "Message is required"
+    
+    if (!formData.email.trim()) {
+      errors.email = "Email is required"
+    } else if (!validateEmail(formData.email)) {
+      errors.email = "Please enter a valid email address (e.g., user@domain.com)"
+    }
+
+    // If there are errors, stop here and show them
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+      return
+    }
+
+    setIsSubmitting(true)
+
+    // 2. LOAD CONFIG
     const config = {
       SERVICE_ID: import.meta.env.VITE_EMAILJS_SERVICE_ID,
       TEMPLATE_ID: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
       PUBLIC_KEY: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
     }
 
-
-    // 2. Generate time
+    // 3. Generate time
     const currentTime = new Date().toLocaleString('en-US', {
       month: 'long',
       day: 'numeric',
@@ -44,10 +77,10 @@ const Contact = () => {
     })
 
     const templateParams = {
-      name: formData.name,
-      email: formData.email,
-      subject: formData.subject,
-      message: formData.message,
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      subject: formData.subject.trim(),
+      message: formData.message.trim(),
       time: currentTime
     }
 
@@ -80,6 +113,7 @@ const Contact = () => {
       </motion.div>
 
       <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+        {/* Contact Info Side */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -87,7 +121,10 @@ const Contact = () => {
           transition={{ duration: 0.7, delay: 0.2 }}
           className="space-y-8"
         >
-          <div>
+          {/* ... (Keep your existing Contact Info JSX here) ... */}
+          {/* I am omitting the side content for brevity as it hasn't changed, 
+              but make sure you keep the JSX for the sidebar here */}
+             <div>
             <h3 className="text-2xl font-bold text-dark-800 dark:text-white mb-6">
               Let's talk about your project
             </h3>
@@ -163,6 +200,7 @@ const Contact = () => {
           </div>
         </motion.div>
 
+        {/* Contact form Side */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -181,25 +219,38 @@ const Contact = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-300"
+                  className={`w-full px-4 py-3 bg-white dark:bg-dark-800 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-300 ${
+                    validationErrors.name ? 'border-red-500' : 'border-dark-200 dark:border-dark-700'
+                  }`}
                   placeholder="Your name"
                 />
+                {validationErrors.name && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <AlertCircle size={14} className="mr-1" /> {validationErrors.name}
+                  </p>
+                )}
               </div>
+              
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
                   Email *
                 </label>
                 <input
-                  type="email"
+                  type="text" // Changed from 'email' to 'text' to prevent browser tooltip, letting us show our custom error
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-300"
+                  className={`w-full px-4 py-3 bg-white dark:bg-dark-800 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-300 ${
+                    validationErrors.email ? 'border-red-500' : 'border-dark-200 dark:border-dark-700'
+                  }`}
                   placeholder="your.email@example.com"
                 />
+                {validationErrors.email && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <AlertCircle size={14} className="mr-1" /> {validationErrors.email}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -213,10 +264,16 @@ const Contact = () => {
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-300"
+                className={`w-full px-4 py-3 bg-white dark:bg-dark-800 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-300 ${
+                  validationErrors.subject ? 'border-red-500' : 'border-dark-200 dark:border-dark-700'
+                }`}
                 placeholder="What's this about?"
               />
+              {validationErrors.subject && (
+                <p className="mt-1 text-sm text-red-500 flex items-center">
+                  <AlertCircle size={14} className="mr-1" /> {validationErrors.subject}
+                </p>
+              )}
             </div>
 
             <div>
@@ -228,11 +285,17 @@ const Contact = () => {
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                required
                 rows={5}
-                className="w-full px-4 py-3 bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-300"
+                className={`w-full px-4 py-3 bg-white dark:bg-dark-800 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-300 ${
+                  validationErrors.message ? 'border-red-500' : 'border-dark-200 dark:border-dark-700'
+                }`}
                 placeholder="Tell me about your project..."
               />
+              {validationErrors.message && (
+                <p className="mt-1 text-sm text-red-500 flex items-center">
+                  <AlertCircle size={14} className="mr-1" /> {validationErrors.message}
+                </p>
+              )}
             </div>
 
             <button
