@@ -25,7 +25,15 @@ const Contact = () => {
     setIsSubmitting(true)
     setSubmitStatus(null)
 
-    // 1. Generate the current time for your email template
+    // 1. LOAD CONFIG FROM ENV
+    const config = {
+      SERVICE_ID: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      TEMPLATE_ID: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      PUBLIC_KEY: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+    }
+
+
+    // 2. Generate time
     const currentTime = new Date().toLocaleString('en-US', {
       month: 'long',
       day: 'numeric',
@@ -35,7 +43,6 @@ const Contact = () => {
       hour12: true
     })
 
-    // 2. Prepare the data to match your HTML template variables: {{name}}, {{email}}, {{message}}, {{time}}
     const templateParams = {
       name: formData.name,
       email: formData.email,
@@ -44,18 +51,11 @@ const Contact = () => {
       time: currentTime
     }
 
-    // 3. Send using emailjs.send (Replace strings with your actual EmailJS keys)
-    const SERVICE_ID = 'service_shcmvyt'
-    const TEMPLATE_ID = 'template_arlll12'
-    const PUBLIC_KEY = 'mJBW7wDVHmU7bUYKj'
-
-    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
+    emailjs.send(config.SERVICE_ID, config.TEMPLATE_ID, templateParams, config.PUBLIC_KEY)
       .then((result) => {
           setIsSubmitting(false)
           setSubmitStatus('success')
           setFormData({ name: '', email: '', subject: '', message: '' })
-          
-          // Clear success message after 5 seconds
           setTimeout(() => setSubmitStatus(null), 5000)
       }, (error) => {
           setIsSubmitting(false)
@@ -80,7 +80,6 @@ const Contact = () => {
       </motion.div>
 
       <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-        {/* Contact information */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -130,7 +129,6 @@ const Contact = () => {
             </div>
           </div>
 
-          {/* Social links */}
           <div>
             <p className="text-dark-600 dark:text-dark-300 mb-4">Follow me on</p>
             <div className="flex space-x-4">
@@ -165,7 +163,6 @@ const Contact = () => {
           </div>
         </motion.div>
 
-        {/* Contact form */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
