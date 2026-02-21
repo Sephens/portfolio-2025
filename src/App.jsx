@@ -41,7 +41,6 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/blogs" element={<BlogsPage />} />
           <Route path="/blog/:id" element={<BlogPostPage />} />
-          <Route path="/blog/:id" element={<BlogPostPage />} />
         </Routes>
         <Footer />
       </div>

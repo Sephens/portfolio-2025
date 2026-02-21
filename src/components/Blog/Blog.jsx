@@ -46,6 +46,7 @@ export default function Blog() {
           Thoughts, tutorials, and deep dives on data science, engineering, and more
         </p>
       </motion.div>
+
       {/* Search + Tag filters */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
