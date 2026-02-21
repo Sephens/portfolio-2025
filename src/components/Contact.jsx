@@ -84,6 +84,9 @@ const Contact = () => {
       time: currentTime
     }
 
+    console.log('Config:', config)
+    console.log('Params:', templateParams)
+
     emailjs.send(config.SERVICE_ID, config.TEMPLATE_ID, templateParams, config.PUBLIC_KEY)
       .then((result) => {
           setIsSubmitting(false)

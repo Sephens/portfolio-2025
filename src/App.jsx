@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Home from './pages/Home'
+import BlogsPage from './pages/BlogsPage'
 import BlogPostPage from './pages/BlogPostPage'
 import Footer from './components/Footer'
 
@@ -38,6 +39,8 @@ function App() {
         <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/blogs" element={<BlogsPage />} />
+          <Route path="/blog/:id" element={<BlogPostPage />} />
           <Route path="/blog/:id" element={<BlogPostPage />} />
         </Routes>
         <Footer />

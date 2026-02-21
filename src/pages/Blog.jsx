@@ -1,145 +1,87 @@
-import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import Container from '../components/UI/Container'
-import Section from '../components/UI/Section'
-import BlogList from '../components/Blog/BlogList'
-import { getAllPosts, getAllTags } from '../utils/blog'
-import { Search, Filter } from 'lucide-react'
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Calendar, Clock, ArrowRight } from "lucide-react";
+import { getAllBlogs } from "../utils/blogParser";
 
-function Blog() {
-  const [posts, setPosts] = useState([])
-  const [filteredPosts, setFilteredPosts] = useState([])
-  const [tags, setTags] = useState([])
-  const [selectedTag, setSelectedTag] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const loadPosts = async () => {
-      try {
-        const [postsData, tagsData] = await Promise.all([
-          getAllPosts(),
-          getAllTags()
-        ])
-        setPosts(postsData)
-        setFilteredPosts(postsData)
-        setTags(tagsData)
-      } catch (error) {
-        console.error('Error loading posts:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadPosts()
-  }, [])
-
-  useEffect(() => {
-    let filtered = posts
-
-    if (selectedTag) {
-      filtered = filtered.filter(post =>
-        post.tags.some(tag => tag.toLowerCase() === selectedTag.toLowerCase())
-      )
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(post =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.abstract.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    }
-
-    setFilteredPosts(filtered)
-  }, [posts, selectedTag, searchQuery])
-
-  if (loading) {
-    return (
-      <Section>
-        <Container>
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading posts...</p>
-          </div>
-        </Container>
-      </Section>
-    )
-  }
+const Blog = () => {
+  const blogPosts = getAllBlogs().slice(0, 5); // show only first 5
 
   return (
-    <Section>
-      <Container>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-4xl font-heading font-bold text-gray-900 mb-4">
-            Blog
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Thoughts, tutorials, and insights about web development, programming, 
-            and technology.
-          </p>
-        </motion.div>
+    <section id="blog" className="section-container">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+        className="text-center"
+      >
+        <h2 className="section-title">Blog & Articles</h2>
+        <p className="section-subtitle">
+          Thoughts, tutorials, and insights about technology and development
+        </p>
+      </motion.div>
 
-        {/* Search and Filter */}
-        <div className="mb-8 space-y-4">
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              type="text"
-              placeholder="Search posts..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+      {/* Blog grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
+        {blogPosts.map((post, index) => (
+          <motion.article
+            key={post.id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            className="bg-white dark:bg-dark-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+          >
+            <img
+              src={post.headerImage}
+              alt={post.title}
+              className="h-48 w-full object-cover"
             />
-          </div>
 
-          <div className="flex flex-wrap justify-center gap-2">
-            <div className="flex items-center text-sm text-gray-600">
-              <Filter className="h-4 w-4 mr-1" />
-              Filter by:
-            </div>
-            <button
-              onClick={() => setSelectedTag('')}
-              className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
-                selectedTag === ''
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              All
-            </button>
-            {tags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => setSelectedTag(tag)}
-                className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
-                  selectedTag === tag
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+            <div className="p-6">
+              <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm rounded-full mb-3">
+                {post.topic}
+              </span>
+
+              <h3 className="text-xl font-bold text-dark-800 dark:text-white mb-3">
+                {post.title}
+              </h3>
+
+              <p className="text-dark-600 dark:text-dark-300 mb-4">
+                {post.abstract}
+              </p>
+
+              <div className="flex items-center justify-between text-sm text-dark-500 dark:text-dark-400 mb-4">
+                <div className="flex items-center">
+                  <Calendar size={16} className="mr-1" />
+                  <span>{new Date(post.date).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center">
+                  <Clock size={16} className="mr-1" />
+                  <span>{post.readTime}</span>
+                </div>
+              </div>
+
+              <Link
+                to={`/blog/${post.id}`}
+                className="inline-flex items-center text-primary-600 dark:text-primary-400 font-medium hover:text-primary-700 dark:hover:text-primary-300"
               >
-                {tag}
-              </button>
-            ))}
-          </div>
-        </div>
+                Read more
+                <ArrowRight size={16} className="ml-1" />
+              </Link>
+            </div>
+          </motion.article>
+        ))}
+      </div>
 
-        {/* Results count */}
-        <div className="mb-6">
-          <p className="text-gray-600">
-            Showing {filteredPosts.length} of {posts.length} posts
-            {selectedTag && ` filtered by "${selectedTag}"`}
-          </p>
-        </div>
+      {/* View all */}
+      <div className="text-center mt-12">
+        <Link to="/blogs" className="btn-secondary">
+          View All Articles
+        </Link>
+      </div>
+    </section>
+  );
+};
 
-        <BlogList posts={filteredPosts} />
-      </Container>
-    </Section>
-  )
-}
-
-export default Blog
+export default Blog;
