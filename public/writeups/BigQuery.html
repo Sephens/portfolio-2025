@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BigQuery SQL Lab — Portfolio Writeup</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --ink-mid: #3a3a5c;
+    --ink-light: #6b6b8a;
+    --accent: #1a6bb5;
+    --accent-light: #e8f2fc;
+    --accent-mid: #2980d9;
+    --gold: #c9963a;
+    --gold-light: #fdf6e8;
+    --border: #e2e2ef;
+    --surface: #f8f8fc;
+    --white: #ffffff;
+    --code-bg: #0f1b2d;
+    --code-text: #cdd9f0;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 300;
+    color: var(--ink);
+    background: var(--white);
+    line-height: 1.8;
+  }
+
+  /* ── LAYOUT ── */
+  .page { max-width: 820px; margin: 0 auto; padding: 0 2rem 4rem; }
+
+  /* ── HEADER ── */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .site-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .site-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 4rem 0 2.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+  }
+
+  .category-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .category-label::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1.title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: 2.8rem;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+    max-width: 680px;
+  }
+
+  .subtitle {
+    font-size: 1.15rem;
+    color: var(--ink-mid);
+    font-weight: 300;
+    max-width: 600px;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-light);
+  }
+
+  .meta-item { display: flex; flex-direction: column; gap: 3px; }
+  .meta-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-light); }
+  .meta-value { color: var(--ink); font-weight: 500; }
+
+  .meta-sep { width: 1px; background: var(--border); align-self: stretch; }
+
+  /* ── SECTIONS ── */
+  section { margin-bottom: 3rem; }
+
+  h2.section-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  h3.sub-title {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--ink);
+    margin: 1.75rem 0 0.5rem;
+  }
+
+  p { margin-bottom: 1rem; color: var(--ink-mid); font-size: 1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  strong { color: var(--ink); font-weight: 600; }
+
+  /* ── SKILLS GRID ── */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 1.25rem 0;
+  }
+
+  .skill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .skill-card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+
+  .skill-card-value {
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  /* ── FINDINGS TABLE ── */
+  .findings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+    font-size: 14px;
+  }
+
+  .findings-table th {
+    background: var(--ink);
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 500;
+  }
+
+  .findings-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-mid);
+    vertical-align: top;
+  }
+
+  .findings-table tr:nth-child(even) td { background: var(--surface); }
+  .findings-table td:first-child { color: var(--ink); font-weight: 400; }
+
+  /* ── QUOTE / INSIGHT ── */
+  .insight-box {
+    background: var(--gold-light);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .insight-box p {
+    color: #7a5a1a;
+    font-style: italic;
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  /* ── CODE ── */
+  .code-snippet {
+    background: var(--code-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.25rem 0;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .code-lang {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #64b5f6;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  pre {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--code-text);
+    padding: 1.25rem 1.5rem;
+    margin: 0;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+
+  .kw { color: #80cbc4; }
+  .fn { color: #f48fb1; }
+  .str { color: #ffcc80; }
+  .cmt { color: #546e7a; font-style: italic; }
+  .tbl { color: #90caf9; }
+  .num { color: #a5d6a7; }
+
+  /* ── STAT CARDS ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 1.5rem 0;
+  }
+
+  .stat-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+  }
+
+  /* ── TAKEAWAYS ── */
+  .takeaway-list { list-style: none; margin: 1rem 0; }
+
+  .takeaway-list li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--white);
+    background: var(--accent);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── TOOLS ── */
+  .tools-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 1rem 0;
+  }
+
+  .tool-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--ink-mid);
+    background: var(--surface);
+  }
+
+  .tool-tag.primary {
+    background: var(--accent-light);
+    border-color: #b0d4f4;
+    color: var(--accent);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0 1rem;
+    margin-top: 3rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    h1.title { font-size: 2rem; }
+    .stat-row { grid-template-columns: 1fr; }
+    .meta-sep { display: none; }
+    .site-header { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="site-logo">Portfolio · Data Analytics</span>
+  <span class="site-tag">Google Cloud Certified Lab</span>
+</header>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="category-label">SQL · Cloud Analytics · BigQuery</div>
+    <h1 class="title">Exploring an Ecommerce Dataset Using SQL in Google BigQuery</h1>
+    <p class="subtitle">A hands-on analysis of over 21 million Google Analytics records — uncovering data quality issues, visitor behaviour patterns, and ecommerce funnel performance using BigQuery Standard SQL.</p>
+    <div class="meta-row">
+      <div class="meta-item">
+        <span class="meta-label">Platform</span>
+        <span class="meta-value">Google BigQuery</span>
+      </div>
+      <div class="meta-sep"></div>
+      <div class="meta-item">
+        <span class="meta-label">Dataset</span>
+        <span class="meta-value">Google Merchandise Store</span>
+      </div>
+      <div class="meta-sep"></div>
+      <div class="meta-item">
+        <span class="meta-label">Lab ID</span>
+        <span class="meta-value">OCBL025</span>
+      </div>
+      <div class="meta-sep"></div>
+      <div class="meta-item">
+        <span class="meta-label">Level</span>
+        <span class="meta-value">Introductory</span>
+      </div>
+      <div class="meta-sep"></div>
+      <div class="meta-item">
+        <span class="meta-label">Score</span>
+        <span class="meta-value">50 / 100</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section>
+    <h2 class="section-title">Overview</h2>
+    <p>This lab was completed as part of my Google Cloud data analytics learning path. Working within Google BigQuery — Google's fully managed, serverless data warehouse — I queried and analysed a real-world ecommerce dataset: the exported Google Analytics session logs for the Google Merchandise Store, containing <strong>over 21 million rows</strong> of visitor interaction data.</p>
+    <p>The lab covered the full analytical workflow: environment setup, schema exploration, data quality validation, and progressively complex SQL analysis — from basic aggregations to multi-step Common Table Expressions and conditional logic with CASE statements.</p>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-number">21M+</div>
+        <div class="stat-label">Raw session rows analysed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">633</div>
+        <div class="stat-label">Distinct products identified</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">35.7%</div>
+        <div class="stat-label">Cart-to-purchase conversion rate</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section>
+    <h2 class="section-title">Tools &amp; Skills Applied</h2>
+    <p>This project required a practical combination of cloud platform navigation, SQL fluency, and analytical thinking. Below are the key technical areas exercised throughout the lab.</p>
+    <div class="tools-row">
+      <span class="tool-tag primary">Google BigQuery</span>
+      <span class="tool-tag primary">Standard SQL</span>
+      <span class="tool-tag primary">Google Cloud Console</span>
+      <span class="tool-tag">GROUP BY / HAVING</span>
+      <span class="tool-tag">COUNT DISTINCT</span>
+      <span class="tool-tag">Aggregate Functions</span>
+      <span class="tool-tag">Common Table Expressions</span>
+      <span class="tool-tag">CASE Statements</span>
+      <span class="tool-tag">CONCAT / CAST</span>
+      <span class="tool-tag">Data Quality Validation</span>
+      <span class="tool-tag">Funnel Analysis</span>
+      <span class="tool-tag">Conversion Rate Analysis</span>
+    </div>
+  </section>
+
+  <!-- TASK 1 -->
+  <section>
+    <h2 class="section-title">Task 1 — Environment Setup &amp; Dataset Access</h2>
+    <p>BigQuery public datasets are not visible by default in the console. The first task involved navigating the BigQuery Explorer and pinning the <code>data-to-insights</code> project — a public repository hosted by Google containing curated datasets for learning and experimentation.</p>
+    <p>Once starred, I navigated to the <strong>ecommerce</strong> dataset and opened the <code>all_sessions_raw</code> table. I explored the three metadata views available in BigQuery's UI:</p>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-card-label">Schema Tab</div>
+        <div class="skill-card-value">Field names, data types (STRING, INTEGER, FLOAT), and field modes — the structural blueprint of the table.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-card-label">Details Tab</div>
+        <div class="skill-card-value">Table metadata including row count (21M+), storage size (5.63 GB), creation date, and table ID.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-card-label">Preview Tab</div>
+        <div class="skill-card-value">A live sample of actual row data — useful for building intuition about the content before writing queries.</div>
+      </div>
+    </div>
+    <p><strong>Key learning:</strong> Understanding a dataset's schema and metadata before querying it is a fundamental best practice. It prevents type mismatches, informs your aggregation strategy, and helps identify fields that may contain nulls or require casting.</p>
+  </section>
+
+  <!-- TASK 2 -->
+  <section>
+    <h2 class="section-title">Task 2 — Data Quality: Identifying Duplicate Records</h2>
+    <p>Before any analysis can be trusted, the underlying data must be validated. The <code>all_sessions_raw</code> table contained no single field that uniquely identified each row — meaning duplicates could only be detected by evaluating the combination of <em>all</em> fields together.</p>
+
+    <h3 class="sub-title">The Approach</h3>
+    <p>I used a <code>GROUP BY</code> across every column in the table combined with <code>COUNT(*)</code>. If every field in a row is truly unique, the count for that group will be exactly 1. Any group with a count greater than 1 represents a duplicate — rows that are identical across all fields. The <code>HAVING</code> clause then filters to show only those groups.</p>
+
+    <div class="code-snippet">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — Duplicate Detection</span></div>
+      <pre><span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> num_duplicate_rows, *
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions_raw`</span>
+<span class="kw">GROUP BY</span>
+  fullVisitorId, channelGrouping, time, country, city,
+  totalTransactionRevenue, transactions, timeOnSite,
+  pageviews, sessionQualityDim, date, visitId, type,
+  productRefundAmount, productQuantity, productPrice,
+  productRevenue, productSKU, v2ProductName,
+  v2ProductCategory, productVariant, currencyCode,
+  itemQuantity, itemRevenue, transactionRevenue,
+  transactionId, pageTitle, searchKeyword,
+  pagePathLevel1, eCommerceAction_type,
+  eCommerceAction_step, eCommerceAction_option
+<span class="kw">HAVING</span> num_duplicate_rows > <span class="num">1</span>;</pre>
+    </div>
+
+    <div class="insight-box">
+      <p>The query returned <strong>615 duplicate records</strong> in the raw table — confirming that the raw export requires cleaning before it can be used for reliable analysis.</p>
+    </div>
+
+    <h3 class="sub-title">Validating the Clean Table</h3>
+    <p>The data team had already produced a deduplicated version of the table called <code>all_sessions</code>. I ran a similar query against it — this time grouping only by the key business fields — to confirm it contained zero duplicate rows. The query returned no results, verifying the clean table's integrity.</p>
+    <p>This exercise reinforced a critical data engineering principle: <strong>never assume a dataset is clean</strong>. Even when a unique key is expected, validating it empirically before analysis is essential practice.</p>
+  </section>
+
+  <!-- TASK 3 -->
+  <section>
+    <h2 class="section-title">Task 3 — Analytical SQL Queries</h2>
+    <p>With a validated, clean dataset, I moved on to extracting business insights through a series of progressively complex SQL queries.</p>
+
+    <h3 class="sub-title">Query 1: Visitor Volume &amp; Unique Visitors</h3>
+    <p>The first query established baseline traffic metrics — total product page views and the number of distinct visitors. Using <code>COUNT(DISTINCT fullVisitorId)</code> is critical here: it ensures each person is counted once regardless of how many sessions or page views they generated.</p>
+
+    <h3 class="sub-title">Query 2: Visitor Breakdown by Traffic Channel</h3>
+    <p>I then segmented unique visitors by their <code>channelGrouping</code> — the acquisition source (Organic Search, Direct, Referral, Social, etc.). This kind of analysis is foundational for marketing teams deciding where to invest budget. The query returned 8 distinct channels.</p>
+
+    <h3 class="sub-title">Query 3: Product Catalogue &amp; Deduplication with GROUP BY</h3>
+    <p>To list all unique products, I used <code>GROUP BY v2ProductName</code> rather than <code>SELECT DISTINCT</code>. While both produce the same result, <code>GROUP BY</code> is the preferred pattern in BigQuery for large datasets as it integrates cleanly with aggregation in subsequent steps. The store had <strong>633 distinct product names</strong>.</p>
+
+    <h3 class="sub-title">Query 4: Top 5 Most-Viewed Products</h3>
+    <p>Filtering to <code>type = 'PAGE'</code> — to exclude non-page interaction types such as events and transactions — I counted views per product and ranked them descending.</p>
+
+    <div class="code-snippet">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — Top Products by Views</span></div>
+      <pre><span class="kw">SELECT</span>
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> product_views,
+  v2ProductName <span class="kw">AS</span> ProductName
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions`</span>
+<span class="kw">WHERE</span> type = <span class="str">'PAGE'</span>
+<span class="kw">GROUP BY</span> v2ProductName
+<span class="kw">ORDER BY</span> product_views <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">5</span>;</pre>
+    </div>
+
+    <h3 class="sub-title">Advanced: Deduplicating Views with a CTE</h3>
+    <p>The previous query counted every page view — including repeat visits by the same person. To measure unique viewer reach (each person counted once per product), I restructured the logic using a <strong>Common Table Expression (CTE)</strong>. The CTE first generates one row per (visitor, product) pair, then the outer query aggregates those pairs.</p>
+
+    <div class="code-snippet">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — CTE for Unique Views per Visitor</span></div>
+      <pre><span class="kw">WITH</span> unique_product_views_by_person <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    fullVisitorId,
+    v2ProductName <span class="kw">AS</span> ProductName
+  <span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions`</span>
+  <span class="kw">WHERE</span> type = <span class="str">'PAGE'</span>
+  <span class="kw">GROUP BY</span> fullVisitorId, v2ProductName
+)
+<span class="kw">SELECT</span>
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> unique_view_count,
+  ProductName
+<span class="kw">FROM</span> unique_product_views_by_person
+<span class="kw">GROUP BY</span> ProductName
+<span class="kw">ORDER BY</span> unique_view_count <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">5</span>;</pre>
+    </div>
+
+    <h3 class="sub-title">Query 5: Orders, Quantities &amp; Average Per Order</h3>
+    <p>Expanding further, I combined <code>COUNT(productQuantity)</code> — which counts only non-null rows, i.e. actual orders — with <code>SUM(productQuantity)</code> to get total units. Dividing the two produced the average units per order. This surfaced an interesting insight:</p>
+
+    <div class="insight-box">
+      <p>The <strong>22 oz YouTube Bottle Infuser</strong> had the highest average order quantity at <strong>9.38 units per order</strong> — suggesting bulk or gift purchasing behaviour, despite not being the most-viewed product.</p>
+    </div>
+  </section>
+
+  <!-- TASK 4 -->
+  <section>
+    <h2 class="section-title">Task 4 — Challenge Queries &amp; Business Insights</h2>
+    <p>The final task presented three open-ended analytical challenges, requiring me to combine multiple SQL concepts to answer real business questions.</p>
+
+    <h3 class="sub-title">Challenge 1: Conversion Rate Analysis</h3>
+    <p>I calculated conversion rates for products where more than 1,000 units had been added to a cart or ordered — excluding frisbees (likely test/demo products). The conversion rate was defined as the ratio of order interactions to total product views.</p>
+    <p>The <code>LOWER(v2ProductName) NOT LIKE '%frisbee%'</code> pattern ensures case-insensitive exclusion, a common requirement when filtering text data that may not be consistently cased.</p>
+
+    <h3 class="sub-title">Challenge 2: Checkout Funnel Analysis with CASE</h3>
+    <p>I mapped numeric action codes to descriptive labels using a <code>CASE</code> statement, then counted the distinct visitors at each stage of the purchase funnel. This is a classic funnel analysis pattern used in product analytics and growth teams.</p>
+
+    <div class="code-snippet">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — Funnel with CASE Statement</span></div>
+      <pre><span class="kw">SELECT</span>
+  <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> fullVisitorId) <span class="kw">AS</span> number_of_unique_visitors,
+  eCommerceAction_type,
+  <span class="kw">CASE</span> eCommerceAction_type
+    <span class="kw">WHEN</span> <span class="str">'3'</span> <span class="kw">THEN</span> <span class="str">'Add product(s) to cart'</span>
+    <span class="kw">WHEN</span> <span class="str">'5'</span> <span class="kw">THEN</span> <span class="str">'Check out'</span>
+    <span class="kw">WHEN</span> <span class="str">'6'</span> <span class="kw">THEN</span> <span class="str">'Completed purchase'</span>
+    <span class="cmt">-- ... additional mappings</span>
+  <span class="kw">END</span> <span class="kw">AS</span> eCommerceAction_type_label
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions`</span>
+<span class="kw">GROUP BY</span> eCommerceAction_type
+<span class="kw">ORDER BY</span> eCommerceAction_type;</pre>
+    </div>
+
+    <div class="insight-box">
+      <p>Of the <strong>56,010 visitors</strong> who added an item to their cart, <strong>19,988 completed a purchase</strong> — a cart-to-purchase conversion rate of <strong>35.68%</strong>. This means roughly 64% of high-intent shoppers abandoned their cart before checkout.</p>
+    </div>
+
+    <h3 class="sub-title">Challenge 3: High-Quality Abandoned Cart Identification</h3>
+    <p>The most complex query of the lab: finding sessions where a high-quality visitor (session quality score above 60) added a product to their cart but generated zero revenue — the textbook definition of cart abandonment.</p>
+    <p>Two technical challenges made this interesting. First, there is no pre-built unique session ID — I had to construct one using <code>CONCAT(fullVisitorId, CAST(visitId AS STRING))</code>, because a single visitor can have multiple visits and <code>visitId</code> alone is not globally unique. Second, I used <code>MAX(eCommerceAction_type)</code> to find the furthest step each session reached in the funnel — if the maximum action was '3' (add to cart) and revenue was zero or null, the session was definitively an abandoned cart.</p>
+
+    <div class="code-snippet">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — Abandoned Cart Detection</span></div>
+      <pre><span class="kw">SELECT</span>
+  <span class="fn">CONCAT</span>(fullVisitorId,
+    <span class="fn">CAST</span>(visitId <span class="kw">AS</span> STRING)) <span class="kw">AS</span> unique_session_id,
+  sessionQualityDim,
+  <span class="fn">SUM</span>(productRevenue) <span class="kw">AS</span> transaction_revenue,
+  <span class="fn">MAX</span>(eCommerceAction_type) <span class="kw">AS</span> checkout_progress
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions`</span>
+<span class="kw">WHERE</span> sessionQualityDim > <span class="num">60</span>
+<span class="kw">GROUP BY</span> unique_session_id, sessionQualityDim
+<span class="kw">HAVING</span>
+  checkout_progress = <span class="str">'3'</span>
+  <span class="kw">AND</span> (transaction_revenue = <span class="num">0</span>
+    <span class="kw">OR</span> transaction_revenue <span class="kw">IS NULL</span>);</pre>
+    </div>
+  </section>
+
+  <!-- KEY FINDINGS -->
+  <section>
+    <h2 class="section-title">Key Findings</h2>
+    <table class="findings-table">
+      <thead>
+        <tr>
+          <th>Finding</th>
+          <th>Detail</th>
+          <th>Business Implication</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>615 duplicate rows in raw data</td>
+          <td>Identified via GROUP BY across all 32 fields</td>
+          <td>Raw exports cannot be used for analysis without deduplication</td>
+        </tr>
+        <tr>
+          <td>633 distinct products in the store</td>
+          <td>Catalogued with GROUP BY on product name</td>
+          <td>Broad product range; views are concentrated on a small subset</td>
+        </tr>
+        <tr>
+          <td>22 oz YouTube Bottle Infuser: 9.38 avg units/order</td>
+          <td>Highest average order quantity in the top 5</td>
+          <td>Possible bulk/gift purchasing; candidate for bundle promotions</td>
+        </tr>
+        <tr>
+          <td>35.68% cart-to-purchase conversion</td>
+          <td>19,988 of 56,010 cart-adders completed purchase</td>
+          <td>64% cart abandonment rate — significant re-targeting opportunity</td>
+        </tr>
+        <tr>
+          <td>High-quality abandoned sessions identified</td>
+          <td>Quality score &gt;60, action type = add-to-cart, revenue = 0</td>
+          <td>These are the highest-value users to target with cart recovery campaigns</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- TAKEAWAYS -->
+  <section>
+    <h2 class="section-title">Key Takeaways</h2>
+    <ul class="takeaway-list">
+      <li>
+        <span class="takeaway-num">1</span>
+        <span><strong>Data validation before analysis is non-negotiable.</strong> The raw table contained 615 duplicate rows. Running a COUNT + GROUP BY + HAVING check before any analysis is a foundational habit that protects the integrity of every insight derived from the data.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">2</span>
+        <span><strong>CTEs make complex logic readable and maintainable.</strong> Breaking the unique-views-per-visitor query into a two-stage CTE made the logic clear: first isolate unique pairs, then aggregate. This is how production-grade SQL should be written.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">3</span>
+        <span><strong>COUNT vs COUNT DISTINCT matters enormously.</strong> Using plain <code>COUNT(fullVisitorId)</code> vs <code>COUNT(DISTINCT fullVisitorId)</code> produces fundamentally different numbers. Choosing the wrong one silently corrupts every downstream metric.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">4</span>
+        <span><strong>Constructing surrogate keys is a real analytical skill.</strong> When no unique identifier exists (as with session data), combining fields with CONCAT and CAST to create a reliable composite key is essential — and prevents incorrect groupings.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">5</span>
+        <span><strong>MAX() as a funnel progress indicator is an elegant pattern.</strong> Using MAX(eCommerceAction_type) per session to determine the furthest step reached — rather than checking for the presence of a specific step — is a clever and scalable approach to funnel analysis.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">6</span>
+        <span><strong>BigQuery's scale changes the way you think about queries.</strong> With 21+ million rows processed in seconds at no infrastructure cost, BigQuery demonstrates why cloud-native data warehouses have replaced traditional databases for analytical workloads.</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>Google Cloud BigQuery Lab · OCBL025 · Completed 2026</span>
+    <span>Data: Google Merchandise Store Analytics Export</span>
+  </footer>
+
+</div>
+</body>
+</html>

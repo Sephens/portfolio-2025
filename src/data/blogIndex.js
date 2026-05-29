@@ -276,6 +276,19 @@ const blogs = [
     isFeatured: false,
     date: "2024-08-20",
   },
+
+  {
+    id: "BL-1025",
+    title: "From Raw Data to Deployed Models",
+    author: "Steve",
+    tags: ["Python", "MachineLearning", "ScikitLearn"],
+    topic: "Machine Learning",
+    abstract: "A comprehensive walkthrough of the full ML workflow — preprocessing, K-Fold cross-validation, hyperparameter tuning, pipelines, and model deployment with scikit-learn.",
+    headerImage: "/BL-1025/ml-pipeline.jpg",
+    isPublished: true,
+    isFeatured: false,
+    date: "2025-01-02",
+  },
 ]
 
 export default blogs.filter((b) => b.isPublished)

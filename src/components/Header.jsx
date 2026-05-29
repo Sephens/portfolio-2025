@@ -22,7 +22,8 @@ const Header = ({ darkMode, toggleDarkMode }) => {
     { name: 'Skills',     href: '#skills' },
     { name: 'Projects',   href: '#projects' },
     { name: 'Experience', href: '#experience' },
-    { name: 'Blogs',       href: '#blog' },
+    { name: 'Blogs',      href: '#blog' },
+    { name: 'Writeups',   href: '#writeups' },
     { name: 'Contact',    href: '#contact' },
   ]
 
