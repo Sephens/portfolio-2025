@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mastering the Linux Command Line</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12121e;--ink-mid:#2e2e4e;--ink-light:#6b6b8a;
+  --accent:#374151;--accent-bg:#f9fafb;
+  --gold:#c9963a;--gold-bg:#fdf6e8;
+  --border:#e2e2ef;--surface:#f8f8fc;
+  --code-bg:#0f1b2d;--code-fg:#cdd9f0;
+}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink-mid);background:#fff;line-height:1.85}
+
+/* ── Nav ── */
+.bw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem}
+.bw-nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.bw-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);text-decoration:none;transition:color .15s}
+.bw-back:hover{color:var(--ink)}
+.bw-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bw-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent)}
+
+/* ── Hero ── */
+.bw-hero{padding:3.5rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.bw-hero-inner{max-width:760px;margin:0 auto}
+.bw-cat{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem}
+.bw-cat-rule{display:inline-block;width:22px;height:1px;background:var(--accent);flex-shrink:0}
+.bw-title{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.75rem,3.8vw,2.6rem);line-height:1.18;color:var(--ink);margin-bottom:1rem;max-width:680px}
+.bw-abstract{font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--ink-mid);max-width:620px;margin-bottom:1.75rem}
+.bw-meta{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:stretch}
+.bw-mi{display:flex;flex-direction:column;gap:3px}
+.bw-ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.bw-mv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.bw-ms{width:1px;background:var(--border);align-self:stretch;margin:2px 0}
+
+/* ── Body ── */
+.bw-body{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+/* ── Typography ── */
+.bw-h1{font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;line-height:1.2;color:var(--ink);margin:2.75rem 0 .9rem}
+.bw-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.45rem;color:var(--ink);margin:2.75rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink)}
+.bw-h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:2rem 0 .45rem}
+.bw-h4{font-family:'Source Serif 4',serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .35rem}
+.bw-h5,.bw-h6{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light);margin:1.25rem 0 .3rem}
+.bw-p{margin:.85rem 0}
+strong{color:var(--ink);font-weight:600}
+.bw-ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.bw-ol{list-style:decimal;margin:.75rem 0 .75rem 1.5rem}
+.bw-ul li,.bw-ol li{margin:.35rem 0;line-height:1.78}
+.bw-fig{margin:1.75rem 0}
+.bw-img{width:100%;border-radius:8px;display:block;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.bw-cap{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px}
+.bw-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.bw-link:hover{opacity:.75}
+.bw-ic{font-family:'DM Mono',monospace;font-size:.83em;background:#f0f0f8;color:#bf1650;padding:.12em .42em;border-radius:4px}
+.bw-cb{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.5rem 0}
+.bw-ch{padding:7px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.bw-cl{font-family:'DM Mono',monospace;font-size:10px;color:#64b5f6;letter-spacing:.1em}
+.bw-cb pre{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--code-fg);padding:1.2rem 1.4rem;margin:0;overflow-x:auto;line-height:1.7;white-space:pre}
+.bw-cb pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.bw-insight{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:1rem 1.35rem;margin:1.5rem 0;font-style:italic;font-size:.98rem;color:#7a5a1a;line-height:1.72}
+.bw-hr{border:none;border-top:1px solid var(--border);margin:2.25rem 0}
+
+/* ── Footer ── */
+.bw-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light)}
+.bw-footer a{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.bw-footer a:hover{opacity:.7}
+.bw-footer a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:600px){
+  .bw-title{font-size:1.6rem}
+  .bw-ms{display:none}
+  .bw-hero{padding:2.25rem 1rem 1.75rem}
+  .bw-body{padding:2rem 1rem 3.5rem}
+  .bw-h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="bw-nav">
+  <div class="bw-nav-inner">
+    <a href="javascript:history.back()" class="bw-back">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </a>
+    <span class="bw-pill">Linux in AWS</span>
+  </div>
+</nav>
+
+<div class="bw-hero">
+  <div class="bw-hero-inner">
+    <div class="bw-cat"><span class="bw-cat-rule"></span>AWS</div>
+    <h1 class="bw-title">Mastering the Linux Command Line</h1>
+    <p class="bw-abstract">The Linux command line is the backbone of system administration, cloud computing, and DevOps. It’s a powerful tool that allows users to interact with their operating system efficiently, automate tasks, and manage systems at scale. In the AWS re/Start program, Module 2 Linux Command Line is a critical component that equips learners with the foundational skills needed to work in cloud environments. This blog will provide a detailed exploration of the Linux command line, covering the key concepts taught in Module 2 and demonstrating how these skills can be applied in real-world scenarios.</p>
+    <div class="bw-meta">
+      <div class="bw-mi"><span class="bw-ml">Author</span><span class="bw-mv">Steve</span></div>
+      <div class="bw-ms"></div>
+      <div class="bw-mi"><span class="bw-ml">Read time</span><span class="bw-mv">4 min</span></div>
+      <div class="bw-ms"></div><div class="bw-mi"><span class="bw-ml">Topic</span><span class="bw-mv">Linux in AWS</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="bw-body">
+  <h2 class="bw-h2">Why Learn the Linux Command Line?</h2>
+<p class="bw-p">Before diving into the specifics, it’s important to understand why the Linux command line is so essential:</p>
+<ul class="bw-ul"><li><strong>Ubiquity in Cloud Computing</strong>: Most cloud servers run on Linux, and AWS is no exception. Knowing how to navigate and manage Linux systems is crucial for working with cloud infrastructure.</li></ul>
+<ul class="bw-ul"><li><strong>Automation</strong>: The command line allows you to automate repetitive tasks, saving time and reducing errors.</li></ul>
+<ul class="bw-ul"><li><strong>Troubleshooting</strong>: When things go wrong, the command line is often the fastest way to diagnose and fix issues.</li></ul>
+<ul class="bw-ul"><li><strong>Flexibility</strong>: The command line provides access to a wide range of tools and utilities that are not available in graphical interfaces.</li></ul>
+<h2 class="bw-h2">What the Article covers</h2>
+<ul class="bw-ul"><li>Describe the login workflow•</li><li>Explain the Linux command syntax•</li><li>Perform basic operations at the command line•</li><li>Explain standard input, standard output, and standard error</li></ul>
+<h3 class="bw-h3">Linux login workflow</h3>
+<p class="bw-p">After a network connection is made, you can connect by using a program like Putty or by using the terminal on Mac OS. You will encounter the login prompt. All Linux sessions begin with the login process (default authentication process). Linux sessions start with the user entering their user name at the prompt. The login prompt is used to authenticate (prove the user’s identity) before using a Linux system. When the password is typed, it does not echo (a line of text isn’t displayed).</p>
+<p class="bw-p">The user name is checked against the /etc/.psswdfile, which is stored in the /etcdirectory. The file represents an individual user account and contains the following fields separated by colons (:)</p>
+<ol class="bw-ol"><li>User name or login name</li><li>Encrypted password</li><li>User ID</li><li>Group ID5.User description</li><li>User’s home directory</li><li>User’s login shell</li></ol>
+<p class="bw-p">During the login workflow, the name is checked against the <code class="bw-ic">/etc/passwd</code> file, and the password is checked against the <code class="bw-ic">/etc/shadow</code> file.</p>
+<div class="bw-cb"><pre><code># User enters username:
+# The system checks /etc/passwd for the username.
+login: steve
+
+# User enters password
+# The system checks the hashed password stored in /etc/shadow.
+# If correct, it grants access and starts the user shell.
+Password:
+
+
+[steve@hostname ~]$ pwd
+/home/steve
+[steve@hostname ~]$</code></pre></div>
+<p class="bw-p">Command Prompt Components Once authenticated, the user is presented with the command prompt, which consists of:</p>
+<ul class="bw-ul"><li>Username: Displays the logged-in user.</li><li>Hostname: Shows the system's name.</li><li>Current Directory (PWD): The directory where the user is located.</li><li>Prompt Symbol:</li><li><code class="bw-ic">$</code> → Regular user</li><li><code class="bw-ic"># </code>→ Root user</li></ul>
+<h2 class="bw-h2">Useful commands</h2>
+<h3 class="bw-h3">The whoami command</h3>
+<p class="bw-p">It is used to show the current user's user name.</p>
+<p class="bw-p">You must ensure that you are the correct user invoking certain commands in the terminal and thus to confirm this, the <code class="bw-ic">whoami</code> command is used.</p>
+<div class="bw-cb"><pre><code>[steve@hostname ~]$ whoami
+steve
+[steve@hostname ~]$</code></pre></div>
+<h3 class="bw-h3">The id command</h3>
+<p class="bw-p">This command is used to identify user and group name and numeric IDs (group id) It displays the user and the group information for each specified USER or (when the USER is omitted) for the current user.</p>
+<figure class="bw-fig"><img src="/BL-1016/whoami.png" alt="whoami" class="bw-img"><figcaption class="bw-cap">whoami</figcaption></figure>
+<h3 class="bw-h3">The hostname command</h3>
+<p class="bw-p">It is used to set or display the system's current host, domain, or node name.</p>
+<figure class="bw-fig"><img src="/BL-1016/hostname.png" alt="hostname" class="bw-img"><figcaption class="bw-cap">hostname</figcaption></figure>
+<h3 class="bw-h3">The <code class="bw-ic">uptime</code> command</h3>
+<p class="bw-p">It indicates how long the system has been up since the last boot</p>
+<figure class="bw-fig"><img src="/BL-1016/uptime.png" alt="uptime" class="bw-img"><figcaption class="bw-cap">uptime</figcaption></figure>
+<h3 class="bw-h3">The date command</h3>
+<p class="bw-p">It can set or dispaly rhe current time in a given format.</p>
+<figure class="bw-fig"><img src="/BL-1016/date.png" alt="date" class="bw-img"><figcaption class="bw-cap">date</figcaption></figure>
+<h3 class="bw-h3">The cal command</h3>
+<p class="bw-p">The command displays the calendar. If no argument is specified, the current month is displayed.</p>
+<div class="bw-cb"><pre><code>[steve@hostname ~]$ cal</code></pre></div>
+<h3 class="bw-h3">The clear command</h3>
+<p class="bw-p">The command is used to clear the terminal screen. It clears all the text on the terminal screen.</p>
+<div class="bw-cb"><pre><code>[steve@hostname ~]$ clear</code></pre></div>
+<h3 class="bw-h3">The echo command</h3>
+<p class="bw-p">The command places a specified text on the screen. Useful in scripts to provide users with information as the script runs.</p>
+<div class="bw-cb"><pre><code>[steve@hostname ~]$ echo "Hello Linux"
+Hello Linux
+[steve@hostname ~]$</code></pre></div>
+<h3 class="bw-h3">The history command</h3>
+<p class="bw-p">Bash keeps a history of each user's commands in a file in the user's home directory.</p>
+<p class="bw-p">The <code class="bw-ic">history</code> command views the history file and displays the current user's history file.</p>
+<figure class="bw-fig"><img src="/BL-1016/history.png" alt="history" class="bw-img"><figcaption class="bw-cap">history</figcaption></figure>
+<p class="bw-p">&gt;Note: If you make a mistake when writing a command, don't reenter it. Use the history command to call the command back to the prompt, and then edit the command to correct the mistake &gt;</p>
+<h3 class="bw-h3">The touch command</h3>
+<p class="bw-p">Used to create, change, or modify timestamps on existing files.</p>
+<p class="bw-p">Also used to create new empty files in a directory. <code class="bw-ic">touch file_name</code></p>
+<p class="bw-p">You can create more than one new file <code class="bw-ic">touch file1 file2 file3 filen</code></p>
+<h3 class="bw-h3">The cat command</h3>
+<p class="bw-p">This command is used to show the current contents of a file.</p>
+<figure class="bw-fig"><img src="/BL-1016/cat.png" alt="cat" class="bw-img"><figcaption class="bw-cap">cat</figcaption></figure>
+<h4 class="bw-h4">There are thousands of commands, but the above are the most commonly used.</h4>
+
+  <footer class="bw-footer">
+    <span>Written by Steve</span>
+    <a href="javascript:history.back()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      All posts
+    </a>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AWS Systems Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12121e;--ink-mid:#2e2e4e;--ink-light:#6b6b8a;
+  --accent:#b91c1c;--accent-bg:#fef2f2;
+  --gold:#c9963a;--gold-bg:#fdf6e8;
+  --border:#e2e2ef;--surface:#f8f8fc;
+  --code-bg:#0f1b2d;--code-fg:#cdd9f0;
+}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink-mid);background:#fff;line-height:1.85}
+
+/* ── Nav ── */
+.bw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem}
+.bw-nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.bw-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);text-decoration:none;transition:color .15s}
+.bw-back:hover{color:var(--ink)}
+.bw-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bw-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent)}
+
+/* ── Hero ── */
+.bw-hero{padding:3.5rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.bw-hero-inner{max-width:760px;margin:0 auto}
+.bw-cat{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem}
+.bw-cat-rule{display:inline-block;width:22px;height:1px;background:var(--accent);flex-shrink:0}
+.bw-title{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.75rem,3.8vw,2.6rem);line-height:1.18;color:var(--ink);margin-bottom:1rem;max-width:680px}
+.bw-abstract{font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--ink-mid);max-width:620px;margin-bottom:1.75rem}
+.bw-meta{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:stretch}
+.bw-mi{display:flex;flex-direction:column;gap:3px}
+.bw-ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.bw-mv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.bw-ms{width:1px;background:var(--border);align-self:stretch;margin:2px 0}
+
+/* ── Body ── */
+.bw-body{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+/* ── Typography ── */
+.bw-h1{font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;line-height:1.2;color:var(--ink);margin:2.75rem 0 .9rem}
+.bw-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.45rem;color:var(--ink);margin:2.75rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink)}
+.bw-h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:2rem 0 .45rem}
+.bw-h4{font-family:'Source Serif 4',serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .35rem}
+.bw-h5,.bw-h6{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light);margin:1.25rem 0 .3rem}
+.bw-p{margin:.85rem 0}
+strong{color:var(--ink);font-weight:600}
+.bw-ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.bw-ol{list-style:decimal;margin:.75rem 0 .75rem 1.5rem}
+.bw-ul li,.bw-ol li{margin:.35rem 0;line-height:1.78}
+.bw-fig{margin:1.75rem 0}
+.bw-img{width:100%;border-radius:8px;display:block;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.bw-cap{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px}
+.bw-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.bw-link:hover{opacity:.75}
+.bw-ic{font-family:'DM Mono',monospace;font-size:.83em;background:#f0f0f8;color:#bf1650;padding:.12em .42em;border-radius:4px}
+.bw-cb{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.5rem 0}
+.bw-ch{padding:7px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.bw-cl{font-family:'DM Mono',monospace;font-size:10px;color:#64b5f6;letter-spacing:.1em}
+.bw-cb pre{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--code-fg);padding:1.2rem 1.4rem;margin:0;overflow-x:auto;line-height:1.7;white-space:pre}
+.bw-cb pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.bw-insight{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:1rem 1.35rem;margin:1.5rem 0;font-style:italic;font-size:.98rem;color:#7a5a1a;line-height:1.72}
+.bw-hr{border:none;border-top:1px solid var(--border);margin:2.25rem 0}
+
+/* ── Footer ── */
+.bw-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light)}
+.bw-footer a{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.bw-footer a:hover{opacity:.7}
+.bw-footer a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:600px){
+  .bw-title{font-size:1.6rem}
+  .bw-ms{display:none}
+  .bw-hero{padding:2.25rem 1rem 1.75rem}
+  .bw-body{padding:2rem 1rem 3.5rem}
+  .bw-h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="bw-nav">
+  <div class="bw-nav-inner">
+    <a href="javascript:history.back()" class="bw-back">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </a>
+    <span class="bw-pill">Security in AWS</span>
+  </div>
+</nav>
+
+<div class="bw-hero">
+  <div class="bw-hero-inner">
+    <div class="bw-cat"><span class="bw-cat-rule"></span>AWS · Monitoring · Management</div>
+    <h1 class="bw-title">AWS Systems Manager</h1>
+    <p class="bw-abstract">Managing and monitoring your resources on AWS is a crucial part of ensuring that your applications perform as expected. ou want to be able to monitor how your applications are being consumed, identify any technical issues that ...</p>
+    <div class="bw-meta">
+      <div class="bw-mi"><span class="bw-ml">Author</span><span class="bw-mv">Steve</span></div>
+      <div class="bw-ms"></div>
+      <div class="bw-mi"><span class="bw-ml">Read time</span><span class="bw-mv">12 min</span></div>
+      <div class="bw-ms"></div><div class="bw-mi"><span class="bw-ml">Topic</span><span class="bw-mv">Security in AWS</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="bw-body">
+  <h2 class="bw-h2">Introduction</h2>
+<p class="bw-p">As part of your day-to-day administrative task in maintaining your workloads, you want to be able to effectively manage your resources, such as patching, performing updates, and automating tasks.</p>
+<h2 class="bw-h2">What is AWS Systems Manager? 🍊</h2>
+<p class="bw-p">AWS Systems Manager is a service that enables you to centrally manage yout AWS resources. You have the visibility of your resources across AWS services and you can perform configuration management, and automate day-to-day operational tasks.</p>
+<p class="bw-p">The service utilizes the concept of documents(JSON and YAML), which define the actions that systems Manager performs on your managed resources such as operational management, change management, application management, and node management.</p>
+<p class="bw-p">The documents can be pre-deined(e.g the AWS-CreateRdsSnapshot document that can be used to create RDS snapshot for an RDS instance.) or customized by the user.</p>
+<h2 class="bw-h2">Key Components of Patch Manager</h2>
+<ol class="bw-ol"><li>Patch Baseline – Defines which patches should be applied to instances based on categories like security updates, critical updates, and specific software versions.</li><li>Patch Groups – Enables administrators to group instances together for easier patch deployment.</li><li>Maintenance Windows – Schedules patching activities to run at predefined times to avoid disruption.</li><li>Compliance Reporting – Provides reports on which instances are compliant or non-compliant based on applied patches.</li><li>Patch Policies – Ensures updates align with organizational security and compliance standards.</li></ol>
+<h2 class="bw-h2">What can you do with AWS Systems Manager?</h2>
+<h3 class="bw-h3">1. Run Command</h3>
+<p class="bw-p">With the run command, you are able to Keep your instances in a consistent state by enforcing security policies, firewall rules, and system settings automatically.</p>
+<h3 class="bw-h3">2. State Manager</h3>
+<p class="bw-p">With state manager, you are able to configure a predefined state that can be used to maintain consistency in your configurations across a fleet of instances, such as firewall configurations, and antivirus configurations.</p>
+<h3 class="bw-h3">3. Inventory</h3>
+<p class="bw-p">The inventory capability of AWS systems manager enables you to track applications, files, system configurations, and patches across your managed instances for better visibility and compliance.</p>
+<h3 class="bw-h3">4. Maintenance Window</h3>
+<p class="bw-p">This service enables you to Schedule maintenance tasks (like patching or updates) during specific time windows so as not to disrupt normal business hours.</p>
+<h3 class="bw-h3">5. Patch Manager</h3>
+<p class="bw-p">Automatically scan, approve, and install patches on your EC2 instances for improved security and compliance.</p>
+<h3 class="bw-h3">6. Automation</h3>
+<p class="bw-p">This enables you to automate various maintenance tasks, such as updating AMIs(Amazon Machine Images), creating snapshots of EBS (Elastic Block Store) volumes, resetting passwords, and launching or terminating EC2 instances.</p>
+<h3 class="bw-h3">7. Distributor</h3>
+<p class="bw-p">With Distributor, you can easily package, distribute, and update applications across multiple instances with seamless version control. You can as well reinstall new package versions and perform in-place updates</p>
+<h3 class="bw-h3">8. Session Manager</h3>
+<p class="bw-p">With Session Manager, you are able to remotely  access your EC2 instances using a browser-based shell or the CLI. It provides secure and auditable instance management without the need to open inbond ports, maintain bastion hosts, or manager SSH keys.</p>
+<h3 class="bw-h3">9. Incident Manager</h3>
+<p class="bw-p">This capability enables you to manage and resolve incident affecting AWS-hosted applications. It offers a management console to track all your incidents and notify responders of impact, identify data that can help with troubleshooting, and help you get services back up and running</p>
+<h3 class="bw-h3">10. Parameter Store</h3>
+<p class="bw-p">Store and securely manage sensitive information like passwords and database connection strings, with encryption and access control.</p>
+<hr class="bw-hr">
+<h2 class="bw-h2">Patch Management</h2>
+<p class="bw-p">Among the many things you can do with AWS Systems Manager, I would like to pick on Patch Management. Let us look at how you can automate patches in Linux and Windows instances with a practical Scenario.</p>
+<p class="bw-p">In organizations with hundreds and often thousands of workstations, it can be logistically challenging to keep all the operating system (OS) and application software up to date. In most cases, OS updates on workstations can be automatically applied via the network. However, administrators must have a clear security policy and baseline plan to ensure that all workstations are running a certain minimum version of software.</p>
+<h3 class="bw-h3">Steps for Implementing Patch Management in AWS Systems Manager</h3>
+<p class="bw-p">Assuming you have a fleet of Linux and Windows Instance, In this simple exercise, we shall:</p>
+<ul class="bw-ul"><li>Patch Linux instances using default baseline</li><li>Create custom patch baseline</li><li>Use patch groups to to patch Windows instances using custom patch baseline</li><li>Verify patch compliance</li></ul>
+<h2 class="bw-h2">1. Patch Linux instances using default baselines</h2>
+<p class="bw-p">In this task, you patch Linux EC2 instances using default baselines available for the OS.</p>
+<p class="bw-p">&gt;Patch Manager provides predefined patch baselines for each of the operating systems that it supports. You can use these baselines as they are currently configured (you can't customize them), or you can create your own custom patch baselines. You can use custom patch baselines for greater control over which patches are approved or rejected for your environment.</p>
+<p class="bw-p">Steps:</p>
+<h4 class="bw-h4">1. In the AWS Management Console, in the search  box, enter <code class="bw-ic">Systems Manager</code> and select it. This option takes you to the Systems Manager console page.</h4>
+<figure class="bw-fig"><img src="/BL-1023/sysmanager1.png" alt="sysmanager" class="bw-img"><figcaption class="bw-cap">sysmanager</figcaption></figure>
+<h4 class="bw-h4">2. In the left navigation pane, under Node Tools, choose Fleet Manager.</h4>
+<figure class="bw-fig"><img src="/BL-1023/fleet1.png" alt="fleet1" class="bw-img"><figcaption class="bw-cap">fleet1</figcaption></figure>
+<p class="bw-p">For example In my case I have some pre-configured EC2 instances. There are three Linux instances and three Windows instances. These EC2 instances have a specific IAM role associated with them that allows you you managed them using Systems Manager, which is why you can view them in the Fleet Manager section.</p>
+<figure class="bw-fig"><img src="/BL-1023/fleet2.png" alt="fleet2" class="bw-img"><figcaption class="bw-cap">fleet2</figcaption></figure>
+<p class="bw-p">If you Select one of the linux instances, you can view details about the specific instance, such as Platform type, Node type, OS name, and the IAM role that allows you to use Systems Manager to manage this instance.</p>
+<figure class="bw-fig"><img src="/BL-1023/fleet3.png" alt="fleet3" class="bw-img"><figcaption class="bw-cap">fleet3</figcaption></figure>
+<h4 class="bw-h4">3. At the top of the page, choose AWS Systems Manager to go back to the Systems Manager homepage.</h4>
+<h4 class="bw-h4">4. In the left navigation pane, under <strong>Node Tools</strong>, choose <strong>Patch Manager</strong>.</h4>
+<figure class="bw-fig"><img src="/BL-1023/patch1.png" alt="patch1" class="bw-img"><figcaption class="bw-cap">patch1</figcaption></figure>
+<p class="bw-p">Here, you will find five tabs in the dashboard giving you an overview of Patch Management:</p>
+<ul class="bw-ul"><li>Dashboard – Provides an overview of patching compliance.</li><li>Compliance Reporting – Displays compliance status of EC2 instances.</li><li>Patch Baselines – Manages predefined patch rules for different OS types.</li><li>Patches – Lists available patches for EC2 instances.</li><li>Settings – Configure settings for Patch Manager.</li></ul>
+<h4 class="bw-h4">5. Choose Patch now to patch the Linux instances with <strong>AWS-AmazonLinux2DefaultPatchBaseline</strong>.</h4>
+<p class="bw-p">You are presented with a Basic configuration window in which allows you to define how patches are applied to EC2 instances. The following are the configurations you can make:</p>
+<p class="bw-p"><strong>Patching Operation</strong></p>
+<ul class="bw-ul"><li>Scan → Checks for missing patches but does NOT install them.</li><li>Scan and Install (Selected) → Checks for missing patches and installs them.</li></ul>
+<p class="bw-p"><strong>Reboot Option</strong></p>
+<ul class="bw-ul"><li>Reboot if needed (Selected) → If a patch requires a restart, the instance will be rebooted automatically.</li><li>Do not reboot my instances → Instances will not be restarted, even if required.</li><li>Schedule a reboot time → Allows scheduling a reboot at a specific time.</li></ul>
+<p class="bw-p"><strong>Instances to Patch</strong></p>
+<ul class="bw-ul"><li>Patch all instances → Applies patches to all managed instances.</li><li>Patch only the target instances I specify → Lets you select specific instances.</li></ul>
+<p class="bw-p"><strong>Patching Log Storage</strong></p>
+<ul class="bw-ul"><li>Logs from the patching process can be stored in an S3 bucket for auditing and troubleshooting.</li></ul>
+<p class="bw-p"><strong>Advanced Options</strong></p>
+<p class="bw-p">This section is for configuring more complex patching workflows.</p>
+<p class="bw-p">Lifecycle Hooks (Optional) Use lifecycle hooks → Allows executing SSM documents before and after patching. Create SSM Document → Allows defining custom pre- and post-patch actions.</p>
+<p class="bw-p">For example, for my case I will configure the following</p>
+<ul class="bw-ul"><li>Patching operation:  Scan and install</li><li>Reboot option: Reboot if needed</li><li>Instances to patch: Patch only the target instances I specify</li><li>Target selection: Specify instance tags</li></ul>
+<p class="bw-p">Tag key:  Patch Group</p>
+<p class="bw-p">Tag value: LinuxProd</p>
+<figure class="bw-fig"><img src="/BL-1023/patch2.png" alt="patch2" class="bw-img"><figcaption class="bw-cap">patch2</figcaption></figure>
+<h4 class="bw-h4">6. Choose <strong>Patch now</strong></h4>
+<p class="bw-p">A new page displays. In the Association execution summary, there is a Status field that will show that three instances will be affected and the progress made.</p>
+<figure class="bw-fig"><img src="/BL-1023/patch3.png" alt="patch3" class="bw-img"><figcaption class="bw-cap">patch3</figcaption></figure>
+<hr class="bw-hr">
+<h2 class="bw-h2">2. Create a custom patch baseline for Windows instances</h2>
+<p class="bw-p">&gt;Although Windows has default patch baselines that you can use, we can also set up a baseline for Windows security updates. Remember you can customize your on patch baselines that you can use.</p>
+<p class="bw-p">&gt;A patch baseline is a set of rules that define how patches are approved or rejected for specific operating systems and applications.</p>
+<h4 class="bw-h4">1. Return to the Systems Manager console. In the search bar at the top, enter Systems Manager and then select it.</h4>
+<h4 class="bw-h4">2. In the left navigation pane, under Node Tools, choose <strong>Patch Manager</strong>.</h4>
+<h4 class="bw-h4">3. Choose the <strong>Patch baselines</strong> tab.</h4>
+<h4 class="bw-h4">4. Choose the <strong>Create patch baseline</strong> button.</h4>
+<figure class="bw-fig"><img src="/BL-1023/create-patchbase1.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<p class="bw-p">Here is the Breakdown of the Patch Baseline Configuration:</p>
+<p class="bw-p">Patch Baseline Details</p>
+<ul class="bw-ul"><li>Name → The name of the patch baseline.</li><li>Description (Optional) → A short description of the patch baseline (not yet filled in).</li><li>Operating System →  This patch baseline applies to the particular instances running the selected OS.</li><li>Default Patch Baseline (Checkbox) → If selected, this becomes the default patch baseline for Windows instances.</li></ul>
+<p class="bw-p">Approval Rules for Operating Systems</p>
+<p class="bw-p">This section defines the criteria for automatic patch approval.</p>
+<p class="bw-p">Operating System Rule 1</p>
+<ul class="bw-ul"><li>Products → Specifies which Windows products (e.g., Windows Server 2019, Windows 10) should receive patches.</li><li>Approval Method:</li><li>Approve patches after a specified number of days → Automatically approves patches after the defined period.</li><li>Approve patches released on a specific date → No specific date is set.</li></ul>
+<ul class="bw-ul"><li>Classification → Defines the type of patches to approve (e.g., Security updates, Critical updates)</li></ul>
+<ul class="bw-ul"><li>Severity → Determines the severity level of patches (e.g., Critical, Important)</li><li>Compliance Reporting (Optional) → If selected, patches will be reported for compliance</li><li>Additional rules can be added using the "Add rule" button.</li></ul>
+<p class="bw-p">I will configure the following as an example:</p>
+<p class="bw-p">For Patch baseline details:</p>
+<ul class="bw-ul"><li>Name, <code class="bw-ic">WindowsServerSecurityUpdates</code></li><li>For Description - optional, <code class="bw-ic">Windows security baseline patch</code></li><li>For Operating system, <code class="bw-ic">Windows</code>.</li><li>I will Leave the check box for Default patch baseline unselected.</li></ul>
+<p class="bw-p">In the Approval rules for operating systems section:</p>
+<ul class="bw-ul"><li>Products: From the dropdown list,  <code class="bw-ic">WindowsServer2019</code>. Also, deselect All so that it no longer appears under Products.</li></ul>
+<ul class="bw-ul"><li>Severity: This option indicates the severity value of the patches that the rule applies to. To ensure that all service packs are included by the rule, I will choose <code class="bw-ic">Critical</code> from the dropdown list.</li></ul>
+<ul class="bw-ul"><li>Classification: From the dropdown list, <code class="bw-ic">SecurityUpdates</code>.</li></ul>
+<ul class="bw-ul"><li>Auto-approval: <code class="bw-ic">3 days</code>.</li></ul>
+<ul class="bw-ul"><li>Compliance reporting - optional: I will select <code class="bw-ic">Critical</code>.</li></ul>
+<figure class="bw-fig"><img src="/BL-1023/create-patchbase2.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-1023/create-patchbase3.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<p class="bw-p">I can add another rule by choosing the Add rule button and configure the following:</p>
+<figure class="bw-fig"><img src="/BL-1023/create-patchbase4.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<h4 class="bw-h4">5. Choose <strong>Create patch baseline</strong>.</h4>
+<h4 class="bw-h4">6. Next, We can modify a patch group for the Windows patch baseline that we have just created, to associate it with a patch group.</h4>
+<h4 class="bw-h4">7. In the Patch baselines section, select the button for the WindowsServerSecurityUpdates patch baseline.</h4>
+<h4 class="bw-h4">8. Choose the Actions dropdown list, and then choose Modify patch groups.</h4>
+<h4 class="bw-h4">9. In the Modify patch groups section under Patch groups, enter WindowsProd</h4>
+<h4 class="bw-h4">10. Choose the Add button, and then choose Close.</h4>
+<figure class="bw-fig"><img src="/BL-1023/create-patchbase5.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<h2 class="bw-h2">3. Patching the Windows instances</h2>
+<p class="bw-p">Now that we have created a patch baseline, we can use this baseline to patch our fleet of windows instances at once using the tag associated with the instances for example WindowsProd</p>
+<p class="bw-p">&gt;After configuration, Patch Manager uses the Run Command to call the RunPatchBaseline document to evaluate which patches should be installed on target instances according to each instance's operating system type directly or during the defined schedule (maintenance window).</p>
+<p class="bw-p">We can begin by tagging Windows instances so that while applying patches, the instances with a certain tag are targeted.</p>
+<h3 class="bw-h3">3.1 Tagging Windows instances</h3>
+<ul class="bw-ul"><li>In the AWS Management Console, in the search  bar, enter EC2 and select it.</li><li>Choose Instances, select the Windows instance you would want to tag, and then choose the Tags tab.</li><li>Choose the Manage tags button, choose Add new tag, and configure the following options:</li><li>Key: Enter Patch Group</li></ul>
+<ul class="bw-ul"><li>Value: Enter WindowsProd</li></ul>
+<ul class="bw-ul"><li>Choose Save.</li></ul>
+<figure class="bw-fig"><img src="/BL-1023/create-patchbase7.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-1023/create-patchbase6.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<p class="bw-p">Repeat the above four steps for all the Windows instances tha you would want to tag in order to be patched.</p>
+<h3 class="bw-h3">3.2 Patching Windows instances</h3>
+<ol class="bw-ol"><li>Return to the Systems Manager console. In the search bar at the top, enter Systems Manager and then select it.</li></ol>
+<ol class="bw-ol"><li>To Patch the Windows instances:</li></ol>
+<ul class="bw-ul"><li>Choose Patch Manager</li></ul>
+<ul class="bw-ul"><li>Choose Patch now.</li></ul>
+<ul class="bw-ul"><li>Patching operation:  Scan and install</li></ul>
+<ul class="bw-ul"><li>Reboot option: Reboot if needed</li></ul>
+<ul class="bw-ul"><li>Instances to patch: Patch only the target instances I specify</li></ul>
+<ul class="bw-ul"><li>Target selection: Specify instance tags</li></ul>
+<ul class="bw-ul"><li>Tag key:  Patch Group</li></ul>
+<ul class="bw-ul"><li>Tag value: WindowsProd</li></ul>
+<ul class="bw-ul"><li>Choose Add</li></ul>
+<ul class="bw-ul"><li>Choose Patch now</li></ul>
+<figure class="bw-fig"><img src="/BL-1023/create-patchbase8.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-1023/create-patchbase9.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<p class="bw-p">A new page displays. When it becomes available, choose the link to the Execution ID.</p>
+<p class="bw-p">A page in the State Manager part of Systems Manager opens.</p>
+<p class="bw-p">Choose the Output link for one of the managed instances that shows a status of InProgress.</p>
+<p class="bw-p">A page in the Run Command part of Systems Manager opens.</p>
+<p class="bw-p">Expand the Output panel to observe the details.</p>
+<figure class="bw-fig"><img src="/BL-1023/create-patchbase10.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<p class="bw-p">&gt;Behind the scenes, Patch Manager uses the Run Command to run the PatchBaselineOperations.  If you scroll through the output, you should see the PatchGroup: WindowsProd details.</p>
+<figure class="bw-fig"><img src="/BL-1023/create-patchbase11.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<p class="bw-p">&gt;A Systems Manager document (SSM document) defines the actions that Systems Manager performs on your managed instances.</p>
+<h2 class="bw-h2">4. Verifying compliance</h2>
+<p class="bw-p">In the left navigation pane, under Node Tools, choose Patch Manager.</p>
+<p class="bw-p">Choose the Dashboard tab. Under Compliance summary, you should now see Compliant:  which verifies that all Windows and Linux instances are compliant. This will depend on the number of instances you have running. In this case, I had 6 instances(3 Windows and 3 Linux) as shown in the image below.</p>
+<figure class="bw-fig"><img src="/BL-1023/compliant1.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<p class="bw-p">Choose the Compliance reporting tab. This tab provides an overview of all running instances with <strong>SSM</strong>. You should be able to verify that the Compliance status of all Linux and Windows instances is Compliant.</p>
+<figure class="bw-fig"><img src="/BL-1023/compliant2.png" alt="create-patch" class="bw-img"><figcaption class="bw-cap">create-patch</figcaption></figure>
+<p class="bw-p">Node patching details for each instance includes the following:</p>
+<ul class="bw-ul"><li>Critical noncompliant count</li><li>Security noncompliant count</li><li>Other noncompliant count</li><li>Last operation date</li><li>Baseline ID</li></ul>
+<hr class="bw-hr">
+<h2 class="bw-h2">Conclusion</h2>
+<p class="bw-p">In this article we were able to have a glimpse of AWS Systems Manager. We saw what one is capable of doing with AWS Systems Manager. We went further and picked on one of the capabilities called Package Manager and we were able to see how this can be done through a practical exercise. AWS Systems Manager is a game-changer for managing and automating your AWS infrastructure. I hope you enjoyed the read!!</p>
+
+  <footer class="bw-footer">
+    <span>Written by Steve</span>
+    <a href="javascript:history.back()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      All posts
+    </a>
+  </footer>
+</div>
+
+</body>
+</html>

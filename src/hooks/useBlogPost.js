@@ -1,95 +1,54 @@
 import { useState, useEffect } from 'react'
 
-// Pre-processes raw file content — removes blank lines inside ``` code blocks
-// This fixes the formatting issue where each line of code has an extra blank line
+// Normalise Windows \r\n → \n so all regex works on both platforms
+function normaliseLineEndings(raw) {
+  return raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+}
+
+// Remove blank lines inside fenced code blocks
 function cleanCodeBlocks(raw) {
   const lines = raw.split('\n')
   const result = []
   let insideCodeBlock = false
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
+  for (const line of lines) {
     const trimmed = line.trim()
-
-    // Toggle code block state on ``` lines
     if (trimmed.startsWith('```')) {
       insideCodeBlock = !insideCodeBlock
       result.push(line)
       continue
     }
-
-    // Inside a code block — skip blank lines
-    if (insideCodeBlock && trimmed === '') {
-      continue
-    }
-
+    if (insideCodeBlock && trimmed === '') continue
     result.push(line)
   }
 
   return result.join('\n')
 }
 
-// Parses the plain-text frontmatter format used in Steve's blog files:
-//
-//   Id: 1006
-//   Title: Javascript Concepts - Part1
-//   Author: Steve
-//   Tags: Javascript Interview
-//   Topic: Javascript
-//   Abstract: ...
-//   HeaderImage: /BL-1006/header.png
-//   isPublished: true
-//
-// Also handles proper --- delimited frontmatter for any newer posts.
+// Parse frontmatter from --- fenced blocks (all files use this format)
 function parseFrontmatter(raw) {
-  // ── Format A: proper markdown frontmatter (--- delimited) ──────────────
-  const fencedMatch = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/)
+  // Match --- ... --- fence, tolerating optional trailing whitespace on fence lines
+  const fencedMatch = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/)
+
   if (fencedMatch) {
     const metaRaw = fencedMatch[1]
-    const content = fencedMatch[2]
+    const content = fencedMatch[2].trim()
     const meta = {}
+
     metaRaw.split('\n').forEach((line) => {
       const colonIdx = line.indexOf(':')
       if (colonIdx === -1) return
       const key = line.slice(0, colonIdx).trim()
       const val = line.slice(colonIdx + 1).trim()
-      meta[key] = val
+      if (key) meta[key] = val
     })
-    if (meta.Tags) meta.Tags = meta.Tags.split(' ').filter(Boolean)
+
+    if (meta.Tags) meta.Tags = meta.Tags.split(/\s+/).filter(Boolean)
     return { meta, content }
   }
 
-  // ── Format B: plain-text frontmatter (Steve's existing format) ─────────
-  const KNOWN_KEYS = ['Id', 'Title', 'Author', 'Tags', 'Topic', 'Abstract', 'HeaderImage', 'isPublished', 'date']
-  const lines = raw.split('\n')
-  const meta = {}
-  let contentStartIndex = 0
-  let i = 0
-
-  while (i < lines.length) {
-    const line = lines[i].trim()
-
-    if (line === '') { i++; continue }
-
-    const colonIdx = line.indexOf(':')
-    if (colonIdx !== -1) {
-      const key = line.slice(0, colonIdx).trim()
-      if (KNOWN_KEYS.includes(key)) {
-        const val = line.slice(colonIdx + 1).trim()
-        meta[key] = val
-        i++
-        continue
-      }
-    }
-
-    contentStartIndex = i
-    break
-  }
-
-  if (meta.Tags) meta.Tags = meta.Tags.split(' ').filter(Boolean)
-
-  const content = lines.slice(contentStartIndex).join('\n').trim()
-  return { meta, content }
+  // Fallback: no frontmatter found — return raw as content
+  return { meta: {}, content: raw.trim() }
 }
 
 // Estimate read time (~200 wpm)
@@ -117,7 +76,8 @@ export function useBlogPost(id) {
         return res.text()
       })
       .then((raw) => {
-        const cleaned = cleanCodeBlocks(raw)         // ← fix blank lines in code blocks
+        const normalised = normaliseLineEndings(raw)
+        const cleaned    = cleanCodeBlocks(normalised)
         const { meta, content } = parseFrontmatter(cleaned)
         setState({
           meta,

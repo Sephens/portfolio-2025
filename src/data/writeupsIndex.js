@@ -33,6 +33,30 @@ const writeups = [
     isFeatured: true,
   },
 
+{
+  id: "WR-002",
+  title: "Troubleshooting SQL Queries in Google BigQuery",
+  author: "Steve",
+  category: "Data Engineering",
+  tags: ["BigQuery", "SQL", "Google Cloud", "Debugging", "Analytics"],
+  topic: "Data Engineering",
+  abstract:
+    "Diagnosing and fixing 10 real-world SQL errors across syntax, logic, and data quality categories — using BigQuery's query validator and analytical reasoning on the Google Merchandise Store ecommerce dataset.",
+  highlights: [
+    "10+ SQL errors diagnosed: typos, missing commas, wrong aggregation functions, and NULL handling",
+    "WHERE vs HAVING distinction applied to filter post-aggregation results correctly",
+    "Uncovered upstream data quality anomaly — raw front-end template code captured by analytics",
+  ],
+  href: "/writeups/BigQuery_SQL_Troubleshooting.html",
+  date: "2026-01-01",
+  readTime: "7 min read",
+  accent: "#1a6bb5",
+  accentBg: "#e8f2fc",
+  isPublished: true,
+  isFeatured: false,
+},
+
+
   /* ── Add future writeups below ──────────────────────────────────
   {
     id: "WR-002",

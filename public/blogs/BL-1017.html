@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AWS Elastic IP</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12121e;--ink-mid:#2e2e4e;--ink-light:#6b6b8a;
+  --accent:#0f766e;--accent-bg:#f0fdfa;
+  --gold:#c9963a;--gold-bg:#fdf6e8;
+  --border:#e2e2ef;--surface:#f8f8fc;
+  --code-bg:#0f1b2d;--code-fg:#cdd9f0;
+}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink-mid);background:#fff;line-height:1.85}
+
+/* ── Nav ── */
+.bw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem}
+.bw-nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.bw-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);text-decoration:none;transition:color .15s}
+.bw-back:hover{color:var(--ink)}
+.bw-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bw-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent)}
+
+/* ── Hero ── */
+.bw-hero{padding:3.5rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.bw-hero-inner{max-width:760px;margin:0 auto}
+.bw-cat{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem}
+.bw-cat-rule{display:inline-block;width:22px;height:1px;background:var(--accent);flex-shrink:0}
+.bw-title{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.75rem,3.8vw,2.6rem);line-height:1.18;color:var(--ink);margin-bottom:1rem;max-width:680px}
+.bw-abstract{font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--ink-mid);max-width:620px;margin-bottom:1.75rem}
+.bw-meta{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:stretch}
+.bw-mi{display:flex;flex-direction:column;gap:3px}
+.bw-ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.bw-mv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.bw-ms{width:1px;background:var(--border);align-self:stretch;margin:2px 0}
+
+/* ── Body ── */
+.bw-body{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+/* ── Typography ── */
+.bw-h1{font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;line-height:1.2;color:var(--ink);margin:2.75rem 0 .9rem}
+.bw-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.45rem;color:var(--ink);margin:2.75rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink)}
+.bw-h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:2rem 0 .45rem}
+.bw-h4{font-family:'Source Serif 4',serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .35rem}
+.bw-h5,.bw-h6{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light);margin:1.25rem 0 .3rem}
+.bw-p{margin:.85rem 0}
+strong{color:var(--ink);font-weight:600}
+.bw-ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.bw-ol{list-style:decimal;margin:.75rem 0 .75rem 1.5rem}
+.bw-ul li,.bw-ol li{margin:.35rem 0;line-height:1.78}
+.bw-fig{margin:1.75rem 0}
+.bw-img{width:100%;border-radius:8px;display:block;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.bw-cap{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px}
+.bw-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.bw-link:hover{opacity:.75}
+.bw-ic{font-family:'DM Mono',monospace;font-size:.83em;background:#f0f0f8;color:#bf1650;padding:.12em .42em;border-radius:4px}
+.bw-cb{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.5rem 0}
+.bw-ch{padding:7px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.bw-cl{font-family:'DM Mono',monospace;font-size:10px;color:#64b5f6;letter-spacing:.1em}
+.bw-cb pre{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--code-fg);padding:1.2rem 1.4rem;margin:0;overflow-x:auto;line-height:1.7;white-space:pre}
+.bw-cb pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.bw-insight{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:1rem 1.35rem;margin:1.5rem 0;font-style:italic;font-size:.98rem;color:#7a5a1a;line-height:1.72}
+.bw-hr{border:none;border-top:1px solid var(--border);margin:2.25rem 0}
+
+/* ── Footer ── */
+.bw-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light)}
+.bw-footer a{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.bw-footer a:hover{opacity:.7}
+.bw-footer a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:600px){
+  .bw-title{font-size:1.6rem}
+  .bw-ms{display:none}
+  .bw-hero{padding:2.25rem 1rem 1.75rem}
+  .bw-body{padding:2rem 1rem 3.5rem}
+  .bw-h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="bw-nav">
+  <div class="bw-nav-inner">
+    <a href="javascript:history.back()" class="bw-back">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </a>
+    <span class="bw-pill">Networking in AWS</span>
+  </div>
+</nav>
+
+<div class="bw-hero">
+  <div class="bw-hero-inner">
+    <div class="bw-cat"><span class="bw-cat-rule"></span>AWS</div>
+    <h1 class="bw-title">AWS Elastic IP</h1>
+    <p class="bw-abstract">In the world of cloud computing, managing network resources efficiently is crucial for ensuring high availability, scalability, and reliability. One such resource in Amazon Web Services (AWS) is the Elastic IP address. Elastic IPs play a vital role in managing public IP addresses for your AWS resources, such as EC2 instances, NAT gateways, and more. This article will provide an in-depth exploration of AWS Elastic IPs, including their features, use cases, benefits, and step-by-step examples.</p>
+    <div class="bw-meta">
+      <div class="bw-mi"><span class="bw-ml">Author</span><span class="bw-mv">Steve</span></div>
+      <div class="bw-ms"></div>
+      <div class="bw-mi"><span class="bw-ml">Read time</span><span class="bw-mv">5 min</span></div>
+      <div class="bw-ms"></div><div class="bw-mi"><span class="bw-ml">Topic</span><span class="bw-mv">Networking in AWS</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="bw-body">
+  <p class="bw-p">This article is based on static and dynamic IPs concept. A static IP address is an address that does not change even after a system reboot or stop.</p>
+<p class="bw-p">A dynamic IP address on the other hand is an address that changes anytime a system reboots or when the lease time is over. Another service called DHCP (Dynamic Host Configuration Protocol) manages this.</p>
+<p class="bw-p">There are scenarios in which one would prefer either of the addresses depending on the type of service that is being utilized.</p>
+<p class="bw-p">Some services requires that the IP address should remain consistent all the time and thus a static IP address is preffered.</p>
+<p class="bw-p">To achieve this, AWS offers a feature that enables static IP addressing for your instances or other supported resources in your account called Elastic IP.</p>
+<h2 class="bw-h2">What is an AWS Elastic IP</h2>
+<p class="bw-p">An Elastic IP (EIP) is a static, public IPv4 address designed for dynamic cloud computing. Unlike a traditional static IP address, an Elastic IP is associated with your AWS account, not a specific resource. This means you can allocate an Elastic IP and associate it with any EC2 instance, NAT gateway, or other supported resource in your account. If the resource is stopped or terminated, you can easily reassociate the Elastic IP with another resource.</p>
+<p class="bw-p">Unlike a regular public IP, which changes every time an instance is stopped and restarted, an Elastic IP remains static until you release it.</p>
+<h2 class="bw-h2">Why Use EIP</h2>
+<p class="bw-p">Elastic IPs are particularly useful in the following scenarios:</p>
+<ul class="bw-ul"><li>Hosting Public-Facing Applications: If you’re running a web server, application server, or database that needs to be accessible over the internet, an Elastic IP ensures that the public IP address remains consistent.</li></ul>
+<ul class="bw-ul"><li>Failover and High Availability: In case of an instance failure, you can quickly remap the Elastic IP to a standby instance, minimizing downtime.</li></ul>
+<ul class="bw-ul"><li>NAT Gateways: Elastic IPs are required for NAT gateways to allow instances in a private subnet to access the internet.</li></ul>
+<ul class="bw-ul"><li>DNS Configuration: Elastic IPs simplify DNS management since the IP address remains the same even if the underlying resource changes.</li></ul>
+<h2 class="bw-h2">How Elastic IPs Work</h2>
+<p class="bw-p">When you allocate an Elastic IP, AWS reserves a public IPv4 address for your account. You can then associate this IP address with an EC2 instance or other supported resource. Here’s how it works:</p>
+<ul class="bw-ul"><li>Allocate: Reserve an Elastic IP address in your AWS account.</li></ul>
+<ul class="bw-ul"><li>Associate: Attach the Elastic IP to an EC2 instance, NAT gateway, or other resource.</li></ul>
+<ul class="bw-ul"><li>Reassociate: If the associated resource is stopped or terminated, you can reassign the Elastic IP to another resource.</li></ul>
+<ul class="bw-ul"><li>Release: When you no longer need the Elastic IP, you can release it back to AWS.</li></ul>
+<h2 class="bw-h2">The Key Characteristics of EIP</h2>
+<ul class="bw-ul"><li><strong>Persistance</strong> - The IP address remains associated with your account until you explicitly release it.</li><li><strong>Reusability</strong> - You can remap the EIP to a different instance or resources as needed.</li><li><strong>Public Accessability</strong> - EIP are designed for resources that need to be accessible over the internet, such as servers, databases, or APIs.</li></ul>
+<h2 class="bw-h2">Importance of Amazon EIP</h2>
+<h4 class="bw-h4">Ensuring high availability and fault tolerance</h4>
+<p class="bw-p">When instances fail due to maintenance, scaling or other operational needs, resulting into IP address changes. This can in turn lead to disruption of services and causing downtimes.</p>
+<p class="bw-p">With an EIP, you can quickly remap the same IP to a new instance, ensuring minimal disruption and maintaining high availability for your application.</p>
+<p class="bw-p">For example, if a web server hosting a critical application fails, you can launch a new instance and reassign the EIP to it, ensuring that users can continue accessing the application without noticing any change.</p>
+<h4 class="bw-h4">Simplifying DNS Management</h4>
+<p class="bw-p">Instead of updating DNS records every time an instance's public IP address changes, you can associate a domain name with an EIP.</p>
+<h2 class="bw-h2">Step-by-Step Guide to Using Elastic IPs</h2>
+<h3 class="bw-h3">Step 1: Allocate an Elastic IP</h3>
+<ul class="bw-ul"><li>Log in to the AWS Management Console.</li></ul>
+<ul class="bw-ul"><li>Navigate to the EC2 Dashboard.</li></ul>
+<ul class="bw-ul"><li>In the left-hand menu, under Network &amp; Security, select E<strong>lastic IPs</strong>.</li></ul>
+<ul class="bw-ul"><li>Click <strong>Allocate Elastic IP address</strong>.</li></ul>
+<ul class="bw-ul"><li>Choose the scope (default is for use in EC2 instances) and click <strong>Allocate</strong>.</li></ul>
+<h3 class="bw-h3">Step 2: Associate an Elastic IP with an EC2 Instance</h3>
+<ul class="bw-ul"><li>In the <strong>Elastic IPs</strong> section, select the Elastic IP you just allocated.</li></ul>
+<ul class="bw-ul"><li>Click <strong>Actions</strong> and choose <strong>Associate Elastic IP address</strong>.</li></ul>
+<ul class="bw-ul"><li>In the <strong>Resource type</strong> dropdown, select <strong>Instance</strong>.</li></ul>
+<ul class="bw-ul"><li>Choose the instance you want to associate the Elastic IP with.</li></ul>
+<ul class="bw-ul"><li>Click <strong>Associate</strong>.</li></ul>
+<h3 class="bw-h3">Step 3: Verify the Association</h3>
+<ul class="bw-ul"><li>Go to the Instances section in the EC2 Dashboard.</li></ul>
+<ul class="bw-ul"><li>Select the instance you associated the Elastic IP with.</li></ul>
+<ul class="bw-ul"><li>Check the Public IPv4 address field. It should now display the Elastic IP.</li></ul>
+<h3 class="bw-h3">Step 4: Reassociate an Elastic IP</h3>
+<p class="bw-p">If the associated instance fails or is terminated, you can reassociate the Elastic IP with another instance:</p>
+<ul class="bw-ul"><li>Go to the <strong>Elastic IPs</strong> section.</li></ul>
+<ul class="bw-ul"><li>Select the <strong>Elastic IP</strong>.</li></ul>
+<ul class="bw-ul"><li>Click <strong>Actions</strong> and choose <strong>Associate Elastic IP address</strong>.</li></ul>
+<ul class="bw-ul"><li>Select the new instance and click <strong>Associate</strong>.</li></ul>
+<h3 class="bw-h3">Step 5: Release an Elastic IP</h3>
+<p class="bw-p">If you no longer need the Elastic IP, you can release it:</p>
+<ul class="bw-ul"><li>Go to the <strong>Elastic IPs</strong> section.</li></ul>
+<ul class="bw-ul"><li>Select the <strong><em>Elastic IP</em></strong>.</li></ul>
+<ul class="bw-ul"><li>Click <strong>Actions</strong> and choose <strong>Release Elastic IP address</strong>.</li></ul>
+<ul class="bw-ul"><li>Confirm the release.</li></ul>
+<p class="bw-p">-------------------------------------------------------------------------</p>
+<p class="bw-p">-------------------------------------------------------------------------</p>
+<h2 class="bw-h2">Conclusion</h2>
+<p class="bw-p">AWS Elastic IPs are a powerful tool for managing public IP addresses in the cloud. They provide flexibility, high availability, and ease of use, making them ideal for hosting public-facing applications, configuring NAT gateways, and ensuring failover capabilities. By following best practices and understanding their limitations, you can leverage Elastic IPs to build resilient and scalable cloud architectures. Whether you’re a beginner or an experienced AWS user, mastering Elastic IPs is a key step in optimizing your cloud infrastructure.</p>
+<p class="bw-p">With the step-by-step examples and use cases provided in this guide, you’re now equipped to start using Elastic IPs effectively in your AWS environment. Happy cloud computing!</p>
+
+  <footer class="bw-footer">
+    <span>Written by Steve</span>
+    <a href="javascript:history.back()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      All posts
+    </a>
+  </footer>
+</div>
+
+</body>
+</html>

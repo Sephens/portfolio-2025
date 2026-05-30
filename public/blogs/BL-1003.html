@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Core Concept You Need to Know About React</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12121e;--ink-mid:#2e2e4e;--ink-light:#6b6b8a;
+  --accent:#0284c7;--accent-bg:#e0f2fe;
+  --gold:#c9963a;--gold-bg:#fdf6e8;
+  --border:#e2e2ef;--surface:#f8f8fc;
+  --code-bg:#0f1b2d;--code-fg:#cdd9f0;
+}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink-mid);background:#fff;line-height:1.85}
+
+/* ── Nav ── */
+.bw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem}
+.bw-nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.bw-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);text-decoration:none;transition:color .15s}
+.bw-back:hover{color:var(--ink)}
+.bw-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bw-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent)}
+
+/* ── Hero ── */
+.bw-hero{padding:3.5rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.bw-hero-inner{max-width:760px;margin:0 auto}
+.bw-cat{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem}
+.bw-cat-rule{display:inline-block;width:22px;height:1px;background:var(--accent);flex-shrink:0}
+.bw-title{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.75rem,3.8vw,2.6rem);line-height:1.18;color:var(--ink);margin-bottom:1rem;max-width:680px}
+.bw-abstract{font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--ink-mid);max-width:620px;margin-bottom:1.75rem}
+.bw-meta{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:stretch}
+.bw-mi{display:flex;flex-direction:column;gap:3px}
+.bw-ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.bw-mv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.bw-ms{width:1px;background:var(--border);align-self:stretch;margin:2px 0}
+
+/* ── Body ── */
+.bw-body{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+/* ── Typography ── */
+.bw-h1{font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;line-height:1.2;color:var(--ink);margin:2.75rem 0 .9rem}
+.bw-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.45rem;color:var(--ink);margin:2.75rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink)}
+.bw-h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:2rem 0 .45rem}
+.bw-h4{font-family:'Source Serif 4',serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .35rem}
+.bw-h5,.bw-h6{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light);margin:1.25rem 0 .3rem}
+.bw-p{margin:.85rem 0}
+strong{color:var(--ink);font-weight:600}
+.bw-ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.bw-ol{list-style:decimal;margin:.75rem 0 .75rem 1.5rem}
+.bw-ul li,.bw-ol li{margin:.35rem 0;line-height:1.78}
+.bw-fig{margin:1.75rem 0}
+.bw-img{width:100%;border-radius:8px;display:block;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.bw-cap{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px}
+.bw-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.bw-link:hover{opacity:.75}
+.bw-ic{font-family:'DM Mono',monospace;font-size:.83em;background:#f0f0f8;color:#bf1650;padding:.12em .42em;border-radius:4px}
+.bw-cb{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.5rem 0}
+.bw-ch{padding:7px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.bw-cl{font-family:'DM Mono',monospace;font-size:10px;color:#64b5f6;letter-spacing:.1em}
+.bw-cb pre{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--code-fg);padding:1.2rem 1.4rem;margin:0;overflow-x:auto;line-height:1.7;white-space:pre}
+.bw-cb pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.bw-insight{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:1rem 1.35rem;margin:1.5rem 0;font-style:italic;font-size:.98rem;color:#7a5a1a;line-height:1.72}
+.bw-hr{border:none;border-top:1px solid var(--border);margin:2.25rem 0}
+
+/* ── Footer ── */
+.bw-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light)}
+.bw-footer a{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.bw-footer a:hover{opacity:.7}
+.bw-footer a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:600px){
+  .bw-title{font-size:1.6rem}
+  .bw-ms{display:none}
+  .bw-hero{padding:2.25rem 1rem 1.75rem}
+  .bw-body{padding:2rem 1rem 3.5rem}
+  .bw-h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="bw-nav">
+  <div class="bw-nav-inner">
+    <a href="javascript:history.back()" class="bw-back">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </a>
+    <span class="bw-pill">React</span>
+  </div>
+</nav>
+
+<div class="bw-hero">
+  <div class="bw-hero-inner">
+    <div class="bw-cat"><span class="bw-cat-rule"></span>React · Interview</div>
+    <h1 class="bw-title">Core Concept You Need to Know About React</h1>
+    <p class="bw-abstract">Learning some of the fundamental concepts of React.js and top questions asked in react interview.</p>
+    <div class="bw-meta">
+      <div class="bw-mi"><span class="bw-ml">Author</span><span class="bw-mv">Steve</span></div>
+      <div class="bw-ms"></div>
+      <div class="bw-mi"><span class="bw-ml">Read time</span><span class="bw-mv">9 min</span></div>
+      <div class="bw-ms"></div><div class="bw-mi"><span class="bw-ml">Topic</span><span class="bw-mv">React</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="bw-body">
+  <h2 class="bw-h2">Why use react.js</h2>
+<p class="bw-p"><strong>_1.Reusable Components:_</strong></p>
+<p class="bw-p">React provides a component based structure.Each tiny elements like button, checkbox, dropdown etc can be a component and the we create wrapper components composed of those smaller components.Each component decides how it should be rendered. Each component has its own internal logic.</p>
+<p class="bw-p"><strong>_2.Fast render with Virtual DOM_</strong></p>
+<p class="bw-p">React uses virtual DOM to render the view.virtual DOM is a virtual representation of the real DOM. Each time the data changes in a react app, a new virtual DOM gets created. Creating a virtual DOM is much faster than rendering the UI inside the browser. Therefore, with the use of virtual DOM, the efficiency of the app improves.</p>
+<p class="bw-p"><strong>_3.SEO friendly_</strong></p>
+<p class="bw-p">React allows developers to develop user interfaces that can be easily navigated in various search engines. It also allows server-side rendering, which boosts the SEO of an app.</p>
+<h2 class="bw-h2">What is JSX?</h2>
+<p class="bw-p">JSX stands for JavaScript XML. It allows us to write HTML inside JavaScript and place them in the DOM without using functions like <code class="bw-ic">appendChild( )</code> or <code class="bw-ic">createElement( )</code>.</p>
+<ul class="bw-ul"><li>Without using JSX, we would have to create an element by the following process:</li></ul>
+<div class="bw-cb"><pre><code>const text = React.createElement('p', {}, 'This is a text');
+const container = React.createElement('div','{}',text );
+ReactDOM.render(container,document.getElementById('app'));</code></pre></div>
+<ul class="bw-ul"><li>Using JSX, the above code can be simplified:</li></ul>
+<p class="bw-p"><code class="bw-ic"><div class="bw-cb"><pre><code>const container = (
+
+ &lt;div&gt;
+   &lt;p&gt;This is a text&lt;/p&gt;
+ &lt;/div&gt;
+);
+ReactDOM.render(container,document.getElementById('app'));</code></pre></div> </code><div class="bw-cb"><pre><code>As one can see in the code above, we are directly using HTML inside JavaScript\*
+
+## What is the virtual DOM? How does react use the virtual DOM to render the UI? {#What-is-the-virtual-DOM-How-does-react-use-the-virtual-DOM-to-render-the-UI}
+
+_DOM stands for 'Document Object Model'. In simple terms, it is a structured representation of the HTML elements that are present in a webpage or web-app. DOM represents the entire UI of your application_
+
+Virtual DOM is a concept where a virtual representation of the real DOM is kept inside the memory and is synced with the real DOM by a library such as ReactDOM.
+
+![Virtual Dom](/BL-1003/vdom.png)
+
+**Why was virtual DOM introduced?**
+
+DOM manipulation is an integral part of any web application, but DOM manipulation is quite slow when compared to other operations in JavaScript.
+
+The efficiency of the application gets affected when several DOM manipulations are being done. Most JavaScript frameworks update the entire DOM even when a small part of the DOM changes.
+
+For example, consider a list that is being rendered inside the DOM. If one of the items in the list changes, the entire list gets rendered again instead of just rendering the item that was changed/updated. This is called inefficient updating.
+To address the problem of inefficient updating, the react team introduced the concept of virtual DOM.
+
+**How does it work?**
+
+![Virtual Dom](/BL-1003/real-virtual.png)
+
+For every DOM object, there is a corresponding virtual DOM object(copy), which has the same properties.
+
+The main difference between the real DOM object and the virtual DOM object is that any changes in the virtual DOM object will not reflect on the screen directly. Consider a virtual DOM object as a blueprint of the real DOM object.
+Whenever a JSX element gets rendered, every virtual DOM object gets updated.
+
+React uses two virtual DOMs to render the user interface. One of them is used to store the current state of the objects and the other to store the previous state of the objects.
+
+Whenever the virtual DOM gets updated, react compares the two virtual DOMs and gets to know about which virtual DOM objects were updated.
+
+After knowing which objects were updated, react renders only those objects inside the real DOM instead of rendering the complete real DOM.This way, with the use of virtual DOM, react solves the problem of inefficient updating
+
+## Explain React state and props? {#Explain-React-state-and-props}
+
+A React component can access dynamic information in two ways: props and state.
+
+### React State {#React-State}
+
+Every component in react has a built-in state object, which contains all the property values that belong to that component.
+
+In other words, the state object controls the behaviour of a component. Any change in the property values of the state object leads to re-rendering of the component.
+
+_Note- State object is not available in functional components but, we can use React Hooks to add state to a functional component._
+
+How to declare a state object?</code></pre></div> Example: class Car extends React.Component{ constructor(props){ super(props); this.state = { brand: "BMW", color: "black" } } }</p>
+<div class="bw-cb"><pre><code>How to use and update the state object?</code></pre></div>
+<p class="bw-p">class Car extends React.Component { constructor(props) { super(props); this.state = { brand: "BMW", color: "Black" }; }</p>
+<p class="bw-p">changeColor() { this.setState(prevState =&gt; { return { color: "Red" }; }); }</p>
+<p class="bw-p">render() { return ( &lt;div&gt; &lt;button onClick={() =&gt; this.changeColor()}&gt;Change Color&lt;/button&gt; &lt;p&gt;{this.state.color}&lt;/p&gt; &lt;/div&gt; ); } }</p>
+<div class="bw-cb"><pre><code>As one can see in the code above, we can use the state by calling this.state.propertyName and we can change the state object property using setState method.
+
+### React Props {#React-Props}
+
+Every react component, accepts a single object argument called props (which stands for “properties”).
+
+These props can be passed to a component using HTML attributes.
+
+Using props, we can pass data from one component to another.
+
+- While rendering a component, we can pass the props as a HTML attribute:</code></pre></div>
+<p class="bw-p">&lt;Car brand="Mercedes"/&gt;</p>
+<div class="bw-cb"><pre><code>The component receives the props:
+
+- In Class component:</code></pre></div>
+<p class="bw-p">class Car extends React.Component { constructor(props) { super(props); this.state = { brand: this.props.brand, color: "Black" }; } }</p>
+<div class="bw-cb"><pre><code>- In Functional component:</code></pre></div>
+<p class="bw-p">function Car(props) { render() { return &lt;h1&gt;Name is {props.name}!&lt;/h1&gt;; } }</p>
+<div class="bw-cb"><pre><code>**Note- Props are read-only. They cannot be manipulated or changed inside a component**
+
+## Explain React Hooks? {#Explain-React-Hooks}
+
+Hooks are functions that let us “hook into” React state and lifecycle features from a `functional component.`
+React Hooks cannot be used in class components.
+
+Why were Hooks introduced in React?
+React hooks were introduced in the 16.8 version of React.
+Previously, functional components were called stateless components. Only class components were used for state management and lifecycle methods.
+
+The need to change a functional component to a class component, whenever state management or lifecycle methods were to be used, led to the development of Hooks.
+
+**Example of a hook:**
+
+`useState hook:`
+In functional components, useState hook lets us define state for a component:</code></pre></div>
+<p class="bw-p">function Person(props) { // We are declaring a state variable called name. // setName is a function to update/change the value of name let [name, setName] = useState(''); }</p>
+<div class="bw-cb"><pre><code>## What are the different lifecycle methods in React? {#What-are-the-different-lifecycle-methods-in-React}
+
+Each component in react goes through three phases: `Mounting`, `Updating`, and `Unmounting`.
+
+- **Mounting** :- Birth of your component
+- **Update** :- Growth of your component
+- **Unmount** :- Death of your component
+
+![React Life Cycle Methods](/BL-1003/ReactLifeCycle.png)
+
+### Common React Lifecycle Methods {#Common-React-Lifecycle-Methods}
+
+- **constructor()**
+
+This is used only if you have a class-based Component and it serves the purpose of initializing the state of a Component. In case of functional Components, the useState() hook is used to do the same.
+
+- **render()**
+
+This is the method that is `responsible for inserting a Component into the DOM`.
+
+The render() method is the most used lifecycle method. This is because render() is the only required method within a class component in React.
+
+It happens during the `mounting` and `updating` of your component.</code></pre></div>
+<p class="bw-p">Below is an example of a simple render() in React.</p>
+<p class="bw-p">class Hello extends Component{ render(){ return &lt;div&gt;Hello {this.props.name}&lt;/div&gt; } }</p>
+<div class="bw-cb"><pre><code>**A render() can also return a null if there is nothing to render for that component.**
+
+- **componentDidMount()**
+
+This is invoked `after a Component is inserted into the DOM for the first time`.
+
+When component has been mounted and ready, that’s when the next React lifecycle method componentDidMount() comes in play.
+
+componentDidMount() is called as soon as the component is mounted and ready. This is a good place to initiate API calls, if you need to load data from a remote endpoint.
+
+`componentDidMount() allows the use of setState()`.
+
+- **componentDidUpdate()**
+
+This is the method invoked after `re-rendering an updated Component`. This method can give you the information about a Component’s previous state and previous props. This lifecycle method is invoked as soon as the updating happens. The most common use case for the componentDidUpdate() method is updating the DOM in response to prop or state changes.
+
+You can call setState() in this lifecycle, but keep in mind that you will need to wrap it in a condition to check for state or prop changes from previous state. Incorrect usage of setState() can lead to an infinite loop.</code></pre></div>
+<p class="bw-p">Take a look at the example below that shows a typical usage example of this lifecycle method.</p>
+<p class="bw-p">componentDidUpdate(prevProps) { //Typical usage, don't forget to compare the props if (this.props.userName !== prevProps.userName) { this.fetchData(this.props.userName); } }</p>
+<div class="bw-cb"><pre><code>Notice in the above example that we are comparing the current props to the previous props. This is to check if there has been a change in props from what it currently is. In this case, there won’t be a need to make the API call if the props did not change.
+
+- **componentWillUnmount()**
+
+As the name suggests this lifecycle method is called just `before the component is unmounted and destroyed`.
+
+You cannot modify the component state in componentWillUnmount lifecycle.
+
+This is where you can perform any cleanups that need to be done such as invalidating timers, canceling network requests, removing event listeners, and so on.</code></pre></div>
+<p class="bw-p">componentWillUnmount() { window.removeEventListener('resize', this.resizeListener) }</p>
+<div class="bw-cb"><pre><code>## What are keys in React? {#What-are-keys-in-React}
+
+A key is a special string attribute that needs to be included when using lists of elements.
+
+Example of a list using key:</code></pre></div>
+<p class="bw-p">const ids = [1,2,3,4,5]; const listElements = ids.map((id)=&gt;{ return( &lt;li key={id.toString()}&gt; {id} &lt;/li&gt; ) }) ```</p>
+<p class="bw-p"><strong>Importance of keys:-</strong></p>
+<ul class="bw-ul"><li>Keys help react identify which elements were added, changed or removed.</li><li>Keys should be given to array elements for providing a unique identity for each element.</li><li>Without keys, React does not understand the order or uniqueness of each element.</li><li>With keys, React has an idea of which particular element was deleted,edited, and added.</li></ul>
+<h2 class="bw-h2">React pure component</h2>
+<p class="bw-p">A React component is considered pure if it renders the same output for the same state and props. For class components like this, React provides the PureComponent base class. Class components that extend the <code class="bw-ic">React.PureComponent</code> class are treated as <code class="bw-ic">pure components</code>.</p>
+<p class="bw-p">Pure components have some performance improvements and render optimizations since React implements the shouldComponentUpdate() method for them with a shallow comparison for props and state.</p>
+<p class="bw-p"><strong>Features of React Pure Components</strong></p>
+<ul class="bw-ul"><li>Prevents re-rendering of Component if props or state is the same</li><li>Takes care of “shouldComponentUpdate” implicitly</li><li>State and Props are Shallow Compared</li><li>Pure Components are more performant in certain cases</li></ul>
+<p class="bw-p"><strong>React Components re-renders in the following scenarios:</strong></p>
+<ul class="bw-ul"><li>“setState” is called in Component</li><li>“props” values are updated</li><li>this.forceUpdate() is called</li></ul>
+<p class="bw-p"><code class="bw-ic">In the case of Pure Components, the React components do not re-render blindly without considering the updated values of React “props” and “state”. If updated values are the same as previous values, render is not triggered.</code></p>
+
+  <footer class="bw-footer">
+    <span>Written by Steve</span>
+    <a href="javascript:history.back()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      All posts
+    </a>
+  </footer>
+</div>
+
+</body>
+</html>

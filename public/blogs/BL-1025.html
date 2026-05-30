@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>From Raw Data to Deployed Models</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12121e;--ink-mid:#2e2e4e;--ink-light:#6b6b8a;
+  --accent:#7c3aed;--accent-bg:#f5f3ff;
+  --gold:#c9963a;--gold-bg:#fdf6e8;
+  --border:#e2e2ef;--surface:#f8f8fc;
+  --code-bg:#0f1b2d;--code-fg:#cdd9f0;
+}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink-mid);background:#fff;line-height:1.85}
+
+/* ── Nav ── */
+.bw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem}
+.bw-nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.bw-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);text-decoration:none;transition:color .15s}
+.bw-back:hover{color:var(--ink)}
+.bw-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bw-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent)}
+
+/* ── Hero ── */
+.bw-hero{padding:3.5rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.bw-hero-inner{max-width:760px;margin:0 auto}
+.bw-cat{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem}
+.bw-cat-rule{display:inline-block;width:22px;height:1px;background:var(--accent);flex-shrink:0}
+.bw-title{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.75rem,3.8vw,2.6rem);line-height:1.18;color:var(--ink);margin-bottom:1rem;max-width:680px}
+.bw-abstract{font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--ink-mid);max-width:620px;margin-bottom:1.75rem}
+.bw-meta{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:stretch}
+.bw-mi{display:flex;flex-direction:column;gap:3px}
+.bw-ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.bw-mv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.bw-ms{width:1px;background:var(--border);align-self:stretch;margin:2px 0}
+
+/* ── Body ── */
+.bw-body{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+/* ── Typography ── */
+.bw-h1{font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;line-height:1.2;color:var(--ink);margin:2.75rem 0 .9rem}
+.bw-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.45rem;color:var(--ink);margin:2.75rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink)}
+.bw-h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:2rem 0 .45rem}
+.bw-h4{font-family:'Source Serif 4',serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .35rem}
+.bw-h5,.bw-h6{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light);margin:1.25rem 0 .3rem}
+.bw-p{margin:.85rem 0}
+strong{color:var(--ink);font-weight:600}
+.bw-ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.bw-ol{list-style:decimal;margin:.75rem 0 .75rem 1.5rem}
+.bw-ul li,.bw-ol li{margin:.35rem 0;line-height:1.78}
+.bw-fig{margin:1.75rem 0}
+.bw-img{width:100%;border-radius:8px;display:block;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.bw-cap{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px}
+.bw-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.bw-link:hover{opacity:.75}
+.bw-ic{font-family:'DM Mono',monospace;font-size:.83em;background:#f0f0f8;color:#bf1650;padding:.12em .42em;border-radius:4px}
+.bw-cb{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.5rem 0}
+.bw-ch{padding:7px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.bw-cl{font-family:'DM Mono',monospace;font-size:10px;color:#64b5f6;letter-spacing:.1em}
+.bw-cb pre{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--code-fg);padding:1.2rem 1.4rem;margin:0;overflow-x:auto;line-height:1.7;white-space:pre}
+.bw-cb pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.bw-insight{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:1rem 1.35rem;margin:1.5rem 0;font-style:italic;font-size:.98rem;color:#7a5a1a;line-height:1.72}
+.bw-hr{border:none;border-top:1px solid var(--border);margin:2.25rem 0}
+
+/* ── Footer ── */
+.bw-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light)}
+.bw-footer a{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.bw-footer a:hover{opacity:.7}
+.bw-footer a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:600px){
+  .bw-title{font-size:1.6rem}
+  .bw-ms{display:none}
+  .bw-hero{padding:2.25rem 1rem 1.75rem}
+  .bw-body{padding:2rem 1rem 3.5rem}
+  .bw-h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="bw-nav">
+  <div class="bw-nav-inner">
+    <a href="javascript:history.back()" class="bw-back">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </a>
+    <span class="bw-pill">Machine Learning</span>
+  </div>
+</nav>
+
+<div class="bw-hero">
+  <div class="bw-hero-inner">
+    <div class="bw-cat"><span class="bw-cat-rule"></span>Python · MachineLearning · ScikitLearn</div>
+    <h1 class="bw-title">From Raw Data to Deployed Models</h1>
+    <p class="bw-abstract">A comprehensive walkthrough of the full ML workflow — preprocessing, K-Fold cross-validation, hyperparameter tuning, pipelines, and model deployment with scikit-learn.</p>
+    <div class="bw-meta">
+      <div class="bw-mi"><span class="bw-ml">Author</span><span class="bw-mv">Steve</span></div>
+      <div class="bw-ms"></div>
+      <div class="bw-mi"><span class="bw-ml">Read time</span><span class="bw-mv">6 min</span></div>
+      <div class="bw-ms"></div><div class="bw-mi"><span class="bw-ml">Topic</span><span class="bw-mv">Machine Learning</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="bw-body">
+  <h2 class="bw-h2">Data Preprocessing</h2>
+<p class="bw-p">Real-world data is rarely clean. Before handing anything to a model, we need to handle missing values, normalize scales, and convert categorical variables into numbers. Skipping any of these steps is one of the most common reasons models underperform in production.</p>
+<h3 class="bw-h3">Imputation</h3>
+<p class="bw-p">Instead of dropping rows with missing values and losing information, we replace them with a computed substitute using <code class="bw-ic">SimpleImputer</code>.</p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON</span></div><pre><code># strategy options: mean | median | most_frequent | constant
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(strategy='median')
+X_imp   = imputer.fit_transform(X_train)
+
+# For categorical columns
+cat_imp = SimpleImputer(strategy='most_frequent')
+X_cat   = cat_imp.fit_transform(X_cat_train)</code></pre></div>
+<h3 class="bw-h3">Feature Scaling</h3>
+<p class="bw-p">Normalizing feature ranges ensures no variable dominates due to its magnitude. This is critical for distance-based models like KNN and SVM, and for gradient descent algorithms.</p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON</span></div><pre><code>from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+# StandardScaler → mean=0, std=1
+scaler    = StandardScaler()
+X_sc      = scaler.fit_transform(X_train)
+X_test_sc = scaler.transform(X_test)   # never refit on test data!
+
+# MinMaxScaler → range [0, 1]
+mm   = MinMaxScaler()
+X_mm = mm.fit_transform(X_train)</code></pre></div>
+<p class="bw-p">Use <code class="bw-ic">StandardScaler</code> for SVM, KNN, and neural networks. Use <code class="bw-ic">MinMaxScaler</code> when you need a bounded range. Tree-based models like RandomForest require no scaling at all.</p>
+<h3 class="bw-h3">Encoding</h3>
+<p class="bw-p">Machine learning models require numeric input. We convert categorical labels using either <code class="bw-ic">LabelEncoder</code> for ordinal data or <code class="bw-ic">OneHotEncoder</code> for nominal categories.</p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON</span></div><pre><code>from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+
+# Label Encoding (ordinal: Low → 0, Medium → 1, High → 2)
+le = LabelEncoder()
+y  = le.fit_transform(df['risk_level'])
+
+# One-Hot Encoding (nominal: no false ordinal relationship)
+ohe   = OneHotEncoder(sparse_output=False, drop='first')
+X_cat = ohe.fit_transform(df[['city']])</code></pre></div>
+<blockquote class="bw-insight"><strong>⚠️ Data Leakage Warning:</strong> Always <code class="bw-ic">fit</code> your scaler and imputer <em>only</em> on training data, then <code class="bw-ic">transform</code> both train and test sets. Fitting on test data leaks information and produces inflated, misleading evaluation scores.</blockquote>
+<hr class="bw-hr">
+<h2 class="bw-h2">K-Fold Cross-Validation</h2>
+<p class="bw-p">A single train/test split is fragile — your score depends heavily on which samples happened to land in which set. K-Fold solves this by rotating the validation window across K partitions, giving you a mean score and standard deviation you can actually trust.</p>
+<p class="bw-p">How it works with K=5:</p>
+<ul class="bw-ul"><li><strong>Fold 1:</strong> Validate on partition 1, train on 2–5</li><li><strong>Fold 2:</strong> Validate on partition 2, train on 1, 3–5</li><li><strong>Fold 3:</strong> Validate on partition 3, train on 1–2, 4–5</li><li><strong>Fold 4:</strong> Validate on partition 4, train on 1–3, 5</li><li><strong>Fold 5:</strong> Validate on partition 5, train on 1–4</li></ul>
+<p class="bw-p">The final reported score is the <strong>mean of all 5 validation scores</strong>. The standard deviation tells you how stable your model is across different data slices.</p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON</span></div><pre><code>from sklearn.model_selection import cross_val_score, StratifiedKFold, cross_validate
+from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# Basic 5-fold CV
+scores = cross_val_score(model, X, y, cv=5, scoring='accuracy')
+print(f"Mean: {scores.mean():.4f} ± {scores.std():.4f}")
+
+# Stratified K-Fold — preserves class distribution in each fold
+skf    = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+scores = cross_val_score(model, X, y, cv=skf, scoring='f1')
+
+# Multiple metrics in one call
+res = cross_validate(model, X, y, cv=5,
+    scoring=['accuracy', 'precision', 'recall', 'f1', 'roc_auc'])
+print(f"F1:      {res['test_f1'].mean():.4f}")
+print(f"ROC-AUC: {res['test_roc_auc'].mean():.4f}")</code></pre></div>
+<p class="bw-p">Use <code class="bw-ic">K=5</code> for large datasets and <code class="bw-ic">K=10</code> for smaller ones. Always use <code class="bw-ic">StratifiedKFold</code> when your target classes are imbalanced — it ensures each fold has the same class ratio as the full dataset.</p>
+<hr class="bw-hr">
+<h2 class="bw-h2">Hyperparameter Tuning with GridSearchCV</h2>
+<p class="bw-p">Hyperparameters are settings defined <em>before</em> training — like the number of trees in a forest or the regularisation strength of an SVM. <code class="bw-ic">GridSearchCV</code> tries every combination in a defined grid, evaluates each with cross-validation, and returns the best configuration automatically.</p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON
+FROM SKLEARN.MODEL_SELECTION IMPORT GRIDSEARCHCV
+FROM SKLEARN.SVM IMPORT SVC</span></div><pre><code>param_grid = {
+    'C':      [0.1, 1, 10, 100],
+    'kernel': ['linear', 'rbf', 'poly'],
+    'gamma':  ['scale', 'auto', 0.01, 0.001]
+}
+# 4 × 3 × 4 = 48 combinations × cv=5 = 240 model fits
+
+grid = GridSearchCV(
+    estimator  = SVC(),
+    param_grid = param_grid,
+    cv         = 5,
+    scoring    = 'accuracy',
+    n_jobs     = -1,
+    refit      = True
+)
+grid.fit(X_train, y_train)
+
+print(grid.best_params_)
+print(f"Best CV score: {grid.best_score_:.4f}")
+test_acc = grid.best_estimator_.score(X_test, y_test)</code></pre></div>
+<p class="bw-p">For large search spaces, <code class="bw-ic">RandomizedSearchCV</code> samples <code class="bw-ic">n_iter</code> random combinations instead of all of them.</p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON
+FROM SKLEARN.MODEL_SELECTION IMPORT RANDOMIZEDSEARCHCV</span></div><pre><code>rand = RandomizedSearchCV(SVC(), param_grid, n_iter=20, cv=5, n_jobs=-1)
+rand.fit(X_train, y_train)</code></pre></div>
+<hr class="bw-hr">
+<h2 class="bw-h2">Building ML Pipelines</h2>
+<p class="bw-p">A <code class="bw-ic">Pipeline</code> chains all preprocessing steps and the model into a single object. It prevents data leakage during cross-validation, makes <code class="bw-ic">GridSearch</code> work on preprocessing parameters, and means deployment is as simple as calling <code class="bw-ic">.predict()</code> on raw data.</p>
+<p class="bw-p">The flow: <strong>Raw Data → Imputer → Scaler → Encoder → Model → Prediction</strong></p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON
+FROM SKLEARN.PIPELINE IMPORT PIPELINE
+FROM SKLEARN.COMPOSE IMPORT COLUMNTRANSFORMER
+FROM SKLEARN.IMPUTE IMPORT SIMPLEIMPUTER</span></div><pre><code>from sklearn.preprocessing import StandardScaler, MinMaxScaler, OneHotEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+
+num_features = ['age', 'income', 'credit_score']
+cat_features  = ['employment_type', 'region']
+
+num_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='median')),
+    ('scaler',  StandardScaler())
+])
+
+cat_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('encoder', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
+])
+
+preprocessor = ColumnTransformer(transformers=[
+    ('num', num_transformer, num_features),
+    ('cat', cat_transformer, cat_features)
+])
+
+pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('classifier',   RandomForestClassifier(random_state=42))
+])
+
+param_grid = {
+    'classifier__n_estimators':  [100, 200, 300],
+    'classifier__max_depth':     [None, 10, 20],
+    'preprocessor__num__scaler': [StandardScaler(), MinMaxScaler()]
+}
+grid = GridSearchCV(pipeline, param_grid, cv=5, scoring='f1', n_jobs=-1)
+grid.fit(X_train, y_train)
+y_pred = grid.best_estimator_.predict(X_test)</code></pre></div>
+<hr class="bw-hr">
+<h2 class="bw-h2">Saving &amp; Deploying with .pkl</h2>
+<p class="bw-p">Saving a <em>Pipeline</em> object preserves all preprocessing steps. Raw data can be predicted on directly with no manual transformation in production.</p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON
+IMPORT JOBLIB</span></div><pre><code>joblib.dump(pipeline, 'fraud_detector_v1.pkl')</code></pre></div>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON
+IMPORT JOBLIB
+IMPORT PANDAS AS PD</span></div><pre><code>pipeline = joblib.load('fraud_detector_v1.pkl')
+
+new_data = pd.DataFrame([{
+    'age': 34,
+    'income': None,
+    'credit_score': 720,
+    'employment_type': 'salaried',
+    'region': 'north'
+}])
+
+pred  = pipeline.predict(new_data)
+proba = pipeline.predict_proba(new_data)[0, 1]
+print(f"Prediction: {pred[0]} | Confidence: {proba:.2%}")</code></pre></div>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON</span></div><pre><code>from flask import Flask, request, jsonify
+import joblib, pandas as pd
+
+app      = Flask(__name__)
+pipeline = joblib.load('fraud_detector_v1.pkl')
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    data  = request.get_json()
+    df    = pd.DataFrame([data])
+    pred  = pipeline.predict(df)[0]
+    proba = pipeline.predict_proba(df)[0, 1]
+    return jsonify({
+        'prediction': int(pred),
+        'confidence': round(float(proba), 4),
+        'model_ver':  'v1.0.0'
+    })
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)</code></pre></div>
+<hr class="bw-hr">
+<h2 class="bw-h2">Hands-On Project: Credit Risk Classification</h2>
+<h3 class="bw-h3">Step 1 — Load &amp; Explore</h3>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON
+IMPORT PANDAS AS PD</span></div><pre><code>df = pd.read_csv('credit_data.csv')
+print(df.isnull().sum())
+print(df['default'].value_counts())
+df.describe()</code></pre></div>
+<h3 class="bw-h3">Step 2 — Build the Preprocessing Pipeline</h3>
+<p class="bw-p">Using the <code class="bw-ic">ColumnTransformer</code> pattern from the Pipelines section above, define:</p>
+<ul class="bw-ul"><li><code class="bw-ic">num_features = ['age', 'income', 'loan_amount', 'credit_history_months']</code></li><li><code class="bw-ic">cat_features = ['employment', 'loan_purpose', 'home_ownership']</code></li></ul>
+<h3 class="bw-h3">Step 3 — Baseline Evaluation</h3>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON</span></div><pre><code>from sklearn.model_selection import StratifiedKFold, cross_validate
+
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+res = cross_validate(pipeline, X, y, cv=skf,
+    scoring=['accuracy', 'f1', 'roc_auc'])
+print(f"Baseline ROC-AUC: {res['test_roc_auc'].mean():.4f}")</code></pre></div>
+<h3 class="bw-h3">Step 4 — Hyperparameter Tuning</h3>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON</span></div><pre><code>param_grid = {
+    'classifier__n_estimators':      [100, 200],
+    'classifier__max_depth':         [5, 10, None],
+    'classifier__min_samples_split': [2, 5]
+}
+grid = GridSearchCV(pipeline, param_grid, cv=5, scoring='roc_auc', n_jobs=-1)
+grid.fit(X_train, y_train)
+print(grid.best_params_)</code></pre></div>
+<h3 class="bw-h3">Step 5 — Final Evaluation</h3>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON</span></div><pre><code>from sklearn.metrics import classification_report, ConfusionMatrixDisplay
+
+best   = grid.best_estimator_
+y_pred = best.predict(X_test)
+print(classification_report(y_test, y_pred))
+ConfusionMatrixDisplay.from_estimator(best, X_test, y_test)</code></pre></div>
+<h3 class="bw-h3">Step 6 — Save &amp; Serve</h3>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">PYTHON
+IMPORT JOBLIB</span></div><pre><code>joblib.dump(grid.best_estimator_, 'credit_risk_v1.pkl')
+
+# curl -X POST http://localhost:5000/predict \
+#   -H "Content-Type: application/json" \
+#   -d '{"age":35,"income":55000,"loan_amount":12000,...}'</code></pre></div>
+<p class="bw-p"><strong>References:</strong></p>
+<ul class="bw-ul"><li><a href="https://scikit-learn.org/stable/modules/preprocessing.html" target="_blank">Scikit-learn — Preprocessing</a></li><li><a href="https://scikit-learn.org/stable/modules/cross_validation.html" target="_blank">Scikit-learn — Cross Validation</a></li><li><a href="https://scikit-learn.org/stable/modules/grid_search.html" target="_blank">Scikit-learn — GridSearchCV</a></li><li><a href="https://scikit-learn.org/stable/modules/pipeline.html" target="_blank">Scikit-learn — Pipelines</a></li><li><a href="https://flask.palletsprojects.com" target="_blank">Flask Documentation</a></li></ul>
+
+  <footer class="bw-footer">
+    <span>Written by Steve</span>
+    <a href="javascript:history.back()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      All posts
+    </a>
+  </footer>
+</div>
+
+</body>
+</html>

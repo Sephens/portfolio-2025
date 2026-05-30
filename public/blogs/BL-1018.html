@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Amazon VPC</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12121e;--ink-mid:#2e2e4e;--ink-light:#6b6b8a;
+  --accent:#0f766e;--accent-bg:#f0fdfa;
+  --gold:#c9963a;--gold-bg:#fdf6e8;
+  --border:#e2e2ef;--surface:#f8f8fc;
+  --code-bg:#0f1b2d;--code-fg:#cdd9f0;
+}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink-mid);background:#fff;line-height:1.85}
+
+/* ── Nav ── */
+.bw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem}
+.bw-nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.bw-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);text-decoration:none;transition:color .15s}
+.bw-back:hover{color:var(--ink)}
+.bw-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bw-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent)}
+
+/* ── Hero ── */
+.bw-hero{padding:3.5rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.bw-hero-inner{max-width:760px;margin:0 auto}
+.bw-cat{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem}
+.bw-cat-rule{display:inline-block;width:22px;height:1px;background:var(--accent);flex-shrink:0}
+.bw-title{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.75rem,3.8vw,2.6rem);line-height:1.18;color:var(--ink);margin-bottom:1rem;max-width:680px}
+.bw-abstract{font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--ink-mid);max-width:620px;margin-bottom:1.75rem}
+.bw-meta{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:stretch}
+.bw-mi{display:flex;flex-direction:column;gap:3px}
+.bw-ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.bw-mv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.bw-ms{width:1px;background:var(--border);align-self:stretch;margin:2px 0}
+
+/* ── Body ── */
+.bw-body{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+/* ── Typography ── */
+.bw-h1{font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;line-height:1.2;color:var(--ink);margin:2.75rem 0 .9rem}
+.bw-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.45rem;color:var(--ink);margin:2.75rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink)}
+.bw-h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:2rem 0 .45rem}
+.bw-h4{font-family:'Source Serif 4',serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .35rem}
+.bw-h5,.bw-h6{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light);margin:1.25rem 0 .3rem}
+.bw-p{margin:.85rem 0}
+strong{color:var(--ink);font-weight:600}
+.bw-ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.bw-ol{list-style:decimal;margin:.75rem 0 .75rem 1.5rem}
+.bw-ul li,.bw-ol li{margin:.35rem 0;line-height:1.78}
+.bw-fig{margin:1.75rem 0}
+.bw-img{width:100%;border-radius:8px;display:block;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.bw-cap{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px}
+.bw-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.bw-link:hover{opacity:.75}
+.bw-ic{font-family:'DM Mono',monospace;font-size:.83em;background:#f0f0f8;color:#bf1650;padding:.12em .42em;border-radius:4px}
+.bw-cb{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.5rem 0}
+.bw-ch{padding:7px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.bw-cl{font-family:'DM Mono',monospace;font-size:10px;color:#64b5f6;letter-spacing:.1em}
+.bw-cb pre{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--code-fg);padding:1.2rem 1.4rem;margin:0;overflow-x:auto;line-height:1.7;white-space:pre}
+.bw-cb pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.bw-insight{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:1rem 1.35rem;margin:1.5rem 0;font-style:italic;font-size:.98rem;color:#7a5a1a;line-height:1.72}
+.bw-hr{border:none;border-top:1px solid var(--border);margin:2.25rem 0}
+
+/* ── Footer ── */
+.bw-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light)}
+.bw-footer a{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.bw-footer a:hover{opacity:.7}
+.bw-footer a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:600px){
+  .bw-title{font-size:1.6rem}
+  .bw-ms{display:none}
+  .bw-hero{padding:2.25rem 1rem 1.75rem}
+  .bw-body{padding:2rem 1rem 3.5rem}
+  .bw-h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="bw-nav">
+  <div class="bw-nav-inner">
+    <a href="javascript:history.back()" class="bw-back">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </a>
+    <span class="bw-pill">Networking in AWS</span>
+  </div>
+</nav>
+
+<div class="bw-hero">
+  <div class="bw-hero-inner">
+    <div class="bw-cat"><span class="bw-cat-rule"></span>AWS · Networks</div>
+    <h1 class="bw-title">Amazon VPC</h1>
+    <p class="bw-abstract">In today's cloud-driven world, Amazon Virtual Private Cloud (VPC) plays a crucial role in providing businesses with a secure, scalable, and customizable network environment within AWS. Amazon VPC allows users to create logically isolated networks, define custom IP address ranges, manage subnets, and control traffic routing through Internet Gateways, NAT Gateways, and VPN connections. With fine-grained security controls, such as Security Groups and Network ACLs, Amazon VPC ensures that cloud resources remain protected while enabling seamless communication between services. This article explores the key components, benefits, and step-by-step setup of Amazon VPC, helping you design a robust network for your cloud applications.</p>
+    <div class="bw-meta">
+      <div class="bw-mi"><span class="bw-ml">Author</span><span class="bw-mv">Steve</span></div>
+      <div class="bw-ms"></div>
+      <div class="bw-mi"><span class="bw-ml">Read time</span><span class="bw-mv">9 min</span></div>
+      <div class="bw-ms"></div><div class="bw-mi"><span class="bw-ml">Topic</span><span class="bw-mv">Networking in AWS</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="bw-body">
+  <h2 class="bw-h2">Create Subnets and Allocate IP addresses in an Amazon Virtual Private Cloud (Amazon VPC)</h2>
+<h2 class="bw-h2">An overview diagram of a VPC</h2>
+<figure class="bw-fig"><img src="/BL-1018/vpc.webp" alt="vpc-diagram" class="bw-img"><figcaption class="bw-cap">vpc-diagram</figcaption></figure>
+<h2 class="bw-h2">What is a VPC (Virtual Private Cloud)</h2>
+<p class="bw-p">A VPC is like a data center but in the cloud. It is logically isolated from other virtual networks, and you can use a VPC to spin up and launch your AWS resources within minutes. Resources within a VPC communicate with each other through private IP addresses. An instance needs a public IP address for it to communicate outside the VPC. The VPC needs networking resources, such as an internet gateway and a route table, for the instance to reach the internet. A CIDR block is a range of private IP addresses that is used within the VPC (for example, the /16 number that you see next to an IP address). A subnet is a range of IP addresses within your VPC.</p>
+<h2 class="bw-h2">Step by step into launching and configuring VPC</h2>
+<h3 class="bw-h3">Step One Launching a VPC</h3>
+<ul class="bw-ul"><li><strong>Define the VPC</strong>: Specify the IP address range (CIDR block).</li><li><strong>Create Subnets</strong>: Divide the VPC into public and private subnets.</li><li><strong>Configure Route Tables</strong>: Define routes for traffic between subnets and to the internet.</li><li><strong>Attach an Internet Gateway</strong>: Enable internet access for public subnets.</li><li><strong>Set Up NAT Gateway</strong>: Allow private subnets to access the internet.</li><li><strong>Launch Resources</strong>: Deploy EC2 instances, RDS databases, etc., in the appropriate subnets.</li><li><strong>Configure Security</strong>: Use Security Groups and NACLs to control traffic.</li></ul>
+<h3 class="bw-h3">Define the VPC</h3>
+<ol class="bw-ol"><li>In the AWS console, type and search for VPC in the search bar on the top-left corner. Select VPC from the list. Alternatively, You can also find VPC under <strong>Services</strong> - <strong>Networking &amp; Content Delivery</strong> in the top left corner</li></ol>
+<figure class="bw-fig"><img src="/BL-1018/vpc_search.png" alt="vpc-search" class="bw-img"><figcaption class="bw-cap">vpc-search</figcaption></figure>
+<p class="bw-p">You are now in the Amazon VPC dashboard. You use the Amazon Virtual Private Cloud (Amazon VPC) service to build your VPC.</p>
+<ol class="bw-ol"><li>Choose the Create VPC button to launch your first VPC. This will launch you into a step by step process to set up a VPC with it's basic components.</li></ol>
+<figure class="bw-fig"><img src="/BL-1018/create-vpc.png" alt="create-vpc" class="bw-img"><figcaption class="bw-cap">create-vpc</figcaption></figure>
+<p class="bw-p">You can configure the following in order to lauch your VPC Configure the following options:</p>
+<ul class="bw-ul"><li>VPC name - This is the name of the VPC</li></ul>
+<ul class="bw-ul"><li>IPv6 CIDR block - Select an IPv4 Block(e.g 10.10.10/16).</li></ul>
+<p class="bw-p">Recall that the CIDR block defines the size of the VPC in terms of the number of addresses that the VPC offers to devices.</p>
+<ul class="bw-ul"><li>Enable DNS hostnames and DNS resolutions if using public resources</li></ul>
+<figure class="bw-fig"><img src="/BL-1018/create-vpc2.png" alt="create-vpc" class="bw-img"><figcaption class="bw-cap">create-vpc</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-1018/create-vpc3.png" alt="create-vpc" class="bw-img"><figcaption class="bw-cap">create-vpc</figcaption></figure>
+<ul class="bw-ul"><li>Click <strong>Create VPC</strong></li></ul>
+<p class="bw-p">A VPC with the specified CIDR block has been created. Now, let's create the subnets.</p>
+<h3 class="bw-h3">Create Subnets (Public &amp; Private)</h3>
+<ul class="bw-ul"><li>In the left navigation pane, choose <strong>Subnets</strong> → <strong>Create Subnet</strong>.</li></ul>
+<figure class="bw-fig"><img src="/BL-1018/subnets.png" alt="create-vpc" class="bw-img"><figcaption class="bw-cap">create-vpc</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-1018/create-subnet.png" alt="create-vpc" class="bw-img"><figcaption class="bw-cap">create-vpc</figcaption></figure>
+<ul class="bw-ul"><li>Choose your VPC</li></ul>
+<ul class="bw-ul"><li>Create a Public Subnet by stating the name, <strong>CIDR block</strong> of the subnet, <strong>Availability Zone</strong>, <strong>Configure Auto-assign Public IP</strong> as enable or disable and then click <strong>Create</strong>.</li></ul>
+<p class="bw-p">&gt;<strong>Enable auto-assign public IPv4 address</strong> provides a public IPv4 address for all instances launched into the selected subnet</p>
+<figure class="bw-fig"><img src="/BL-1018/public_subnet.png" alt="create-vpc" class="bw-img"><figcaption class="bw-cap">create-vpc</figcaption></figure>
+<p class="bw-p">&gt;A public subnet must have an internet gateway</p>
+<ul class="bw-ul"><li>Create a Private Subnet by stating the name, CIDR block of the subnet, Availability Zone, and disble Auto-assign Public IP and then click <strong>Create</strong>.</li></ul>
+<figure class="bw-fig"><img src="/BL-1018/private-subnet.png" alt="create-vpc" class="bw-img"><figcaption class="bw-cap">create-vpc</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-1018/public-subnet.png" alt="create-vpc" class="bw-img"><figcaption class="bw-cap">create-vpc</figcaption></figure>
+<p class="bw-p">You can delete or edit the settings of a particular subnet by selecting the subnet in your dashboard then clicking on <strong>Actions</strong> and then select whether you want to delete or edit settings or manage the subnet.</p>
+<figure class="bw-fig"><img src="/BL-1018/edit-subnet1.png" alt="edit-subnet" class="bw-img"><figcaption class="bw-cap">edit-subnet</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-1018/edit-subnet2.png" alt="edit-subnet" class="bw-img"><figcaption class="bw-cap">edit-subnet</figcaption></figure>
+<h3 class="bw-h3">Create Route Tables</h3>
+<ul class="bw-ul"><li>In the VPC Dashboard, Click <strong>Route Tables</strong> → <strong>Create Route Table</strong></li></ul>
+<figure class="bw-fig"><img src="/BL-1018/create-routet1.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<ul class="bw-ul"><li>Name your route table appropriately</li><li>Associate your the table with your VPC that you created</li><li>Click <strong>Create route table</strong></li></ul>
+<figure class="bw-fig"><img src="/BL-1018/name-rt.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<p class="bw-p">You can then add and edit routes</p>
+<ul class="bw-ul"><li>Click Edit routes</li></ul>
+<figure class="bw-fig"><img src="/BL-1018/edit-rt.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-1018/edit-rt1.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<ul class="bw-ul"><li>Click <strong>Save Changes</strong></li></ul>
+<p class="bw-p">You can associate your route table with your public subnet</p>
+<ul class="bw-ul"><li>Click on <strong>Subnet Associations</strong> tab</li><li>On the <strong>Explicit subnet associations</strong> click <strong>Edit subnet associations</strong></li></ul>
+<figure class="bw-fig"><img src="/BL-1018/rt-assoc1.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<ul class="bw-ul"><li>Select the subnet you would like to associate with your route table</li><li>Click <strong>Save Associations</strong></li></ul>
+<figure class="bw-fig"><img src="/BL-1018/rt-assoc2.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<h2 class="bw-h2">Attach an Internet Gateway</h2>
+<p class="bw-p">In order for the resources in the public subnets to be able to access internet services or communication, the subnet is atttached to an Internet Gateway.</p>
+<p class="bw-p">An Internet Gateway sits in between the VPC and the internet. Any communications from and to the internet must pass through this "Gate".</p>
+<p class="bw-p">In order to create and attach an Internet Gateway in a VPC, the following steps are followed:</p>
+<ul class="bw-ul"><li>In the left navigation pane, choose <strong>Internet Gateways</strong> → <strong>Create Internet Gateway</strong>.</li></ul>
+<figure class="bw-fig"><img src="/BL-1018/go-to-igw.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<ul class="bw-ul"><li>Give a name to your Gateway e.g  <code class="bw-ic">MyGateway</code> and a tag (optional)</li><li>Click <strong>Create Internet Gateway</strong>.</li></ul>
+<figure class="bw-fig"><img src="/BL-1018/create-igw.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<ul class="bw-ul"><li>Click <strong>Attach to VPC</strong>.  Alternatively, you can go to <strong>Actions</strong> and click <strong>Attach to VPC</strong></li></ul>
+<figure class="bw-fig"><img src="/BL-1018/attach-igw.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<h2 class="bw-h2">Setting Up a NAT Gateway</h2>
+<p class="bw-p">A NAT Gateway allows private subnet resources to be able to access the internet. The resources might need updates/patches hence they would download these patches from another server found in the internet.</p>
+<p class="bw-p">To set up a NAT Gateway, the following steps are followed:</p>
+<ul class="bw-ul"><li>On the dashboard, Go to <strong>NAT Gateways</strong> -&gt; <strong>Create NAT Gateways</strong></li></ul>
+<figure class="bw-fig"><img src="/BL-1018/go-to-NAT.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<ul class="bw-ul"><li>Select the <strong>Public Subnet</strong> and create an <strong>Elastic IP</strong></li></ul>
+<ul class="bw-ul"><li>Click <strong>Create NAT Gateway</strong></li></ul>
+<figure class="bw-fig"><img src="/BL-1018/create-NAT.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<ul class="bw-ul"><li>Go to <strong>Route Tables</strong>, create a <strong>Private Route Table</strong>, and add:</li></ul>
+<p class="bw-p">Destination: 0.0.0.0/0</p>
+<p class="bw-p">Target: NAT Gateway</p>
+<figure class="bw-fig"><img src="/BL-1018/edit-private-rt-for-NAT.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-1018/edit-private-rt-for-NAT.png.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<ul class="bw-ul"><li>Associate the <strong>Private Route Table</strong> with the <strong>Private Subnet</strong>.</li></ul>
+<figure class="bw-fig"><img src="/BL-1018/private-NAT-assoc.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-1018/private-NAT-save-assoc.png" alt="create-routetable" class="bw-img"><figcaption class="bw-cap">create-routetable</figcaption></figure>
+<h2 class="bw-h2">Create Security Groups</h2>
+<p class="bw-p">Security groups are like firewalls at instance level. i.e. They control the traffic in and out of instances running in the VPC.</p>
+<p class="bw-p">The following steps are followed when creating a security group:</p>
+<ul class="bw-ul"><li>Create a Security Group (e.g., WebServerSG).</li><li>Allow:</li></ul>
+<p class="bw-p">Inbound: HTTP (80), HTTPS (443), SSH (22) for Public Subnet.</p>
+<p class="bw-p">Outbound: All traffic.</p>
+<ul class="bw-ul"><li>Associate this Security Group with your instances.</li></ul>
+<h3 class="bw-h3">A simple VPC architecture</h3>
+<div class="bw-cb"><pre><code>VPC: 10.0.0.0/16
+├── Public Subnet (10.0.1.0/24) 
+│   ├── EC2 Instance (Public Web Server)
+│   ├── Route Table (0.0.0.0/0 → IGW)
+│   └── Internet Gateway (IGW)
+├── Private Subnet (10.0.2.0/24)
+│   ├── EC2 Instance (Private App Server)
+│   ├── Route Table (0.0.0.0/0 → NAT Gateway)
+│   └── NAT Gateway (for outbound internet access)</code></pre></div>
+<h2 class="bw-h2">Launch Resources</h2>
+<ul class="bw-ul"><li>Go to EC2 → Launch Instance.</li><li>Choose an AMI (e.g., Amazon Linux 2).</li><li>Select the Public Subnet (for a web server).</li><li>Assign the Security Group you created.</li><li>Enable Auto-assign Public IP.</li><li>Click Launch.</li></ul>
+<h2 class="bw-h2">The Key Components of a VPC</h2>
+<h3 class="bw-h3">1. IP Address range (CIDR Block)</h3>
+<p class="bw-p">A VPC is defined using a range of IP addresses.</p>
+<p class="bw-p">Unlike the traditional Classful IP addressing, which had limitations and wastage of IP addresses, the Classless Inter-Domain Routing makes it flexible to manage networks and IP addressing without limitations and wastage.</p>
+<p class="bw-p">The CIDR determines the size of the VPC in terms of the number of IP addresses available in it.</p>
+<h3 class="bw-h3">2. Subnets</h3>
+<p class="bw-p">This is a portion or segment of the VPC CIDR Block (IP address range) that one can place resources.</p>
+<p class="bw-p">A subnet is tied to a specific Availability Zone (AZ) within a region. There are two types of subnets in a VPC:</p>
+<ul class="bw-ul"><li>Public Subnet - The resources in this subnet can access the internet using an internet gateway.(IGW)</li></ul>
+<ul class="bw-ul"><li>Private Subnet - Resources in this subnet cannot directly access the internet. They can only do so via a NAT gateway or a NAT instance.</li></ul>
+<h3 class="bw-h3">3. Route Tables</h3>
+<p class="bw-p">In a house, we have rooms and for one to move from one room to another, he/she needs to follow certain paths or corridors in that house.</p>
+<p class="bw-p">In a network, for a traffic to travel from one from a particular network to another, in order to reach the intended device, it needs to follow some paths.</p>
+<p class="bw-p">Routers are used to route (to provide the best paths) packets or traffic from one network to another.</p>
+<p class="bw-p">A route table contains a set og rules (routes) that determine where network traffic is directed.</p>
+<p class="bw-p">Each subnet must be associated with a route table.</p>
+<p class="bw-p">A default route is created automatically when the VPC is created. A default route is a route to destinations not found within the network.</p>
+<h3 class="bw-h3">4. Internet Gateway(IGW)</h3>
+<p class="bw-p">Resources within the public or private networks of a VPC may want an internet access.</p>
+<p class="bw-p">In order to communicate with the internet, a gateway (like a door) is required.</p>
+<p class="bw-p">An internet gateway allows communication between resources in your public subnet of your VPC and the internet.</p>
+<h3 class="bw-h3">5. NAT Gateway or NAT instance</h3>
+<p class="bw-p">This gateway allowsresources within the private subnet to access the internet for updates or patches while preventing the internet from initiating connection to those Resources</p>
+<p class="bw-p">NAT Gateway is a managed service while a NAT instance is an EC2 instance configured to perform NAT.</p>
+<h3 class="bw-h3">6. Security Groups</h3>
+<p class="bw-p">Just like a traditional firewall that filters inbound and outbound traffic, a security group acts as a virtual firewall for instances in the VPC, to control inbound and outbound traffic.</p>
+<p class="bw-p">They operate at instance level and are stateful (automatically allows return trffic).</p>
+<p class="bw-p">Stateful means that they keep records of states or operations at the network interfaces. i.e. Memorize</p>
+<h3 class="bw-h3">7. Network Access Control Lists (NACLs)</h3>
+<p class="bw-p">These are stateless(you must explicitly allow return traffic) firewall that operates at subnet level.</p>
+<p class="bw-p">They deny or allow traffic based on defined rules.</p>
+<h3 class="bw-h3">8. VPC Peering</h3>
+<p class="bw-p">VPC Peering allows you to connect two VPCs privately using AWS’s network.</p>
+<p class="bw-p">The VPCs can be in the same or different AWS accounts or regions.</p>
+<p class="bw-p">Peered VPCs can communicate as if they are part of the same network.</p>
+<h3 class="bw-h3">9. VPC Endpoints</h3>
+<p class="bw-p">VPC Endpoints allow private connectivity between your VPC and supported AWS services (e.g., S3, DynamoDB) without using the internet or a NAT device.</p>
+<p class="bw-p">There are two types:</p>
+<ul class="bw-ul"><li>Interface Endpoints: Uses an Elastic Network Interface (ENI) with a private IP address.</li></ul>
+<ul class="bw-ul"><li>Gateway Endpoints: Uses a gateway for specific services like S3 and DynamoDB.</li></ul>
+<h3 class="bw-h3">10. Elastic IP Addresses</h3>
+<p class="bw-p">An Elastic IP (EIP) is a static, public IPv4 address that you can allocate to your AWS account and associate with instances or NAT Gateways.</p>
+<h2 class="bw-h2">Conclusion</h2>
+<p class="bw-p">In summary, a VPC is a foundational component of AWS that provides a secure, scalable, and customizable networking environment for your cloud resources. It is essential for building secure and efficient cloud architectures.</p>
+
+  <footer class="bw-footer">
+    <span>Written by Steve</span>
+    <a href="javascript:history.back()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      All posts
+    </a>
+  </footer>
+</div>
+
+</body>
+</html>

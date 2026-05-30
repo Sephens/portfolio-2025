@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Introduction to Amazon EC2</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12121e;--ink-mid:#2e2e4e;--ink-light:#6b6b8a;
+  --accent:#d97706;--accent-bg:#fffbeb;
+  --gold:#c9963a;--gold-bg:#fdf6e8;
+  --border:#e2e2ef;--surface:#f8f8fc;
+  --code-bg:#0f1b2d;--code-fg:#cdd9f0;
+}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink-mid);background:#fff;line-height:1.85}
+
+/* ── Nav ── */
+.bw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem}
+.bw-nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.bw-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);text-decoration:none;transition:color .15s}
+.bw-back:hover{color:var(--ink)}
+.bw-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bw-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent)}
+
+/* ── Hero ── */
+.bw-hero{padding:3.5rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.bw-hero-inner{max-width:760px;margin:0 auto}
+.bw-cat{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem}
+.bw-cat-rule{display:inline-block;width:22px;height:1px;background:var(--accent);flex-shrink:0}
+.bw-title{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.75rem,3.8vw,2.6rem);line-height:1.18;color:var(--ink);margin-bottom:1rem;max-width:680px}
+.bw-abstract{font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--ink-mid);max-width:620px;margin-bottom:1.75rem}
+.bw-meta{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:stretch}
+.bw-mi{display:flex;flex-direction:column;gap:3px}
+.bw-ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.bw-mv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.bw-ms{width:1px;background:var(--border);align-self:stretch;margin:2px 0}
+
+/* ── Body ── */
+.bw-body{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+/* ── Typography ── */
+.bw-h1{font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;line-height:1.2;color:var(--ink);margin:2.75rem 0 .9rem}
+.bw-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.45rem;color:var(--ink);margin:2.75rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink)}
+.bw-h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:2rem 0 .45rem}
+.bw-h4{font-family:'Source Serif 4',serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .35rem}
+.bw-h5,.bw-h6{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light);margin:1.25rem 0 .3rem}
+.bw-p{margin:.85rem 0}
+strong{color:var(--ink);font-weight:600}
+.bw-ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.bw-ol{list-style:decimal;margin:.75rem 0 .75rem 1.5rem}
+.bw-ul li,.bw-ol li{margin:.35rem 0;line-height:1.78}
+.bw-fig{margin:1.75rem 0}
+.bw-img{width:100%;border-radius:8px;display:block;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.bw-cap{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px}
+.bw-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.bw-link:hover{opacity:.75}
+.bw-ic{font-family:'DM Mono',monospace;font-size:.83em;background:#f0f0f8;color:#bf1650;padding:.12em .42em;border-radius:4px}
+.bw-cb{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.5rem 0}
+.bw-ch{padding:7px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.bw-cl{font-family:'DM Mono',monospace;font-size:10px;color:#64b5f6;letter-spacing:.1em}
+.bw-cb pre{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--code-fg);padding:1.2rem 1.4rem;margin:0;overflow-x:auto;line-height:1.7;white-space:pre}
+.bw-cb pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.bw-insight{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:1rem 1.35rem;margin:1.5rem 0;font-style:italic;font-size:.98rem;color:#7a5a1a;line-height:1.72}
+.bw-hr{border:none;border-top:1px solid var(--border);margin:2.25rem 0}
+
+/* ── Footer ── */
+.bw-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light)}
+.bw-footer a{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.bw-footer a:hover{opacity:.7}
+.bw-footer a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:600px){
+  .bw-title{font-size:1.6rem}
+  .bw-ms{display:none}
+  .bw-hero{padding:2.25rem 1rem 1.75rem}
+  .bw-body{padding:2rem 1rem 3.5rem}
+  .bw-h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="bw-nav">
+  <div class="bw-nav-inner">
+    <a href="javascript:history.back()" class="bw-back">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </a>
+    <span class="bw-pill">Amazon EC2</span>
+  </div>
+</nav>
+
+<div class="bw-hero">
+  <div class="bw-hero-inner">
+    <div class="bw-cat"><span class="bw-cat-rule"></span>AWS</div>
+    <h1 class="bw-title">Introduction to Amazon EC2</h1>
+    <p class="bw-abstract">Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides resizable compute capacity in the cloud. It is designed to make web-scale cloud computing easier for developers.</p>
+    <div class="bw-meta">
+      <div class="bw-mi"><span class="bw-ml">Author</span><span class="bw-mv">Steve</span></div>
+      <div class="bw-ms"></div>
+      <div class="bw-mi"><span class="bw-ml">Read time</span><span class="bw-mv">10 min</span></div>
+      <div class="bw-ms"></div><div class="bw-mi"><span class="bw-ml">Topic</span><span class="bw-mv">Amazon EC2</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="bw-body">
+  <h2 class="bw-h2">Introduction</h2>
+<p class="bw-p">Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides resizable compute capacity in the cloud. It is designed to make web-scale cloud computing easier for developers.</p>
+<p class="bw-p">Amazon EC2’s simple web service interface allows you to obtain and configure capacity with minimal friction. It provides you with complete control of your computing resources and lets you run on Amazon’s proven computing environment. Amazon EC2 reduces the time required to obtain and boot new server instances to minutes, allowing you to quickly scale capacity, both up and down, as your computing requirements change.</p>
+<p class="bw-p">Amazon EC2 changes the economics of computing by allowing you to pay only for capacity that you actually use. Amazon EC2 provides developers the tools to build failure-resilient applications and isolate themselves from common failure scenarios.</p>
+<h3 class="bw-h3">Topics covered</h3>
+<ol class="bw-ol"><li>Launch a web server with termination protection enabled</li><li>Monitor Your EC2 instance</li></ol>
+<ol class="bw-ol"><li>Modify the security group that your web server is using to allow HTTP access</li></ol>
+<ol class="bw-ol"><li>Resize your Amazon EC2 instance to scale</li></ol>
+<ol class="bw-ol"><li>Test termination protection</li></ol>
+<ol class="bw-ol"><li>Terminate your EC2 instance</li></ol>
+<h3 class="bw-h3">1. Launching your EC2 instance</h3>
+<p class="bw-p">In the AWS Management Console on the Services menu, choose EC2.</p>
+<p class="bw-p">In the left navigation pane, choose EC2 Dashboard to ensure that you are on the dashboard page.</p>
+<p class="bw-p">Choose Launch instance, and then select Launch instance.</p>
+<h4 class="bw-h4">Naming your EC2 instance</h4>
+<p class="bw-p">When you name your instance, AWS creates a key-value pair. The key for this pair is Name, and the value is the name you enter for your EC2 instance.</p>
+<p class="bw-p">In the Name and tags pane, in the Name text box, enter the name of your EC2 instance.</p>
+<h4 class="bw-h4">Choosing an Amazon Machine Image (AMI)</h4>
+<p class="bw-p">An AMI provides the information required to launch an instance, which is a virtual server in the cloud. An AMI includes the following:</p>
+<p class="bw-p">A template for the root volume for the instance (for example, an operating system or an application server with applications) Launch permissions that control which AWS accounts can use the AMI to launch instances A block device mapping that specifies the volumes to attach to the instance when it is launched The Quick Start list contains the most commonly used AMIs. You can also create your own AMI or select an AMI from the AWS Marketplace, an online store where you can sell or buy software that runs on AWS.</p>
+<p class="bw-p">Locate the Application and OS Images (Amazon Machine Image) pane.</p>
+<p class="bw-p">Under AMI Machine Image (AMI), notice that the Amazon Linux 2 AMI image is selected by default. You can decide to keep this setting or choose your preferred.</p>
+<h4 class="bw-h4">Choosing an instance type</h4>
+<p class="bw-p">Amazon EC2 provides a wide selection of instance types optimized to fit different use cases. Instance types comprise varying combinations of CPU, memory, storage, and networking capacity and give you the flexibility to choose the appropriate mix of resources for your applications. Each instance type includes one or more instance sizes so that you can scale your resources to the requirements of your target workload.</p>
+<p class="bw-p">For example, a t3.micro instance has 2 virtual CPUs and 1 GiB of memory.</p>
+<h4 class="bw-h4">Configuring a key pair</h4>
+<p class="bw-p">Amazon EC2 uses public-key cryptography to encrypt and decrypt login information. To log in to your instance, you must create a key pair, specify the name of the key pair when you launch the instance, and provide the private key when you connect to the instance.</p>
+<p class="bw-p">It is an optional feature but mostly recommended.</p>
+<h4 class="bw-h4">Configuring the network settings</h4>
+<p class="bw-p">You use this pane to configure networking settings.</p>
+<p class="bw-p">The VPC indicates which virtual private cloud (VPC) you want to launch the instance into. You can have multiple VPCs, including different ones for development, testing, and production.</p>
+<p class="bw-p">In the Network settings pane, choose Edit</p>
+<p class="bw-p">Here you can configure the VPC and Security Group.</p>
+<p class="bw-p">In the security group, you give the name and the description.</p>
+<p class="bw-p">A security group acts as a virtual firewall that controls the traffic for one or more instances. When you launch an instance, you associate one or more security groups with the instance. You add rules to each security group that allow traffic to or from its associated instances. You can modify the rules for a security group at any time; the new rules are automatically applied to all instances that are associated with the security group.</p>
+<h4 class="bw-h4">Adding storage</h4>
+<p class="bw-p">Amazon EC2 stores data on a network-attached virtual disk called Amazon Elastic Block Store (Amazon EBS).</p>
+<p class="bw-p">You launch the EC2 instance using a default 8 GiB disk volume. This is your root volume (also known as a boot volume).</p>
+<p class="bw-p">You can do this in the Configure Storage pane.</p>
+<h4 class="bw-h4">Configuring advanced details</h4>
+<p class="bw-p">In the Advanced details pane, you can set advanced features like termination protection, among others.</p>
+<p class="bw-p">When you launch an instance in Amazon EC2, you have the option of passing user data to the instance. These commands can be used to perform common automated configuration tasks and even run scripts after the instance starts.</p>
+<p class="bw-p">For example, in the User Data text box, you can define your scripts that will run when the instance launches.</p>
+<div class="bw-cb"><pre><code>#!/bin/bash
+yum -y install httpd
+systemctl enable httpd
+systemctl start httpd
+echo '&lt;html&gt;&lt;h1&gt;Hello From Your Web Server!&lt;/h1&gt;&lt;/html&gt;' &gt; /var/www/html/index.html</code></pre></div>
+<p class="bw-p">In this case, the script does the following:</p>
+<ul class="bw-ul"><li>Install an Apache web server (httpd)</li></ul>
+<ul class="bw-ul"><li>Configure the web server to automatically start on boot</li></ul>
+<ul class="bw-ul"><li>Activate the Web server</li></ul>
+<ul class="bw-ul"><li>Create a simple web page</li></ul>
+<h4 class="bw-h4">Launching an EC2 instance</h4>
+<p class="bw-p">Now that you have configured your EC2 instance settings, it is time to launch your instance.</p>
+<p class="bw-p">In the right pane, choose Launch instance</p>
+<p class="bw-p">Choose <strong>View all instances</strong></p>
+<p class="bw-p">The instance appears in a Pending state, which means it is being launched. It then changes to Running, which indicates that the instance has started booting. There will be a short time before you can access the instance.</p>
+<p class="bw-p">The instance receives a public DNS name that you can use to contact the instance from the Internet.</p>
+<h3 class="bw-h3">2. Monitor Your Instance</h3>
+<p class="bw-p">Monitoring is an important part of maintaining the reliability, availability, and performance of your Amazon Elastic Compute Cloud (Amazon EC2) instances and your AWS solutions.</p>
+<p class="bw-p">Select the instance by checking the box next to the instance and navigate to the bottom of the screen to the Status checks tab.</p>
+<blockquote class="bw-insight">With instance status monitoring, you can quickly determine whether Amazon EC2 has detected any problems that might prevent your instances from running applications. Amazon EC2 performs automated checks on every running EC2 instance to identify hardware and software issues.</blockquote>
+<p class="bw-p">Select the <strong>Monitoring tab</strong>.</p>
+<p class="bw-p">This tab displays Amazon CloudWatch metrics for your instance.</p>
+<p class="bw-p">You can choose a graph to see an expanded view.</p>
+<blockquote class="bw-insight">Amazon EC2 sends metrics to Amazon CloudWatch for your EC2 instances. Basic (five-minute) monitoring is enabled by default. You can enable detailed (one-minute) monitoring.</blockquote>
+<p class="bw-p">In the <strong>Actions</strong> menu, select Monitor and troubleshoot Get Instance Screenshot.</p>
+<p class="bw-p">This shows you what your Amazon EC2 instance console would look like if a screen were attached to it.</p>
+<blockquote class="bw-insight">If you are unable to reach your instance via SSH or RDP, you can capture a screenshot of your instance and view it as an image. This provides visibility as to the status of the instance, and allows for quicker troubleshooting.</blockquote>
+<h3 class="bw-h3">3. Update Your Security Group and Access the Web Server</h3>
+<p class="bw-p">When we launched the EC2 instance, we provided a script that installed a web server and created a simple web page. In this section, we will access content from the web server.</p>
+<p class="bw-p">When we select the instance by checking the box, select the Details tab, and copy the Public IPv4 address of our instance to the clipboard.</p>
+<p class="bw-p">Open a new tab in our web browser, paste the IP address we just copied, and then press Enter.</p>
+<p class="bw-p">We are not currently able to access our web server because the security group is not permitting inbound traffic on port 80, which is used for HTTP web requests. This is a demonstration of using a security group as a firewall to restrict the network traffic that is allowed in and out of an instance.</p>
+<p class="bw-p">To correct this, we will now update the security group to permit web traffic on port 80.</p>
+<ul class="bw-ul"><li>In the EC2 Management Console tab, in the left navigation pane, select Security Groups located under Network &amp; Security.</li></ul>
+<ul class="bw-ul"><li>Select Web Server security group. The Web in this case is the name we gave as our security group name.</li></ul>
+<ul class="bw-ul"><li>Select the Inbound rules tab.</li></ul>
+<ul class="bw-ul"><li>The security group currently has no rules.</li></ul>
+<ul class="bw-ul"><li>Select Edit inbound rules then select Add rule and configure the rule with the following settings:</li></ul>
+<ul class="bw-ul"><li>Type: HTTP</li></ul>
+<ul class="bw-ul"><li>Source: Anywhere-IPv4</li></ul>
+<ul class="bw-ul"><li>Select Save rules</li></ul>
+<p class="bw-p">When we return to the web server tab that we previously opened and refresh the page.</p>
+<p class="bw-p">We should see the message Hello From Your Web Server!</p>
+<p class="bw-p">We can add, edit, or delete rules using the <strong>Edit inbound rules</strong> menu.</p>
+<h3 class="bw-h3">4. Resize Your Instance: Instance Type and EBS Volume</h3>
+<p class="bw-p">As your needs change, you might find that your instance is over-utilized (too small) or under-utilized (too large). If so, you can change the instance type. For example, if a t3.micro instance is too small for its workload, you can change it to an m5.medium instance. Similarly, you can change the size of a disk.</p>
+<h4 class="bw-h4">Stop Your Instance</h4>
+<p class="bw-p">Before you can resize an instance, you must stop it.</p>
+<p class="bw-p">When you stop an instance, it is shut down. There is no charge for a stopped EC2 instance, but the storage charge for attached Amazon EBS volumes remains.</p>
+<ul class="bw-ul"><li>On the EC2 Management Console, in the left navigation pane, select Instances.</li><li>Web Server (the name of our instance) should already be selected.</li><li>Select Instance state &gt; Stop instance.</li><li>Select Stop</li><li>Your instance will perform a normal shutdown and then will stop running.</li><li>Wait for the Instance State to display: stopped</li></ul>
+<h4 class="bw-h4">Change The Instance Type</h4>
+<p class="bw-p">In the Actions menu, select Instance Settings &gt; Change Instance Type, then configure to the best of your choice.</p>
+<p class="bw-p">Then select Apply</p>
+<p class="bw-p">When the instance is started again, it will be of the new instance type you have configured above.</p>
+<h3 class="bw-h3">Resize the EBS Volume</h3>
+<ul class="bw-ul"><li>In the left navigation menu, select Volumes located under Elastic Block Store.</li><li>Select the volume by checking the box, and navigate to the Actions menu, select Modify Volume.</li><li>Change the volume to your most suitable size.</li><li>Select Modify</li><li>Select Modify to confirm and increase or decrease the size of the volume.</li></ul>
+<h4 class="bw-h4">Start the Resized Instance</h4>
+<p class="bw-p">You will now start the instance again, which will now have more or less memory and more or less disk space.</p>
+<h3 class="bw-h3">5. Termination Protection</h3>
+<p class="bw-p">You can delete your instance when you no longer need it. This is referred to as terminating your instance. You cannot connect to or restart an instance after it has been terminated.</p>
+<ul class="bw-ul"><li>Select your instance</li><li>In the Actions menu, select Instance settings &gt; Change termination protection.</li><li>Check Enable followed by Save.</li></ul>
+<p class="bw-p">When you now select your instance and then navigate to the top and select Instance state menu, select Terminate instance, <em>There is a message that says: On an EBS-backed instance, the default action is for the root EBS volume to be deleted when the instance is terminated. Storage on any local drives will be lost. It will ask if you are sure that you want to terminate the instance. You will be able to select the Terminate button.</em></p>
+
+  <footer class="bw-footer">
+    <span>Written by Steve</span>
+    <a href="javascript:history.back()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      All posts
+    </a>
+  </footer>
+</div>
+
+</body>
+</html>

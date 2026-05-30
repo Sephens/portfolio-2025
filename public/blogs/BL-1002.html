@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Client Vs Server Side Rendering</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12121e;--ink-mid:#2e2e4e;--ink-light:#6b6b8a;
+  --accent:#0284c7;--accent-bg:#e0f2fe;
+  --gold:#c9963a;--gold-bg:#fdf6e8;
+  --border:#e2e2ef;--surface:#f8f8fc;
+  --code-bg:#0f1b2d;--code-fg:#cdd9f0;
+}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink-mid);background:#fff;line-height:1.85}
+
+/* ── Nav ── */
+.bw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem}
+.bw-nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.bw-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);text-decoration:none;transition:color .15s}
+.bw-back:hover{color:var(--ink)}
+.bw-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bw-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent)}
+
+/* ── Hero ── */
+.bw-hero{padding:3.5rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.bw-hero-inner{max-width:760px;margin:0 auto}
+.bw-cat{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem}
+.bw-cat-rule{display:inline-block;width:22px;height:1px;background:var(--accent);flex-shrink:0}
+.bw-title{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.75rem,3.8vw,2.6rem);line-height:1.18;color:var(--ink);margin-bottom:1rem;max-width:680px}
+.bw-abstract{font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--ink-mid);max-width:620px;margin-bottom:1.75rem}
+.bw-meta{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:stretch}
+.bw-mi{display:flex;flex-direction:column;gap:3px}
+.bw-ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.bw-mv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.bw-ms{width:1px;background:var(--border);align-self:stretch;margin:2px 0}
+
+/* ── Body ── */
+.bw-body{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+/* ── Typography ── */
+.bw-h1{font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;line-height:1.2;color:var(--ink);margin:2.75rem 0 .9rem}
+.bw-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.45rem;color:var(--ink);margin:2.75rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink)}
+.bw-h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:2rem 0 .45rem}
+.bw-h4{font-family:'Source Serif 4',serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .35rem}
+.bw-h5,.bw-h6{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light);margin:1.25rem 0 .3rem}
+.bw-p{margin:.85rem 0}
+strong{color:var(--ink);font-weight:600}
+.bw-ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.bw-ol{list-style:decimal;margin:.75rem 0 .75rem 1.5rem}
+.bw-ul li,.bw-ol li{margin:.35rem 0;line-height:1.78}
+.bw-fig{margin:1.75rem 0}
+.bw-img{width:100%;border-radius:8px;display:block;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.bw-cap{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px}
+.bw-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.bw-link:hover{opacity:.75}
+.bw-ic{font-family:'DM Mono',monospace;font-size:.83em;background:#f0f0f8;color:#bf1650;padding:.12em .42em;border-radius:4px}
+.bw-cb{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.5rem 0}
+.bw-ch{padding:7px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.bw-cl{font-family:'DM Mono',monospace;font-size:10px;color:#64b5f6;letter-spacing:.1em}
+.bw-cb pre{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--code-fg);padding:1.2rem 1.4rem;margin:0;overflow-x:auto;line-height:1.7;white-space:pre}
+.bw-cb pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.bw-insight{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:1rem 1.35rem;margin:1.5rem 0;font-style:italic;font-size:.98rem;color:#7a5a1a;line-height:1.72}
+.bw-hr{border:none;border-top:1px solid var(--border);margin:2.25rem 0}
+
+/* ── Footer ── */
+.bw-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light)}
+.bw-footer a{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.bw-footer a:hover{opacity:.7}
+.bw-footer a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:600px){
+  .bw-title{font-size:1.6rem}
+  .bw-ms{display:none}
+  .bw-hero{padding:2.25rem 1rem 1.75rem}
+  .bw-body{padding:2rem 1rem 3.5rem}
+  .bw-h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="bw-nav">
+  <div class="bw-nav-inner">
+    <a href="javascript:history.back()" class="bw-back">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </a>
+    <span class="bw-pill">React</span>
+  </div>
+</nav>
+
+<div class="bw-hero">
+  <div class="bw-hero-inner">
+    <div class="bw-cat"><span class="bw-cat-rule"></span>React · Next</div>
+    <h1 class="bw-title">Client Vs Server Side Rendering</h1>
+    <p class="bw-abstract">Difference between different types of rendering techniques and advantage of Next.js over React.js.</p>
+    <div class="bw-meta">
+      <div class="bw-mi"><span class="bw-ml">Author</span><span class="bw-mv">Steve</span></div>
+      <div class="bw-ms"></div>
+      <div class="bw-mi"><span class="bw-ml">Read time</span><span class="bw-mv">4 min</span></div>
+      <div class="bw-ms"></div><div class="bw-mi"><span class="bw-ml">Topic</span><span class="bw-mv">React</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="bw-body">
+  <h2 class="bw-h2">Client Side Rendering</h2>
+<figure class="bw-fig"><img src="/BL-1002/csr.png" alt="Client Side Rendering" class="bw-img"><figcaption class="bw-cap">Client Side Rendering</figcaption></figure>
+<p class="bw-p">When we talk about client-side rendering,it’s about rendering content in the browser using JavaScript.</p>
+<p class="bw-p">So instead of getting all the content from the HTML document itself, a simple HTML document with a JavaScript file in initial loading itself is received, which renders the rest of the site using the browser.</p>
+<p class="bw-p">With client-side rendering, the initial page load is naturally a bit slow. However, after that, every subsequent page load is very fast. In this approach, communication with server happens only for getting the run-time data. Moreover, there is no need to reload the entire UI after every call to the server. The client-side framework manages to update UI with changed data by re-rendering only that particular DOM element.</p>
+<h2 class="bw-h2">Server Side Rendering</h2>
+<figure class="bw-fig"><img src="/BL-1002/ssr.png" alt="Server Side Rendering" class="bw-img"><figcaption class="bw-cap">Server Side Rendering</figcaption></figure>
+<p class="bw-p">In server-side rendering when a user makes a request to a webpage, the server prepares an HTML page by fetching user-specific data and sends it to the user’s machine over the internet. Webpages are generated on your server for every request. This entire process of fetching data from the database, creating an HTML page and serve it to user is known as SSR.</p>
+<h2 class="bw-h2">Static Site Generation</h2>
+<p class="bw-p">At build time, your app will fetch all the data required and compile it down to static webpages. After a production build is created, every request is going to reuse that statically generated HTML file. This provides the best performance and can easily be cached on a CDN.</p>
+<h2 class="bw-h2">Problems with React.js</h2>
+<p class="bw-p">React uses Client Side Rendering. With React, nothing gets displayed until all of your JavaScript loads. Your HTML is nearly empty and React injects your content in your HTML with JavaScript. This leads multiple problems:-</p>
+<ul class="bw-ul"><li>When the browser is loading the JavaScript, the screen is blank because <code class="bw-ic">&lt;div id="root"&gt;&lt;/div&gt;</code> does not show anything. Depending on the size of your JavaScript bundle, this could lead to your visitors staring at a white screen for a couple of seconds.</li></ul>
+<ul class="bw-ul"><li>Most SEO crawlers do not have JavaScript enabled. DuckDuckGo, Google, Bing and any other search engine would not actually know what is on your website since it requires JavaScript to display the content. You will not be ranked at all on Search Engines.</li></ul>
+<h2 class="bw-h2">Methods for Prerendering using Next.js</h2>
+<p class="bw-p">Next.js offers <code class="bw-ic">(Server Side Rendering)SSR</code> and <code class="bw-ic">(Static Site Generation)SSG</code> using <code class="bw-ic">getStaticProps</code> and <code class="bw-ic">getServerSideProps</code>.</p>
+<h3 class="bw-h3">getStaticProps</h3>
+<p class="bw-p">getStaticProps is a server-side function that will only be called at build time. The build will then use the response from getStaticProps to generate a static webpage.</p>
+<p class="bw-p">Since stale data is a problem with static generated pages, there is an option you can set to revalidate your static page and rebuild it if data changes. revalidate: 60 will check your data every 60 seconds and rebuild the page if needed.</p>
+<p class="bw-p">Example Use:</p>
+<div class="bw-cb"><pre><code>// This function gets called at build time on server-side.
+export async function getStaticProps() {
+const res = await fetch('https://.../data');
+const data = await res.json();
+
+// By returning { props: data }, the Dashboard component
+// will receive `data` as a prop at build time
+return {
+props: {
+data
+},
+// Check if data changes every 60 seconds.
+// Rebuild page if different
+revalidate: 60
+};
+}
+
+// data will be populated at build time by getStaticProps()
+export default function Dashboard({ data }) {
+return &lt;div&gt;{data}&lt;/div&gt;;
+}</code></pre></div>
+<h3 class="bw-h3">getServerSideProps</h3>
+<p class="bw-p">getServerSideProps is similar to getStaticProps but is called every time the page loads instead of at build time. This ensures that all of your initial data is up to date on every load.</p>
+<p class="bw-p">Since this is called on every load, you do not need to revalidate like getStaticProps. This also leads to a slower load time since you are no longer serving a static file, but have to rebuild on every load.</p>
+<p class="bw-p">Example Use:</p>
+<div class="bw-cb"><pre><code>// This function gets called at build time on server-side.
+export async function getServerSideProps() {
+const res = await fetch('https://.../data');
+const data = await res.json();
+
+// By returning { props: data }, the Dashboard component
+// will receive `data` as a prop at build time
+return {
+props: {
+data
+}
+};
+}
+
+// data will be populated at build time by getServerSideProps()
+export default function Dashboard({ data }) {
+return &lt;div&gt;{data}&lt;/div&gt;;
+}</code></pre></div>
+<h2 class="bw-h2">Benefits of using Next.js</h2>
+<ul class="bw-ul"><li>Search engines can crawl the site for better SEO.</li><li>The initial page load is faster.</li></ul>
+<figure class="bw-fig"><img src="/BL-1002/nextjs-pros-and-cons.png" alt="nextjs pros and cons" class="bw-img"><figcaption class="bw-cap">nextjs pros and cons</figcaption></figure>
+<p class="bw-p"><strong>References:</strong></p>
+<ul class="bw-ul"><li><a href="https://nextjs.org/docs/getting-started" target="_blank">Next.js</a></li></ul>
+
+  <footer class="bw-footer">
+    <span>Written by Steve</span>
+    <a href="javascript:history.back()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      All posts
+    </a>
+  </footer>
+</div>
+
+</body>
+</html>

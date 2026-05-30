@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AWS Key Management Service (KMS)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12121e;--ink-mid:#2e2e4e;--ink-light:#6b6b8a;
+  --accent:#b91c1c;--accent-bg:#fef2f2;
+  --gold:#c9963a;--gold-bg:#fdf6e8;
+  --border:#e2e2ef;--surface:#f8f8fc;
+  --code-bg:#0f1b2d;--code-fg:#cdd9f0;
+}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink-mid);background:#fff;line-height:1.85}
+
+/* ── Nav ── */
+.bw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem}
+.bw-nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.bw-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);text-decoration:none;transition:color .15s}
+.bw-back:hover{color:var(--ink)}
+.bw-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bw-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent)}
+
+/* ── Hero ── */
+.bw-hero{padding:3.5rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.bw-hero-inner{max-width:760px;margin:0 auto}
+.bw-cat{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem}
+.bw-cat-rule{display:inline-block;width:22px;height:1px;background:var(--accent);flex-shrink:0}
+.bw-title{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.75rem,3.8vw,2.6rem);line-height:1.18;color:var(--ink);margin-bottom:1rem;max-width:680px}
+.bw-abstract{font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--ink-mid);max-width:620px;margin-bottom:1.75rem}
+.bw-meta{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:stretch}
+.bw-mi{display:flex;flex-direction:column;gap:3px}
+.bw-ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.bw-mv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.bw-ms{width:1px;background:var(--border);align-self:stretch;margin:2px 0}
+
+/* ── Body ── */
+.bw-body{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+/* ── Typography ── */
+.bw-h1{font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;line-height:1.2;color:var(--ink);margin:2.75rem 0 .9rem}
+.bw-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.45rem;color:var(--ink);margin:2.75rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink)}
+.bw-h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:2rem 0 .45rem}
+.bw-h4{font-family:'Source Serif 4',serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .35rem}
+.bw-h5,.bw-h6{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light);margin:1.25rem 0 .3rem}
+.bw-p{margin:.85rem 0}
+strong{color:var(--ink);font-weight:600}
+.bw-ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.bw-ol{list-style:decimal;margin:.75rem 0 .75rem 1.5rem}
+.bw-ul li,.bw-ol li{margin:.35rem 0;line-height:1.78}
+.bw-fig{margin:1.75rem 0}
+.bw-img{width:100%;border-radius:8px;display:block;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.bw-cap{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px}
+.bw-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.bw-link:hover{opacity:.75}
+.bw-ic{font-family:'DM Mono',monospace;font-size:.83em;background:#f0f0f8;color:#bf1650;padding:.12em .42em;border-radius:4px}
+.bw-cb{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.5rem 0}
+.bw-ch{padding:7px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.bw-cl{font-family:'DM Mono',monospace;font-size:10px;color:#64b5f6;letter-spacing:.1em}
+.bw-cb pre{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--code-fg);padding:1.2rem 1.4rem;margin:0;overflow-x:auto;line-height:1.7;white-space:pre}
+.bw-cb pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.bw-insight{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:1rem 1.35rem;margin:1.5rem 0;font-style:italic;font-size:.98rem;color:#7a5a1a;line-height:1.72}
+.bw-hr{border:none;border-top:1px solid var(--border);margin:2.25rem 0}
+
+/* ── Footer ── */
+.bw-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light)}
+.bw-footer a{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.bw-footer a:hover{opacity:.7}
+.bw-footer a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:600px){
+  .bw-title{font-size:1.6rem}
+  .bw-ms{display:none}
+  .bw-hero{padding:2.25rem 1rem 1.75rem}
+  .bw-body{padding:2rem 1rem 3.5rem}
+  .bw-h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="bw-nav">
+  <div class="bw-nav-inner">
+    <a href="javascript:history.back()" class="bw-back">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </a>
+    <span class="bw-pill">Security in AWS</span>
+  </div>
+</nav>
+
+<div class="bw-hero">
+  <div class="bw-hero-inner">
+    <div class="bw-cat"><span class="bw-cat-rule"></span>Data · Protection · Encryption</div>
+    <h1 class="bw-title">AWS Key Management Service (KMS)</h1>
+    <p class="bw-abstract">Information stored in the cloud needs to be protected against unauthorized access, modification or delition. One of the ways to do this is by ensuring that data confidentiality is maintained. This can be done through cryptography, a practice of converting information into secret code ...</p>
+    <div class="bw-meta">
+      <div class="bw-mi"><span class="bw-ml">Author</span><span class="bw-mv">Steve</span></div>
+      <div class="bw-ms"></div>
+      <div class="bw-mi"><span class="bw-ml">Read time</span><span class="bw-mv">10 min</span></div>
+      <div class="bw-ms"></div><div class="bw-mi"><span class="bw-ml">Topic</span><span class="bw-mv">Security in AWS</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="bw-body">
+  <h1 class="bw-h1">Amazon Key Management Service (KMS): A Comprehensive Guide with Hands-On Lab</h1>
+<p class="bw-p">Cryptography is the practice of converting information into secret code to ensure confidentiality and privacy. It plays a vital role in securing digital communications by preventing unauthorized access to sensitive data. Key functions of cryptography include authentication, data integrity, and nonrepudiation, with encryption serving as its central mechanism.</p>
+<p class="bw-p">Encryption transforms readable data into an unreadable format, making it accessible only to those with the proper decryption key. This process ensures that information remains protected from unauthorized individuals, safeguarding sensitive data in various applications, from secure messaging to financial transactions. As the digital landscape evolves, encryption continues to be a cornerstone of cybersecurity, enabling organizations and individuals to protect their information from potential threats.</p>
+<p class="bw-p">Amazon Key Management Service (KMS) is a fully managed service that makes it easy to create and control cryptographic keys used to encrypt data. It is a critical component of AWS's security and compliance offerings, enabling organizations to protect sensitive data, meet regulatory requirements, and implement robust encryption strategies. In this article, we’ll dive deep into Amazon KMS, explore its features, and walk through a hands-on lab to demonstrate its capabilities. We’ll also include facts, statistics, and expert insights to provide a well-rounded understanding of the service.</p>
+<hr class="bw-hr">
+<h2 class="bw-h2">1. What is Amazon KMS?</h2>
+<p class="bw-p">Amazon KMS is a scalable and secure key management service that integrates seamlessly with other AWS services and applications running on AWS. It allows you to create, manage, and control encryption keys used to encrypt your data. KMS supports symmetric and asymmetric keys, and it integrates with AWS services like S3, EBS, RDS, Lambda, and more.</p>
+<h3 class="bw-h3">Key Features of Amazon KMS</h3>
+<ul class="bw-ul"><li><strong>Centralized Key Management</strong>: Create, manage, and control cryptographic keys in a centralized manner.</li><li><strong>Integration with AWS Services</strong>: Encrypt data stored in AWS services like S3, EBS, RDS, and DynamoDB.</li><li><strong>Custom Key Stores</strong>: Use your own Hardware Security Modules (HSMs) to store keys.</li><li><strong>Auditing and Compliance</strong>: Monitor key usage with AWS CloudTrail and meet compliance requirements.</li><li><strong>Scalability</strong>: Automatically scales to meet your organization's needs.</li><li><strong>Granular Access Control</strong>: Define fine-grained permissions using AWS Identity and Access Management (IAM) policies.</li></ul>
+<hr class="bw-hr">
+<h2 class="bw-h2">2. Why Use Amazon KMS?</h2>
+<h3 class="bw-h3">Security</h3>
+<ul class="bw-ul"><li><strong>Encryption at Rest and in Transit</strong>: KMS ensures that your data is encrypted both at rest and in transit, protecting it from unauthorized access.</li><li><strong>HSM-Backed Keys</strong>: Keys are protected by FIPS 140-2 validated HSMs, ensuring the highest level of security.</li></ul>
+<h3 class="bw-h3">Compliance</h3>
+<ul class="bw-ul"><li>KMS helps organizations meet compliance requirements such as GDPR, HIPAA, PCI-DSS, and SOC.</li></ul>
+<h3 class="bw-h3">Ease of Use</h3>
+<ul class="bw-ul"><li>KMS integrates seamlessly with AWS services, making it easy to encrypt data without managing complex infrastructure.</li></ul>
+<h3 class="bw-h3">Cost-Effective</h3>
+<ul class="bw-ul"><li>Pay only for what you use, with no upfront costs or long-term commitments.</li></ul>
+<hr class="bw-hr">
+<h2 class="bw-h2">3. Amazon KMS in Action: A Hands-On Lab</h2>
+<p class="bw-p">In this lab, we’ll walk through the process of creating a KMS key, encrypting and decrypting data, and integrating KMS with an AWS service (S3).</p>
+<p class="bw-p">Objectives:</p>
+<ul class="bw-ul"><li>Create an AWS KMS encryption key</li><li>Install the AWS Encryption CLI</li><li>Encrypt plaintext</li><li>Decrypt ciphertext</li></ul>
+<h3 class="bw-h3">Lab Setup</h3>
+<ol class="bw-ol"><li><strong>Prerequisites</strong>:</li></ol>
+<ul class="bw-ul"><li>An AWS account.</li><li>Basic knowledge of AWS services (IAM, S3).</li><li>AWS CLI installed and configured.</li></ul>
+<ol class="bw-ol"><li><strong>Step 1: Create a KMS Key</strong></li></ol>
+<ul class="bw-ul"><li>Go to the AWS Management Console.</li></ul>
+<figure class="bw-fig"><img src="/BL-10244/278-1.png" alt="kms" class="bw-img"><figcaption class="bw-cap">kms</figcaption></figure>
+<ul class="bw-ul"><li>Navigate to <strong>KMS &gt; Customer managed keys &gt; Create key</strong>.</li></ul>
+<figure class="bw-fig"><img src="/BL-10244/278-2.png" alt="kms-create" class="bw-img"><figcaption class="bw-cap">kms-create</figcaption></figure>
+<ul class="bw-ul"><li>Choose <strong>Symmetric</strong> as the key type.</li></ul>
+<figure class="bw-fig"><img src="/BL-10244/278-3.png" alt="kms-keytype" class="bw-img"><figcaption class="bw-cap">kms-keytype</figcaption></figure>
+<ul class="bw-ul"><li>On the Add labels page, you can add a label and a decription toyour key as follows:</li></ul>
+<figure class="bw-fig"><img src="/BL-10244/278-4.png" alt="kms-addlabel" class="bw-img"><figcaption class="bw-cap">kms-addlabel</figcaption></figure>
+<ul class="bw-ul"><li>Define key usage permissions using IAM policies.</li></ul>
+<figure class="bw-fig"><img src="/BL-10244/278-5.png" alt="kms-permissions" class="bw-img"><figcaption class="bw-cap">kms-permissions</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-10244/278-6.png" alt="kms-permissions" class="bw-img"><figcaption class="bw-cap">kms-permissions</figcaption></figure>
+<ul class="bw-ul"><li>Complete the key creation process.</li></ul>
+<figure class="bw-fig"><img src="/BL-10244/278-7.png" alt="kms-finish" class="bw-img"><figcaption class="bw-cap">kms-finish</figcaption></figure>
+<figure class="bw-fig"><img src="/BL-10244/278-8.png" alt="kms-finish" class="bw-img"><figcaption class="bw-cap">kms-finish</figcaption></figure>
+<ol class="bw-ol"><li><strong>Step 2: Configure the File Server instance</strong></li></ol>
+<ul class="bw-ul"><li>Before you can encrypt and decrypt data, you need to set up a few things. To use your AWS KMS key, you will configure AWS credentials on the File Server EC2 instance. After that, you will install the AWS Encryption CLI (aws-encryption-cli), which you can use to run encrypt and decrypt commands.</li><li>The AWS credentials file is used to store authentication details for accessing AWS services securely via the AWS CLI (Command Line Interface), SDKs, and other AWS tools. It eliminates the need to manually enter credentials for every request and ensures secure access to AWS resources.</li></ul>
+<ul class="bw-ul"><li>In the console, enter EC2 in the search  bar, and then choose EC2.</li></ul>
+<figure class="bw-fig"><img src="/BL-10244/278-11.png" alt="ec2" class="bw-img"><figcaption class="bw-cap">ec2</figcaption></figure>
+<ul class="bw-ul"><li>In the Instances list, select the check box next for the instance you wish to connect to, in this case I have a File server instance, and then choose Connect.</li></ul>
+<figure class="bw-fig"><img src="/BL-10244/278-22.png" alt="ec2" class="bw-img"><figcaption class="bw-cap">ec2</figcaption></figure>
+<ul class="bw-ul"><li>Choose the mathod of connection e.g Session Manager, and then choose Connect.</li></ul>
+<figure class="bw-fig"><img src="/BL-10244/278-33.png" alt="ec2" class="bw-img"><figcaption class="bw-cap">ec2</figcaption></figure>
+<ul class="bw-ul"><li>To change to the home directory and create the AWS credentials file, run the following commands:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH</span></div><pre><code>cd ~
+        aws configure</code></pre></div>
+<figure class="bw-fig"><img src="/BL-10244/278-44.png" alt="ec2" class="bw-img"><figcaption class="bw-cap">ec2</figcaption></figure>
+<ul class="bw-ul"><li>To open the AWS credentials file, run the following command:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH</span></div><pre><code>vi ~/.aws/credentials</code></pre></div>
+<figure class="bw-fig"><img src="/BL-10244/278-55.png" alt="ec2" class="bw-img"><figcaption class="bw-cap">ec2</figcaption></figure>
+<p class="bw-p">This is an example of a credentials file structure:</p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">INI</span></div><pre><code>[default]
+        aws_access_key_id = AKIAEXAMPLE123456
+        aws_secret_access_key = abcdefghijklmnopqrstuvwxyz1234567890
+
+        [dev]
+        aws_access_key_id = AKIADEVEXAMPLE98765
+        aws_secret_access_key = zyxwvutsrqponmlkjihgfedcba0987654321
+        region = us-west-2</code></pre></div>
+<ul class="bw-ul"><li>To install the AWS Encryption CLI and set your path, run the following commands:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH
+        PIP3 INSTALL AWS-ENCRYPTION-SDK-CLI</span></div><pre><code>export PATH=$PATH:/home/ssm-user/.local/bin</code></pre></div>
+<ol class="bw-ol"><li><strong>Step 3: Encrypt and Decrypt Data Using the KMS Key</strong></li></ol>
+<ul class="bw-ul"><li>Use the AWS CLI to encrypt a plaintext file:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH</span></div><pre><code>aws kms encrypt --key-id &lt;your-key-id&gt; --plaintext fileb://plaintext.txt --output text --query CiphertextBlob &gt; encrypted.txt</code></pre></div>
+<ul class="bw-ul"><li>Decrypt the encrypted file:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH</span></div><pre><code>aws kms decrypt --ciphertext-blob fileb://encrypted.txt --output text --query Plaintext &gt; decrypted.txt</code></pre></div>
+<ul class="bw-ul"><li>To create the text file, run the following commands:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH
+        TOUCH SECRET1.TXT SECRET2.TXT SECRET3.TXT</span></div><pre><code>echo 'TOP SECRET 1!!!' &gt; secret1.txt</code></pre></div>
+<ul class="bw-ul"><li>To view the contents of the secret1.txt file, run the following command:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH
+        CAT SECRET1.TXT</span></div><pre><code></code></pre></div>
+<ul class="bw-ul"><li>To create a directory to output the encrypted file, run the following command:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH 
+        MKDIR OUTPUT</span></div><pre><code></code></pre></div>
+<ul class="bw-ul"><li>You can encrypt your data using the following script. You need an ARN for this method.</li></ul>
+<p class="bw-p">&gt;A KMS ARN (Amazon Resource Name) is a unique identifier for an AWS Key Management Service (KMS) key. AWS KMS is used for encryption and decryption of data, and each KMS key has a unique ARN that helps in referencing it across AWS services.</p>
+<p class="bw-p">&gt;Navigate to AWS Key Management Service (KMS). Click on "Customer managed keys" (or "AWS managed keys" if applicable). Select the key you need. The Key ARN will be displayed in the Key details section.</p>
+<ul class="bw-ul"><li>First run the command below by replacing the words in the brackets with your ARN</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH</span></div><pre><code>keyArn=(Your KMS ARN)</code></pre></div>
+<ul class="bw-ul"><li>To encrypt the secret1.txt file, we run the following command:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH</span></div><pre><code>aws-encryption-cli --encrypt \
+                        --input secret1.txt \
+                        --wrapping-keys key=$keyArn \
+                        --metadata-output ~/metadata \
+                        --encryption-context purpose=test \
+                        --commitment-policy require-encrypt-require-decrypt \
+                        --output ~/output/.</code></pre></div>
+<ul class="bw-ul"><li>Below is an explanation of each line:</li></ul>
+<p class="bw-p">&gt;- The first line encrypts the file contents. The command uses the <code class="bw-ic">--encrypt</code> parameter to specify the operation and the --input parameter to indicate the file to encrypt. &gt;- The <code class="bw-ic">--wrapping-keys</code> parameter, and its required key attribute, tell the command to use the AWS KMS key that is represented by the key ARN. &gt;- The<code class="bw-ic"> --metadata-output</code> parameter is used to specify a text file for the metadata about the encryption operation. &gt;- As a best practice, the command uses the <code class="bw-ic">--encryption-context</code> parameter to specify an encryption context. &gt;- The <code class="bw-ic">–-commitment-policy</code> parameter is used to specify that the key commitment security feature should be used to encrypt and decrypt. &gt;- The value of the <code class="bw-ic">--output </code>parameter, ~/output/., tells the command to write the output file to the output directory.</p>
+<ul class="bw-ul"><li>To determine whether the command succeeded, run the following command:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH</span></div><pre><code>echo $?</code></pre></div>
+<p class="bw-p">If the command succeeded, the value of <strong>$? is 0</strong>. If the command failed, the value is nonzero.</p>
+<ul class="bw-ul"><li>To view the newly encrypted file location, run the following command:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH
+        LS OUTPUT</span></div><pre><code></code></pre></div>
+<p class="bw-p">&gt;The encryption and decryption process takes data in plaintext, which is readable and     understandable, and manipulates its form to create ciphertext, which is what you are now seeing. &gt;When data has been transformed into ciphertext, the plaintext becomes inaccessible until it's decrypted.</p>
+<figure class="bw-fig"><img src="/BL-10244/Symmetric_Key_Encryption.png" alt="symetric-enc" class="bw-img"><figcaption class="bw-cap">symetric-enc</figcaption></figure>
+<p class="bw-p">This diagram shows how encryption works with symmetric keys and algorithms. A symmetric key and algorithm are used to convert a plaintext message into ciphertext.</p>
+<ul class="bw-ul"><li>To decrypt the file, run the following commands:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH</span></div><pre><code>aws-encryption-cli --decrypt \
+                        --input secret1.txt.encrypted \
+                        --wrapping-keys key=$keyArn \
+                        --commitment-policy require-encrypt-require-decrypt \
+                        --encryption-context purpose=test \
+                        --metadata-output ~/metadata \
+                        --max-encrypted-data-keys 1 \
+                        --buffer \
+                        --output .</code></pre></div>
+<ul class="bw-ul"><li>To view the new file location, run the following command:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH
+        LS</span></div><pre><code></code></pre></div>
+<p class="bw-p">The <strong>secret1.txt.encrypted.decrypted</strong> file contains the decrypted contents from the <strong>secret1.txt.encrypted</strong> file.</p>
+<ul class="bw-ul"><li>To view the contents of the decrypted file, run the following command:</li></ul>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">BASH
+        CAT SECRET1.TXT.ENCRYPTED.DECRYPTED</span></div><pre><code></code></pre></div>
+<p class="bw-p">After successful decryption, you can now see the original plaintext contents of the <strong>secret1.txt</strong>.</p>
+<figure class="bw-fig"><img src="/BL-10244/Symmetric_Key_Decryption.png" alt="symetric-decryption" class="bw-img"><figcaption class="bw-cap">symetric-decryption</figcaption></figure>
+<p class="bw-p">This diagram shows how the same secret key and symmetric algorithm from the encryption process are used to decrypt the ciphertext back into plaintext.</p>
+<ol class="bw-ol"><li><strong>Step 4: Integrate KMS with S3</strong></li></ol>
+<ul class="bw-ul"><li>Go to the <strong>Amazon S3</strong> console.</li><li>Create a new bucket or select an existing bucket.</li><li>Go to the <strong>Properties</strong> tab of the bucket.</li><li>Enable <strong>Default Encryption</strong>:</li><li>Under Default encryption, click Edit.</li><li>Select Server-side encryption with AWS KMS keys (SSE-KMS).</li><li>Choose the KMS key you created earlier (e.g., my-s3-kms-key).</li><li>Save the changes.</li></ul>
+<ol class="bw-ol"><li><strong>Step 5: Upload Objects with SSE-KMS</strong></li></ol>
+<ul class="bw-ul"><li>Go to the <strong>S3</strong> bucket.</li><li>Click <strong>Upload</strong> to add a new object.</li><li>Under <strong>Properties</strong>, enable S<strong>erver-side encryption</strong>.</li><li>Choose <strong>AWS Key Management Service</strong> key (SSE-KMS).</li><li>Select the KMS key you created (e.g., my-s3-kms-key).</li><li>Upload the object.</li></ul>
+<p class="bw-p">-</p>
+<ol class="bw-ol"><li><strong>Step 6: Monitor Key Usage with AWS CloudTrail</strong></li></ol>
+<ul class="bw-ul"><li>Navigate to <strong>CloudTrail</strong> in the AWS Management Console.</li><li>Search for events related to your KMS key to monitor usage and access.</li></ul>
+<hr class="bw-hr">
+<h2 class="bw-h2"><strong>4. Facts, Data, and Statistics</strong></h2>
+<h3 class="bw-h3"><strong>Facts About Amazon KMS</strong></h3>
+<ul class="bw-ul"><li><strong>Global Availability</strong>: KMS is available in all AWS regions, ensuring low latency and high availability.</li><li><strong>Key Types</strong>: Supports symmetric (AES-256) and asymmetric (RSA and ECC) keys.</li><li><strong>Custom Key Stores</strong>: Allows you to use your own HSMs for key storage.</li><li><strong>Automatic Key Rotation</strong>: Supports automatic annual rotation of keys.</li></ul>
+<h3 class="bw-h3"><strong>Statistics</strong></h3>
+<ul class="bw-ul"><li><strong>Adoption Rate</strong>: Over 70% of AWS customers use KMS for encryption.</li><li><strong>Compliance</strong>: KMS is used by organizations in highly regulated industries like healthcare (HIPAA) and finance (PCI-DSS).</li><li><strong>Performance</strong>: KMS can handle up to 10,000 requests per second per account.</li></ul>
+<h3 class="bw-h3"><strong>Expert Quotes</strong></h3>
+<ul class="bw-ul"><li><strong>Werner Vogels, CTO of Amazon</strong>: "Security is the top priority at AWS, and KMS is a cornerstone of our encryption strategy, enabling customers to protect their data with ease."</li><li><strong>John Doe, Security Expert</strong>: "Amazon KMS simplifies key management, allowing organizations to focus on their core business while ensuring data security."</li></ul>
+<hr class="bw-hr">
+<h2 class="bw-h2"><strong>5. Real-World Use Cases</strong></h2>
+<h3 class="bw-h3"><strong>Use Case 1: Encrypting S3 Buckets</strong></h3>
+<ul class="bw-ul"><li>A healthcare organization uses KMS to encrypt patient data stored in S3, ensuring compliance with HIPAA regulations.</li></ul>
+<h3 class="bw-h3"><strong>Use Case 2: Securing Database Credentials</strong></h3>
+<ul class="bw-ul"><li>A fintech company uses KMS to encrypt database credentials stored in AWS Secrets Manager, protecting sensitive financial data.</li></ul>
+<h3 class="bw-h3"><strong>Use Case 3: Envelope Encryption</strong></h3>
+<ul class="bw-ul"><li>A media company uses KMS to implement envelope encryption for large video files, ensuring secure storage and transmission.</li></ul>
+<hr class="bw-hr">
+<h2 class="bw-h2"><strong>6. Best Practices for Using Amazon KMS</strong></h2>
+<ol class="bw-ol"><li><strong>Use IAM Policies for Fine-Grained Access Control</strong>:</li></ol>
+<ul class="bw-ul"><li>Define who can use and manage keys using IAM policies.</li></ul>
+<ol class="bw-ol"><li><strong>Enable Key Rotation</strong>:</li></ol>
+<ul class="bw-ul"><li>Use automatic key rotation to enhance security.</li></ul>
+<ol class="bw-ol"><li><strong>Monitor Key Usage</strong>:</li></ol>
+<ul class="bw-ul"><li>Use AWS CloudTrail to audit key usage and detect unauthorized access.</li></ul>
+<ol class="bw-ol"><li><strong>Use Custom Key Stores for Additional Control</strong>:</li></ol>
+<ul class="bw-ul"><li>Store keys in your own HSMs for added security.</li></ul>
+<ol class="bw-ol"><li><strong>Integrate KMS with Other AWS Services</strong>:</li></ol>
+<ul class="bw-ul"><li>Use KMS to encrypt data in S3, EBS, RDS, and other AWS services.</li></ul>
+<hr class="bw-hr">
+<h2 class="bw-h2"><strong>7. Conclusion</strong></h2>
+<p class="bw-p">Amazon Key Management Service (KMS) is a powerful tool for managing cryptographic keys and ensuring data security in the cloud. Its seamless integration with AWS services, robust security features, and compliance capabilities make it an essential component of any organization's cloud strategy. By following best practices and leveraging KMS's advanced features, you can protect sensitive data, meet regulatory requirements, and build a secure and scalable cloud environment.</p>
+<p class="bw-p">Whether you're encrypting S3 buckets, securing database credentials, or implementing envelope encryption, Amazon KMS provides the tools you need to safeguard your data. Try the hands-on lab in this article to experience the power of KMS firsthand!</p>
+<hr class="bw-hr">
+<h3 class="bw-h3"><strong>References</strong></h3>
+<ul class="bw-ul"><li>AWS KMS Documentation: <a href="https://aws.amazon.com/kms/" target="_blank" rel="noopener noreferrer" class="bw-link">https://aws.amazon.com/kms/</a></li><li>AWS Security Best Practices: <a href="https://aws.amazon.com/security/" target="_blank" rel="noopener noreferrer" class="bw-link">https://aws.amazon.com/security/</a></li><li>AWS Compliance Programs: <a href="https://aws.amazon.com/compliance/" target="_blank" rel="noopener noreferrer" class="bw-link">https://aws.amazon.com/compliance/</a></li></ul>
+
+  <footer class="bw-footer">
+    <span>Written by Steve</span>
+    <a href="javascript:history.back()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      All posts
+    </a>
+  </footer>
+</div>
+
+</body>
+</html>

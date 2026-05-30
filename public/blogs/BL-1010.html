@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>React Lifecycle Methods</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12121e;--ink-mid:#2e2e4e;--ink-light:#6b6b8a;
+  --accent:#0284c7;--accent-bg:#e0f2fe;
+  --gold:#c9963a;--gold-bg:#fdf6e8;
+  --border:#e2e2ef;--surface:#f8f8fc;
+  --code-bg:#0f1b2d;--code-fg:#cdd9f0;
+}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink-mid);background:#fff;line-height:1.85}
+
+/* ── Nav ── */
+.bw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem}
+.bw-nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.bw-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);text-decoration:none;transition:color .15s}
+.bw-back:hover{color:var(--ink)}
+.bw-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bw-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent)}
+
+/* ── Hero ── */
+.bw-hero{padding:3.5rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.bw-hero-inner{max-width:760px;margin:0 auto}
+.bw-cat{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem}
+.bw-cat-rule{display:inline-block;width:22px;height:1px;background:var(--accent);flex-shrink:0}
+.bw-title{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.75rem,3.8vw,2.6rem);line-height:1.18;color:var(--ink);margin-bottom:1rem;max-width:680px}
+.bw-abstract{font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--ink-mid);max-width:620px;margin-bottom:1.75rem}
+.bw-meta{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:stretch}
+.bw-mi{display:flex;flex-direction:column;gap:3px}
+.bw-ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.bw-mv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.bw-ms{width:1px;background:var(--border);align-self:stretch;margin:2px 0}
+
+/* ── Body ── */
+.bw-body{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+/* ── Typography ── */
+.bw-h1{font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;line-height:1.2;color:var(--ink);margin:2.75rem 0 .9rem}
+.bw-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.45rem;color:var(--ink);margin:2.75rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink)}
+.bw-h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:2rem 0 .45rem}
+.bw-h4{font-family:'Source Serif 4',serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .35rem}
+.bw-h5,.bw-h6{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light);margin:1.25rem 0 .3rem}
+.bw-p{margin:.85rem 0}
+strong{color:var(--ink);font-weight:600}
+.bw-ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.bw-ol{list-style:decimal;margin:.75rem 0 .75rem 1.5rem}
+.bw-ul li,.bw-ol li{margin:.35rem 0;line-height:1.78}
+.bw-fig{margin:1.75rem 0}
+.bw-img{width:100%;border-radius:8px;display:block;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.bw-cap{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px}
+.bw-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.bw-link:hover{opacity:.75}
+.bw-ic{font-family:'DM Mono',monospace;font-size:.83em;background:#f0f0f8;color:#bf1650;padding:.12em .42em;border-radius:4px}
+.bw-cb{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.5rem 0}
+.bw-ch{padding:7px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.bw-cl{font-family:'DM Mono',monospace;font-size:10px;color:#64b5f6;letter-spacing:.1em}
+.bw-cb pre{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--code-fg);padding:1.2rem 1.4rem;margin:0;overflow-x:auto;line-height:1.7;white-space:pre}
+.bw-cb pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.bw-insight{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:1rem 1.35rem;margin:1.5rem 0;font-style:italic;font-size:.98rem;color:#7a5a1a;line-height:1.72}
+.bw-hr{border:none;border-top:1px solid var(--border);margin:2.25rem 0}
+
+/* ── Footer ── */
+.bw-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light)}
+.bw-footer a{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.bw-footer a:hover{opacity:.7}
+.bw-footer a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:600px){
+  .bw-title{font-size:1.6rem}
+  .bw-ms{display:none}
+  .bw-hero{padding:2.25rem 1rem 1.75rem}
+  .bw-body{padding:2rem 1rem 3.5rem}
+  .bw-h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="bw-nav">
+  <div class="bw-nav-inner">
+    <a href="javascript:history.back()" class="bw-back">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </a>
+    <span class="bw-pill">React</span>
+  </div>
+</nav>
+
+<div class="bw-hero">
+  <div class="bw-hero-inner">
+    <div class="bw-cat"><span class="bw-cat-rule"></span>React · Interview</div>
+    <h1 class="bw-title">React Lifecycle Methods</h1>
+    <p class="bw-abstract">Lifecycle methods are series of events that happen throughout the birth, growth, and death of a React component.</p>
+    <div class="bw-meta">
+      <div class="bw-mi"><span class="bw-ml">Author</span><span class="bw-mv">Steve</span></div>
+      <div class="bw-ms"></div>
+      <div class="bw-mi"><span class="bw-ml">Read time</span><span class="bw-mv">5 min</span></div>
+      <div class="bw-ms"></div><div class="bw-mi"><span class="bw-ml">Topic</span><span class="bw-mv">React</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="bw-body">
+  <p class="bw-p"><strong>Visual overview of topics covered in this tutorial</strong></p>
+<figure class="bw-fig"><img src="/BL-1010/Lifecycle.png" alt="Lifecycle" class="bw-img"><figcaption class="bw-cap">Lifecycle</figcaption></figure>
+<h2 class="bw-h2">What is the React component lifecycle?</h2>
+<p class="bw-p">In React, components go through a lifecycle of events:</p>
+<ul class="bw-ul"><li>Mounting (adding nodes to the DOM)</li><li>Updating (altering existing nodes in the DOM)</li><li>Unmounting (removing nodes from the DOM)</li></ul>
+<h2 class="bw-h2">Mounting lifecycle methods</h2>
+<p class="bw-p">The mounting phase refers to the phase during which a component is created and inserted to the DOM. The following methods are called in order.</p>
+<ul class="bw-ul"><li>constructor()</li><li>static getDerivedStateFromProps()</li><li>render()</li><li>componentDidMount()</li></ul>
+<h3 class="bw-h3">constructor()</h3>
+<p class="bw-p">The constructor() is the very first method that is invoked before the component is mounted to the DOM.</p>
+<p class="bw-p">The constructor method is called before the component is mounted to the DOM. In most cases, you would initialize state and bind event handlers methods within the constructor method.</p>
+<p class="bw-p">Example of the constructor() React lifecycle method in action:</p>
+<div class="bw-cb"><pre><code>const MyComponent extends React.Component {
+  constructor(props) {
+   super(props)
+    this.state = {
+       points: 0
+    }
+    this.handlePoints = this.handlePoints.bind(this)
+    }
+}</code></pre></div>
+<h3 class="bw-h3">static getDerivedStateFromProps()</h3>
+<p class="bw-p">Its main function is to ensure that the state and props are in sync for when it’s required.</p>
+<p class="bw-p">The basic structure of the static getDerivedStateFromProps() looks like this:</p>
+<div class="bw-cb"><pre><code>static getDerivedStateFromProps(props, state) {
+  //do stuff here
+}</code></pre></div>
+<div class="bw-cb"><pre><code>You can return an object to update the state of the component:
+
+static getDerivedStateFromProps(props, state) {
+    return {
+       points: 200 // update state with this
+    }
+}
+
+Or you can return null to make no updates:
+
+static getDerivedStateFromProps(props, state) {
+ return null
+}</code></pre></div>
+<div class="bw-cb"><pre><code>class App extends Component {
+  state = {
+    points: 10
+  }
+
+  // *******
+  //  NB: Not the recommended way to use this method. Just an example. Unconditionally overriding state here is generally considered a bad idea
+  // ********
+
+  static getDerivedStateFromProps(props, state) {
+    return {
+      points: 1000
+    }
+  }
+
+  render() {
+    return (
+      &lt;div className="App"&gt;
+        &lt;header className="App-header"&gt;
+          &lt;img src={logo} className="App-logo" alt="logo" /&gt;
+          &lt;p&gt;
+            You've scored {this.state.points} points.
+          &lt;/p&gt;
+        &lt;/header&gt;
+      &lt;/div&gt;
+    );
+  }
+}
+
+The 1000 comes from updating state within the static getDerivedStateFromProps method.</code></pre></div>
+<h3 class="bw-h3">render()</h3>
+<p class="bw-p">As the name suggests it handles the rendering of your component to the UI</p>
+<div class="bw-cb"><pre><code>class Hello extends Component{
+   render(){
+      return &lt;div&gt;Hello {this.props.name}&lt;/div&gt;
+   }
+}</code></pre></div>
+<p class="bw-p">The render() method returns JSX that is displayed in the UI. A render() can also return a null if there is nothing to render for that component.</p>
+<p class="bw-p">A render() method has to be pure with no side-effects. React requires that your render() is pure. Pure functions are those that do not have any side-effects and will always return the same output when the same inputs are passed. This means that you can not <code class="bw-ic">setState() within a render()</code>. <code class="bw-ic">You cannot modify the component state within the render().</code></p>
+<h3 class="bw-h3">componentDidMount</h3>
+<p class="bw-p">After render is called, <code class="bw-ic">the component is mounted to the DOM and the componentDidMount method is invoked.</code></p>
+<p class="bw-p">This function is invoked immediately after the component is mounted to the DOM.</p>
+<p class="bw-p">You would use the componentDidMount lifecycle method to grab a DOM node from the component tree immediately after it’s mounted.</p>
+<p class="bw-p"><strong>If you also want to make network requests as soon as the component is mounted to the DOM, this is a perfect place to do so.</strong></p>
+<div class="bw-cb"><pre><code>componentDidMount() {
+  this.fetchListOfTweets() // where fetchListOfTweets initiates a netowrk request to fetch a certain list of tweets.
+}</code></pre></div>
+<p class="bw-p"><strong>You could also set up subscriptions such as timers</strong></p>
+<div class="bw-cb"><pre><code>// e.g requestAnimationFrame
+componentDidMount() {
+    window.requestAnimationFrame(this._updateCountdown);
+ }</code></pre></div>
+<h2 class="bw-h2">Updating lifecycle methods</h2>
+<p class="bw-p">Whenever a change is made to the state or props of a React component, the component is rerendered. In simple terms, the component is updated. This is the updating phase of the React component lifecycle.</p>
+<ul class="bw-ul"><li>shouldComponentUpdate()</li><li>render()</li><li>getSnapshotBeforeUpdate()</li><li>componentDidUpdate()</li></ul>
+<h3 class="bw-h3">shouldComponentUpdate()</h3>
+<p class="bw-p">In most cases, you’ll want a component to rerender when state or props changes. However, you do have control over this behavior.</p>
+<p class="bw-p">Within this lifecycle method, you can return a boolean true or false and control whether the component gets rerendered (e.g., upon a change in state or props).</p>
+<div class="bw-cb"><pre><code>shouldComponentUpdate(nextProps, nextState)
+{
+ return this.props.title !== nextProps.title ||
+  this.state.input !== nextState.input
+}</code></pre></div>
+<h3 class="bw-h3">render()</h3>
+<p class="bw-p">After the shouldComponentUpdate method is called, render is called immediately afterward, depending on the returned value from shouldComponentUpdate, which defaults to true.</p>
+<h3 class="bw-h3">getSnapshotBeforeUpdate()</h3>
+<p class="bw-p">The getSnapshotBeforeUpdatelifecycle method stores the previous values of the state after the DOM is updated. getSnapshotBeforeUpdate() is called right after the render method.</p>
+<div class="bw-cb"><pre><code>getSnapshotBeforeUpdate(prevProps, prevState) {
+
+}</code></pre></div>
+<p class="bw-p">Here’s the important thing: the value queried from the DOM in getSnapshotBeforeUpdate refers to the <code class="bw-ic">value just before the DOM is updated, even though the render method was previously called</code>.</p>
+<p class="bw-p"><code class="bw-ic">The getSnapshotBeforeUpdate React lifecycle method doesn’t work on its own. It is meant to be used in conjunction with the componentDidUpdate lifecycle method</code>.</p>
+<h3 class="bw-h3">componentDidUpdate()</h3>
+<p class="bw-p">The componentDidUpdate lifecycle method is invoked after the getSnapshotBeforeUpdate. As with the getSnapshotBeforeUpdate method it receives the previous props and state as arguments:</p>
+<div class="bw-cb"><pre><code>componentDidUpdate(prevProps, prevState) {
+
+}</code></pre></div>
+<p class="bw-p">However it also takes whatever value is returned from the getSnapshotBeforeUpdate lifecycle method is passed as the third argument to the componentDidUpdate method.</p>
+<div class="bw-cb"><pre><code>componentDidUpdate(prevProps, prevState, snapshot) {
+
+}</code></pre></div>
+<h2 class="bw-h2">Unmounting lifecycle method</h2>
+<p class="bw-p">The following method is invoked during the component unmounting phase</p>
+<ul class="bw-ul"><li>componentWillUnmount()</li></ul>
+<h3 class="bw-h3">componentWillUnmount()</h3>
+<p class="bw-p">The componentWillUnmount lifecycle method is invoked immediately before a component is unmounted and destroyed. This is the ideal place to perform any necessary cleanup such as clearing up timers, cancelling network requests, or cleaning up any subscriptions that were created in componentDidMount().</p>
+<div class="bw-cb"><pre><code>// e.g add event listener
+componentDidMount() {
+  el.addEventListener()
+}</code></pre></div>
+<div class="bw-cb"><pre><code>// e.g remove event listener
+componentWillUnmount() {
+  el.removeEventListener()
+}</code></pre></div>
+<p class="bw-p"><strong>References:</strong></p>
+<ul class="bw-ul"><li><a href="https://programmingwithmosh.com/javascript/react-lifecycle-methods" target="_blank">React Lifecycle Methods- A Deep Dive</a></li><li><a href="https://blog.logrocket.com/react-lifecycle-methods-tutorial-examples" target="_blank">React lifecycle methods: An approachable tutorial with examples</a></li></ul>
+
+  <footer class="bw-footer">
+    <span>Written by Steve</span>
+    <a href="javascript:history.back()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      All posts
+    </a>
+  </footer>
+</div>
+
+</body>
+</html>

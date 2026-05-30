@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Amazon Identity and Access Management (IAM)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12121e;--ink-mid:#2e2e4e;--ink-light:#6b6b8a;
+  --accent:#b91c1c;--accent-bg:#fef2f2;
+  --gold:#c9963a;--gold-bg:#fdf6e8;
+  --border:#e2e2ef;--surface:#f8f8fc;
+  --code-bg:#0f1b2d;--code-fg:#cdd9f0;
+}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink-mid);background:#fff;line-height:1.85}
+
+/* ── Nav ── */
+.bw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem}
+.bw-nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.bw-back{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);text-decoration:none;transition:color .15s}
+.bw-back:hover{color:var(--ink)}
+.bw-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bw-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent)}
+
+/* ── Hero ── */
+.bw-hero{padding:3.5rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.bw-hero-inner{max-width:760px;margin:0 auto}
+.bw-cat{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem}
+.bw-cat-rule{display:inline-block;width:22px;height:1px;background:var(--accent);flex-shrink:0}
+.bw-title{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.75rem,3.8vw,2.6rem);line-height:1.18;color:var(--ink);margin-bottom:1rem;max-width:680px}
+.bw-abstract{font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--ink-mid);max-width:620px;margin-bottom:1.75rem}
+.bw-meta{display:flex;flex-wrap:wrap;gap:1.1rem;align-items:stretch}
+.bw-mi{display:flex;flex-direction:column;gap:3px}
+.bw-ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.bw-mv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.bw-ms{width:1px;background:var(--border);align-self:stretch;margin:2px 0}
+
+/* ── Body ── */
+.bw-body{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+/* ── Typography ── */
+.bw-h1{font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;line-height:1.2;color:var(--ink);margin:2.75rem 0 .9rem}
+.bw-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.45rem;color:var(--ink);margin:2.75rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink)}
+.bw-h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:2rem 0 .45rem}
+.bw-h4{font-family:'Source Serif 4',serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .35rem}
+.bw-h5,.bw-h6{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light);margin:1.25rem 0 .3rem}
+.bw-p{margin:.85rem 0}
+strong{color:var(--ink);font-weight:600}
+.bw-ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.bw-ol{list-style:decimal;margin:.75rem 0 .75rem 1.5rem}
+.bw-ul li,.bw-ol li{margin:.35rem 0;line-height:1.78}
+.bw-fig{margin:1.75rem 0}
+.bw-img{width:100%;border-radius:8px;display:block;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.bw-cap{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px}
+.bw-link{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.bw-link:hover{opacity:.75}
+.bw-ic{font-family:'DM Mono',monospace;font-size:.83em;background:#f0f0f8;color:#bf1650;padding:.12em .42em;border-radius:4px}
+.bw-cb{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.5rem 0}
+.bw-ch{padding:7px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.bw-cl{font-family:'DM Mono',monospace;font-size:10px;color:#64b5f6;letter-spacing:.1em}
+.bw-cb pre{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--code-fg);padding:1.2rem 1.4rem;margin:0;overflow-x:auto;line-height:1.7;white-space:pre}
+.bw-cb pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.bw-insight{background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:1rem 1.35rem;margin:1.5rem 0;font-style:italic;font-size:.98rem;color:#7a5a1a;line-height:1.72}
+.bw-hr{border:none;border-top:1px solid var(--border);margin:2.25rem 0}
+
+/* ── Footer ── */
+.bw-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-light)}
+.bw-footer a{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.bw-footer a:hover{opacity:.7}
+.bw-footer a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:600px){
+  .bw-title{font-size:1.6rem}
+  .bw-ms{display:none}
+  .bw-hero{padding:2.25rem 1rem 1.75rem}
+  .bw-body{padding:2rem 1rem 3.5rem}
+  .bw-h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="bw-nav">
+  <div class="bw-nav-inner">
+    <a href="javascript:history.back()" class="bw-back">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </a>
+    <span class="bw-pill">Security in AWS</span>
+  </div>
+</nav>
+
+<div class="bw-hero">
+  <div class="bw-hero-inner">
+    <div class="bw-cat"><span class="bw-cat-rule"></span>AWS</div>
+    <h1 class="bw-title">Amazon Identity and Access Management (IAM)</h1>
+    <p class="bw-abstract">AWS Identity and Access Management (IAM) is a powerful service that enables you to manage access to AWS services and resources securely. With IAM, you can create and manage AWS users and groups, and use permissions to allow or deny their access to AWS resources. IAM is a critical component of AWS security, and understanding how to use it effectively is essential for any organization using AWS. In this article, we will explore the key concepts of IAM, including users, groups, roles, policies, and permissions. We will also provide practical examples and code snippets to help you get started with IAM.</p>
+    <div class="bw-meta">
+      <div class="bw-mi"><span class="bw-ml">Author</span><span class="bw-mv">Steve</span></div>
+      <div class="bw-ms"></div>
+      <div class="bw-mi"><span class="bw-ml">Read time</span><span class="bw-mv">5 min</span></div>
+      <div class="bw-ms"></div><div class="bw-mi"><span class="bw-ml">Topic</span><span class="bw-mv">Security in AWS</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="bw-body">
+  <h2 class="bw-h2">What is IAM</h2>
+<p class="bw-p">IAM is a service that helps securely control access to AWS resources. You can use it to manage access to AWS services and resources securely.</p>
+<p class="bw-p">Using IAM, you can create and manage AWS users and groups (to support authentication). You can also use IAM for permissions to allow or deny their access to AWS resources (to support authorization).</p>
+<ul class="bw-ul"><li><strong>Authentication</strong></li></ul>
+<p class="bw-p">Use IAM to configure authentication, which is the first step because it controls who can access AWS resources. IAM is used for user authentication, and applications and other AWS services also use it for access.</p>
+<ul class="bw-ul"><li><strong>Authorization</strong></li></ul>
+<p class="bw-p">IAM is used to configure authorization based on the user. Authorization determines which resources users can access and what they can do to or with those resources. Authorization is defined through the use of policies. A policy is an object in AWS that, when associated with an identity or resource, defines their permissions.</p>
+<h2 class="bw-h2">Key Concepts of AWS IAM</h2>
+<ol class="bw-ol"><li><strong>Users</strong></li></ol>
+<p class="bw-p">An IAM user is an entity that you create in AWS to represent the person or application that interacts with AWS resources. Each user has a unique name and credentials (password or access keys) to access AWS services.</p>
+<p class="bw-p"><strong>IAM account root user</strong></p>
+<p class="bw-p">When you first create an AWS account, you begin with a single sign-in identity. This entity has complete access to all AWS services and resources in the account and is called the AWS account root user. You access the account root user by signing in with the email address and password that you used to create the account.</p>
+<ol class="bw-ol"><li><strong>Groups</strong></li></ol>
+<p class="bw-p">An IAM group is a collection of IAM users. You can use groups to specify permissions for multiple users, making it easier to manage permissions for users who have similar job responsibilities.</p>
+<ol class="bw-ol"><li><strong>Roles</strong></li></ol>
+<p class="bw-p">An IAM role is an IAM identity that you can create in your account that has specific permissions. Unlike users, roles are not associated with a specific person or application. Instead, they are assumed by users, applications, or AWS services to gain temporary access to resources.</p>
+<ol class="bw-ol"><li><strong>Policies</strong></li></ol>
+<p class="bw-p">An IAM policy is a document that defines permissions. Policies are written in JSON format and can be attached to users, groups, or roles to specify what actions are allowed or denied on which resources.</p>
+<ol class="bw-ol"><li><strong>Permissions</strong></li></ol>
+<p class="bw-p">Permissions in IAM are defined by policies. They determine what actions a user, group, or role can perform on which AWS resources.</p>
+<ol class="bw-ol"><li><strong>Identity federation</strong></li></ol>
+<p class="bw-p">This is a system of trust between two parties. Its purpose is to authenticate users and convey the information needed to authorize their access to resources. In this system, an identity provider (IdP) is responsible for user authentication. A service provider (SP), such as a service or an application, controls access to resources.</p>
+<h3 class="bw-h3">IAM Policy Structure</h3>
+<p class="bw-p">An IAM policy is a JSON document that consists of one or more statements. Each statement includes the following elements:</p>
+<ul class="bw-ul"><li><strong>Effect</strong>: Specifies whether the statement allows or denies access. Possible values are Allow or Deny.</li></ul>
+<ul class="bw-ul"><li><strong>Action</strong>: Specifies the AWS service actions that are allowed or denied.</li></ul>
+<ul class="bw-ul"><li><strong>Resource</strong>: Specifies the AWS resource(s) to which the actions apply.</li></ul>
+<ul class="bw-ul"><li><strong>Condition</strong> (optional): Specifies the conditions under which the policy is in effect.</li></ul>
+<p class="bw-p">Here is an example of a simple IAM policy:</p>
+<div class="bw-cb"><pre><code>{
+  "Version": "2025-2-20",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::example-bucket"
+    }
+  ]
+}</code></pre></div>
+<h2 class="bw-h2">Creating IAM Users and Groups</h2>
+<h3 class="bw-h3">Creating an IAM User</h3>
+<p class="bw-p">You can create an IAM user using the AWS Management Console, AWS CLI, or SDKs. Here’s how to create an IAM user using the AWS CLI:</p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">AWS IAM CREATE-USER --USER-NAME STEVE</span></div><pre><code></code></pre></div>
+<h3 class="bw-h3">Creating an IAM Group</h3>
+<p class="bw-p">To create an IAM group, use the following AWS CLI command:</p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">AWS IAM CREATE-GROUP --GROUP-NAME DEVELOPERS</span></div><pre><code></code></pre></div>
+<h3 class="bw-h3">Adding a User to a Group</h3>
+<p class="bw-p">To add a user to a group, use the following command:</p>
+<div class="bw-cb"><div class="bw-ch"><span class="bw-cl">AWS IAM ADD-USER-TO-GROUP --USER-NAME STEVE --GROUP-NAME DEVELOPERS</span></div><pre><code></code></pre></div>
+<h3 class="bw-h3">Attaching Policies to Users and Groups</h3>
+<h5 class="bw-h5">Attaching a Policy to a User</h5>
+<p class="bw-p">To attach a policy to a user, use the following command:</p>
+<div class="bw-cb"><pre><code>aws iam attach-user-policy --user-name Steve --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess</code></pre></div>
+<h5 class="bw-h5">Attaching a Policy to a Group</h5>
+<p class="bw-p">To attach a policy to a group, use the following command:</p>
+<div class="bw-cb"><pre><code>aws iam attach-group-policy --group-name Developers --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess</code></pre></div>
+<h2 class="bw-h2">Creating and Using IAM Roles</h2>
+<h3 class="bw-h3">Creating an IAM Role</h3>
+<p class="bw-p">To create an IAM role, you need to define a trust policy that specifies who can assume the role. Here’s an example of a trust policy that allows an EC2 instance to assume the role:</p>
+<div class="bw-cb"><pre><code>{
+  "Version": "2025-02-20",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}</code></pre></div>
+<p class="bw-p">You can create the role using the AWS CLI:</p>
+<div class="bw-cb"><pre><code>aws iam create-role --role-name EC2S3AccessRole --assume-role-policy-document file://trust-policy.json</code></pre></div>
+<h4 class="bw-h4">Attaching a Policy to a Role</h4>
+<p class="bw-p">To attach a policy to the role, use the following command:</p>
+<div class="bw-cb"><pre><code>aws iam attach-role-policy --role-name EC2S3AccessRole --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess</code></pre></div>
+<h3 class="bw-h3">Assuming a Role</h3>
+<p class="bw-p">To assume a role, you can use the AWS Security Token Service (STS) to request temporary security credentials. Here’s an example using the AWS CLI:</p>
+<div class="bw-cb"><pre><code>aws sts assume-role --role-arn arn:aws:iam::123456789012:role/EC2S3AccessRole --role-session-name MySessionName</code></pre></div>
+<h2 class="bw-h2">IAM Best Practices</h2>
+<ol class="bw-ol"><li><strong>Least Privilege</strong>: Grant only the permissions required to perform a task. Avoid using overly permissive policies.</li></ol>
+<ol class="bw-ol"><li><strong>Use Groups</strong>: Assign permissions to groups rather than individual users to simplify permission management.</li></ol>
+<ol class="bw-ol"><li><strong>Rotate Credentials Regularly</strong>: Regularly rotate IAM user access keys and passwords to enhance security.</li></ol>
+<ol class="bw-ol"><li><strong>Enable MFA</strong>: Enable Multi-Factor Authentication (MFA) for additional security, especially for privileged users.</li></ol>
+<ol class="bw-ol"><li><strong>Monitor Activity</strong>: Use AWS CloudTrail to monitor and log IAM user activity.</li></ol>
+<hr class="bw-hr">
+<h2 class="bw-h2">Conclusion</h2>
+<p class="bw-p">AWS IAM is a fundamental service for managing access to AWS resources securely. By understanding and implementing IAM users, groups, roles, and policies, you can ensure that your AWS environment is secure and compliant with best practices. The examples and code snippets provided in this article should help you get started with IAM and integrate it into your AWS workflows.</p>
+<p class="bw-p">Remember, security is an ongoing process, and regularly reviewing and updating your IAM policies and permissions is crucial to maintaining a secure AWS environment.</p>
+
+  <footer class="bw-footer">
+    <span>Written by Steve</span>
+    <a href="javascript:history.back()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      All posts
+    </a>
+  </footer>
+</div>
+
+</body>
+</html>
