@@ -56,6 +56,24 @@ const writeups = [
   isFeatured: false,
 },
 
+{
+  id: "WR-003",
+  title: "Troubleshooting and Solving Data Join Pitfalls",
+  category: "Data Engineering",
+  tags: ["BigQuery", "SQL", "Google Cloud", "Data Integrity", "Joins"],
+  abstract: "Diagnosing four critical SQL join pitfalls on a live ecommerce dataset — from many-to-many key multiplication and silent record loss, to unintentional cross joins that triple output without warning.",
+  highlights: [
+    "154 units of inventory silently reported as 462 due to N:N key join",
+    "819 SKUs (43% of dataset) dropped by a wrong INNER JOIN",
+    "Unintentional cross join inflated 82 rows to 246 after a lookup table grew",
+  ],
+  href: "/writeups/BigQuery_Join_Pitfalls.html",
+  readTime: "9 min read",
+  accent: "#1a6bb5",
+  accentBg: "#e8f2fc",
+  isPublished: true,
+  isFeatured: false,
+}
 
   /* ── Add future writeups below ──────────────────────────────────
   {

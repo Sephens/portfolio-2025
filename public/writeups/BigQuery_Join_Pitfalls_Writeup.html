@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Troubleshooting Data Join Pitfalls — Portfolio Writeup</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1a2e; --ink-mid: #3a3a5c; --ink-light: #6b6b8a;
+    --accent: #1a6bb5; --accent-light: #e8f2fc;
+    --gold: #c9963a; --gold-light: #fdf6e8;
+    --red: #b53a1a; --red-light: #fdf0ec;
+    --green: #1a7a3a; --green-light: #edf7f1;
+    --purple: #5a3a9a; --purple-light: #f0ecfd;
+    --border: #e2e2ef; --surface: #f8f8fc; --white: #ffffff;
+    --code-bg: #0f1b2d; --code-text: #cdd9f0;
+  }
+  html { font-size: 16px; }
+  body { font-family: 'Source Serif 4', Georgia, serif; font-weight: 300; color: var(--ink); background: var(--white); line-height: 1.8; }
+  .page { max-width: 820px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .site-header { border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; max-width: 820px; margin: 0 auto; }
+  .site-logo { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink-light); letter-spacing: 0.08em; text-transform: uppercase; }
+  .site-tag { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); background: var(--accent-light); padding: 3px 10px; border-radius: 20px; letter-spacing: 0.05em; }
+  .hero { padding: 4rem 0 2.5rem; border-bottom: 1px solid var(--border); margin-bottom: 3rem; }
+  .category-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+  .category-label::before { content: ''; display: inline-block; width: 24px; height: 1px; background: var(--accent); }
+  h1.title { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 2.8rem; line-height: 1.15; color: var(--ink); margin-bottom: 1.25rem; max-width: 680px; }
+  .subtitle { font-size: 1.15rem; color: var(--ink-mid); font-weight: 300; max-width: 600px; line-height: 1.7; margin-bottom: 2rem; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 1.5rem; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink-light); }
+  .meta-item { display: flex; flex-direction: column; gap: 3px; }
+  .meta-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-light); }
+  .meta-value { color: var(--ink); font-weight: 500; }
+  .meta-sep { width: 1px; background: var(--border); align-self: stretch; }
+  section { margin-bottom: 3rem; }
+  h2.section-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.6rem; color: var(--ink); margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 2px solid var(--ink); }
+  h3.sub-title { font-family: 'Source Serif 4', serif; font-weight: 600; font-size: 1.1rem; color: var(--ink); margin: 1.75rem 0 0.5rem; }
+  p { margin-bottom: 1rem; color: var(--ink-mid); font-size: 1rem; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--ink); font-weight: 600; }
+  code { font-family: 'DM Mono', monospace; font-size: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--ink); }
+
+  /* ── STAT CARDS ── */
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 1.5rem 0; }
+  .stat-card { border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; text-align: center; }
+  .stat-number { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--accent); line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-light); text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.4; }
+
+  /* ── TOOLS ── */
+  .tools-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 1rem 0; }
+  .tool-tag { font-family: 'DM Mono', monospace; font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); color: var(--ink-mid); background: var(--surface); }
+  .tool-tag.primary { background: var(--accent-light); border-color: #b0d4f4; color: var(--accent); }
+
+  /* ── JOIN TYPE GRID ── */
+  .join-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 1.25rem 0; }
+  .join-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .join-card-head { padding: 0.6rem 1rem; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.05em; }
+  .join-card-head.inner  { background: #e8f2fc; color: #0d3b6e; }
+  .join-card-head.left   { background: #edf7f1; color: #0d3b1a; }
+  .join-card-head.right  { background: #fff8e8; color: #6b3e0a; }
+  .join-card-head.full   { background: #f0ecfd; color: #2d1a5e; }
+  .join-card-head.cross  { background: var(--red-light); color: var(--red); }
+  .join-card-body { padding: 0.75rem 1rem; font-size: 13px; color: var(--ink-mid); line-height: 1.6; background: var(--white); }
+
+  /* ── CODE BLOCKS ── */
+  .code-snippet { background: var(--code-bg); border-radius: 8px; overflow: hidden; margin: 1.25rem 0; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .code-lang { font-family: 'DM Mono', monospace; font-size: 11px; color: #64b5f6; letter-spacing: 0.06em; text-transform: uppercase; }
+  .code-tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 3px; }
+  .code-tag.warn { background: rgba(180,120,0,0.4); color: #ffd580; }
+  .code-tag.ok   { background: rgba(40,160,80,0.35); color: #7fda9f; }
+  .code-tag.bad  { background: rgba(180,40,40,0.35); color: #f48a8a; }
+  pre { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--code-text); padding: 1.25rem 1.5rem; margin: 0; white-space: pre; overflow-x: auto; line-height: 1.7; }
+  .kw { color: #80cbc4; } .fn { color: #f48fb1; } .str { color: #ffcc80; }
+  .cmt { color: #546e7a; font-style: italic; } .tbl { color: #90caf9; } .num { color: #a5d6a7; }
+  .hl-bad { background: rgba(220,50,50,0.2); border-radius: 2px; padding: 0 2px; }
+  .hl-ok  { background: rgba(50,200,100,0.15); border-radius: 2px; padding: 0 2px; }
+
+  /* ── CALLOUTS ── */
+  .insight-box { background: var(--gold-light); border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .insight-box p { color: #7a5a1a; font-style: italic; font-size: 1.05rem; margin: 0; }
+  .note-box { background: var(--accent-light); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 13px; color: #0d3b6e; line-height: 1.65; }
+  .warn-box { background: var(--red-light); border-left: 3px solid var(--red); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 13px; color: #7a1a0d; line-height: 1.65; }
+
+  /* ── PITFALL TIMELINE ── */
+  .pitfall-trail { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.25rem 0; }
+  .pitfall-trail-header { background: var(--ink); color: var(--white); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 14px; }
+  .pitfall-row { display: flex; align-items: flex-start; border-bottom: 1px solid var(--border); }
+  .pitfall-row:last-child { border-bottom: none; }
+  .pitfall-icon { flex: 0 0 36px; display: flex; align-items: center; justify-content: center; padding: 12px 0; font-size: 14px; border-right: 1px solid var(--border); background: var(--surface); }
+  .pitfall-content { padding: 10px 14px; flex: 1; }
+  .pitfall-title { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+  .pitfall-detail { font-size: 12px; color: var(--ink-light); line-height: 1.55; }
+  .pitfall-fix { display: inline-block; font-family: 'DM Mono', monospace; font-size: 10px; background: var(--green-light); color: var(--green); border: 1px solid #a8dfc0; border-radius: 4px; padding: 1px 6px; margin-left: 8px; vertical-align: middle; }
+
+  /* ── MATH BOX ── */
+  .math-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; margin: 1.25rem 0; text-align: center; }
+  .math-line { font-family: 'DM Mono', monospace; font-size: 15px; color: var(--ink); margin-bottom: 6px; }
+  .math-line.red { color: var(--red); font-weight: 500; }
+  .math-line.green { color: var(--green); font-weight: 500; }
+  .math-caption { font-size: 12px; color: var(--ink-light); margin-top: 6px; }
+
+  /* ── FINDINGS TABLE ── */
+  .findings-table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 14px; }
+  .findings-table th { background: var(--ink); color: var(--white); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 10px 14px; text-align: left; font-weight: 500; }
+  .findings-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--ink-mid); vertical-align: top; }
+  .findings-table tr:nth-child(even) td { background: var(--surface); }
+  .findings-table td:first-child { color: var(--ink); font-weight: 400; font-family: 'DM Mono', monospace; font-size: 12px; }
+
+  /* ── TAKEAWAYS ── */
+  .takeaway-list { list-style: none; margin: 1rem 0; }
+  .takeaway-list li { display: flex; gap: 12px; align-items: flex-start; padding: 0.75rem 0; border-bottom: 1px solid var(--border); font-size: 15px; color: var(--ink-mid); line-height: 1.6; }
+  .takeaway-list li:last-child { border-bottom: none; }
+  .takeaway-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--white); background: var(--accent); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+  footer { border-top: 1px solid var(--border); padding: 2rem 0 1rem; margin-top: 3rem; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-light); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+
+  @media (max-width: 600px) {
+    h1.title { font-size: 2rem; }
+    .stat-row, .join-grid { grid-template-columns: 1fr; }
+    .meta-sep { display: none; }
+    .site-header { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="site-logo">Portfolio · Data Analytics</span>
+  <span class="site-tag">Google Cloud Certified Lab</span>
+</header>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="category-label">SQL Joins · Data Integrity · BigQuery</div>
+    <h1 class="title">Troubleshooting and Solving Data Join Pitfalls</h1>
+    <p class="subtitle">A deep dive into the most dangerous mistakes when joining database tables — from many-to-many key relationships and unintentional row multiplication to choosing the right join type and surfacing hidden data gaps.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Platform</span><span class="meta-value">Google BigQuery</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Lab ID</span><span class="meta-value">GSP412</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Dataset</span><span class="meta-value">Google Merchandise Store</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Level</span><span class="meta-value">Intermediate</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Credits</span><span class="meta-value">5</span></div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section>
+    <h2 class="section-title">Overview</h2>
+    <p>Of all the ways to corrupt data in SQL, join errors are among the most insidious. Unlike syntax mistakes that are caught immediately, join pitfalls often produce results that look plausible — the query runs, returns a number, and nobody questions it. Until someone notices the inventory figures are triple what they should be.</p>
+    <p>This intermediate lab used the Google Merchandise Store's ecommerce dataset to expose four of the most common join pitfalls in production SQL work: joining on non-unique keys, losing records to an incorrect join type, misreading NULL values, and triggering an unintentional cross join through a many-to-many relationship. For each pitfall, I diagnosed the root cause, quantified the damage, and implemented the correct solution.</p>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-number">462</div>
+        <div class="stat-label">Triple-counted inventory units (true value: 154)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">819</div>
+        <div class="stat-label">SKUs silently dropped by a wrong join type</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">246</div>
+        <div class="stat-label">Rows from an unintentional cross join (true value: 82)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOLS -->
+  <section>
+    <h2 class="section-title">Tools &amp; Skills Applied</h2>
+    <div class="tools-row">
+      <span class="tool-tag primary">Google BigQuery</span>
+      <span class="tool-tag primary">Standard SQL</span>
+      <span class="tool-tag primary">JOIN types (INNER, LEFT, RIGHT, FULL, CROSS)</span>
+      <span class="tool-tag">Many-to-many relationship detection</span>
+      <span class="tool-tag">STRING_AGG / ARRAY_AGG</span>
+      <span class="tool-tag">NULL filtering post-join</span>
+      <span class="tool-tag">CTEs for deduplication</span>
+      <span class="tool-tag">CREATE OR REPLACE TABLE</span>
+      <span class="tool-tag">Data integrity validation</span>
+      <span class="tool-tag">Cross join identification &amp; resolution</span>
+    </div>
+  </section>
+
+  <!-- JOIN TYPES PRIMER -->
+  <section>
+    <h2 class="section-title">Join Types: A Reference</h2>
+    <p>Before diagnosing pitfalls, it's important to understand what each join type actually does to your data. The choice of join type is not cosmetic — it determines which rows survive the operation and which are discarded or multiplied.</p>
+    <div class="join-grid">
+      <div class="join-card">
+        <div class="join-card-head inner">INNER JOIN — Default</div>
+        <div class="join-card-body">Returns only rows where the key exists in <em>both</em> tables. Rows with no match on either side are silently dropped. The most common source of missing data in analytics.</div>
+      </div>
+      <div class="join-card">
+        <div class="join-card-head left">LEFT JOIN</div>
+        <div class="join-card-body">Returns all rows from the left table, with matched data from the right table where available. Non-matching right-side values appear as NULL. Preserves your primary dataset.</div>
+      </div>
+      <div class="join-card">
+        <div class="join-card-head right">RIGHT JOIN</div>
+        <div class="join-card-body">The mirror of a LEFT JOIN — all rows from the right table are preserved. Rarely used in practice; most teams achieve the same result by swapping table order in a LEFT JOIN.</div>
+      </div>
+      <div class="join-card">
+        <div class="join-card-head full">FULL JOIN</div>
+        <div class="join-card-body">Returns all rows from both tables. Non-matching rows on either side appear with NULLs. Ideal for finding gaps and mismatches across two datasets simultaneously.</div>
+      </div>
+      <div class="join-card" style="grid-column: 1 / -1;">
+        <div class="join-card-head cross">CROSS JOIN — Use with extreme caution</div>
+        <div class="join-card-body">Produces every possible combination of rows from both tables — no join key required. With tables of M and N rows, the result is M × N rows. One extra row in either table multiplies the entire output. Legitimate for distributing a single lookup value (e.g., a discount rate) across all rows; dangerous when the source table unexpectedly grows.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TASK 4 -->
+  <section>
+    <h2 class="section-title">Task 1 — Understanding Your Key Fields Before Joining</h2>
+    <p>The foundation of any safe join is knowing the cardinality of your key fields — specifically, whether the key you plan to join on is unique in each table. Assuming uniqueness without verifying it is one of the most expensive mistakes in data work.</p>
+
+    <h3 class="sub-title">Discovering the SKU–Product Name relationship</h3>
+    <p>The ecommerce dataset has two candidate fields for joining: <code>productSKU</code> and <code>v2ProductName</code>. I first queried both together to get a baseline count — returning 2,273 rows. I then queried for distinct SKUs alone and got 1,909. The difference revealed that multiple product names can share a single SKU.</p>
+
+    <div class="code-snippet">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — SKU cardinality check</span></div>
+      <pre><span class="cmt">-- How many product names share the same SKU?</span>
+<span class="kw">SELECT</span>
+  v2ProductName,
+  <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> productSKU) <span class="kw">AS</span> SKU_count,
+  <span class="fn">STRING_AGG</span>(<span class="kw">DISTINCT</span> productSKU <span class="kw">LIMIT</span> <span class="num">5</span>) <span class="kw">AS</span> SKU
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions_raw`</span>
+<span class="kw">WHERE</span> productSKU <span class="kw">IS NOT NULL</span>
+<span class="kw">GROUP BY</span> v2ProductName
+<span class="kw">HAVING</span> SKU_count > <span class="num">1</span>
+<span class="kw">ORDER BY</span> SKU_count <span class="kw">DESC</span>;</pre>
+    </div>
+
+    <p>The results confirmed a one-to-many relationship: one product name (like "Android Women's Short Sleeve Badge Tee") had up to 12 SKUs — one per size and colour variant. That's expected and by design.</p>
+    <p>The more dangerous discovery came next: querying in the reverse direction revealed that <strong>some single SKUs had multiple different product names</strong>. For example, <code>GGOEGPJC019099</code> appeared under three names: <em>"7&quot; Dog Frisbee"</em>, <em>"7" Dog Frisbee"</em>, and <em>"Google 7-inch Dog Flying Disc Blue"</em> — a special character variant, a punctuation variant, and an entirely different name for what was clearly the same physical product.</p>
+
+    <div class="insight-box">
+      <p>This is a many-to-many (N:N) key relationship — one SKU mapped to multiple names, and multiple SKUs mapped to multiple names. Joining two tables on an N:N key without deduplicating first is the root cause of most unintentional row multiplication in SQL analytics.</p>
+    </div>
+  </section>
+
+  <!-- TASK 5 PITFALL 1 -->
+  <section>
+    <h2 class="section-title">Pitfall 1 — Triple-Counting Inventory via a Non-Unique Key</h2>
+    <p>With the N:N relationship identified, I next demonstrated what happens in practice when you join on that non-unique key. The product inventory table (<code>ecommerce.products</code>) held one clean record for <code>GGOEGPJC019099</code> with a stock level of 154 units. Joining the website sessions table against this on the SKU field should return 154 — but it didn't.</p>
+
+    <h3 class="sub-title">The join that corrupts the count</h3>
+    <p>Because the website sessions table had three rows for the same SKU (one per product name variant), the INNER JOIN matched the single inventory record against all three website rows — replicating the stock level three times.</p>
+
+    <div class="code-snippet">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — the broken aggregation</span><span class="code-tag bad">✕ wrong result</span></div>
+      <pre><span class="kw">WITH</span> inventory_per_sku <span class="kw">AS</span> (
+  <span class="kw">SELECT DISTINCT</span>
+    website.v2ProductName,
+    website.productSKU,
+    inventory.stockLevel
+  <span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions_raw`</span> <span class="kw">AS</span> website
+  <span class="kw">JOIN</span> <span class="tbl">`data-to-insights.ecommerce.products`</span> <span class="kw">AS</span> inventory
+    <span class="kw">ON</span> website.productSKU = inventory.SKU
+  <span class="kw">WHERE</span> productSKU = <span class="str">'GGOEGPJC019099'</span>
+)
+<span class="kw">SELECT</span>
+  productSKU,
+  <span class="hl-bad"><span class="fn">SUM</span>(stockLevel) <span class="kw">AS</span> total_inventory</span>  <span class="cmt">-- sums 154 × 3 = 462</span>
+<span class="kw">FROM</span> inventory_per_sku
+<span class="kw">GROUP BY</span> productSKU;</pre>
+    </div>
+
+    <div class="math-box">
+      <div class="math-line">1 inventory record (stockLevel = 154)</div>
+      <div class="math-line">× 3 website rows (same SKU, 3 different names)</div>
+      <div class="math-line red">= SUM reports 462 ✕</div>
+      <div class="math-caption">The inventory figure is inflated by a factor of 3 — a silent, dangerous error with no warning or error message</div>
+    </div>
+
+    <h3 class="sub-title">The fix: deduplicate the key before joining</h3>
+    <p>The solution is to reduce the website dataset to one row per SKU <em>before</em> joining against the inventory table. <code>ARRAY_AGG(DISTINCT v2ProductName LIMIT 1)</code> collapses all name variants into a single row per SKU, eliminating the multiplication.</p>
+
+    <div class="code-snippet">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — ARRAY_AGG deduplication</span><span class="code-tag ok">✓ correct</span></div>
+      <pre><span class="cmt">-- Collapse all name variants into one row per SKU first</span>
+<span class="kw">SELECT</span>
+  productSKU,
+  <span class="hl-ok"><span class="fn">ARRAY_AGG</span>(<span class="kw">DISTINCT</span> v2ProductName <span class="kw">LIMIT</span> <span class="num">1</span>) <span class="kw">AS</span> product_name</span>
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions_raw`</span>
+<span class="kw">WHERE</span> productSKU = <span class="str">'GGOEGAAX0098'</span>
+<span class="kw">GROUP BY</span> productSKU;
+<span class="cmt">-- Now each SKU appears exactly once — safe to join on</span></pre>
+    </div>
+
+    <div class="note-box"><strong>Rule:</strong> Before joining two tables, always verify the cardinality of the key in both tables. A 1:1 join is safe. A 1:N join requires awareness. An N:N join without deduplication will silently multiply your data.</div>
+  </section>
+
+  <!-- TASK 6 PITFALL 2 -->
+  <section>
+    <h2 class="section-title">Pitfall 2 — Silently Losing 819 Records with an INNER JOIN</h2>
+    <p>The second pitfall was subtler — and arguably more common. When I joined the website sessions table against the product inventory table on SKU using the default INNER JOIN, I expected to get back all 1,909 distinct website SKUs. Instead, only 1,090 returned. The other 819 had disappeared silently.</p>
+    <p>No error. No warning. Just a result that was 43% smaller than the correct answer.</p>
+
+    <h3 class="sub-title">Why INNER JOIN drops records</h3>
+    <p>An INNER JOIN only returns rows where the key exists in <em>both</em> tables. The 819 missing SKUs existed on the website — real products that real customers had viewed or purchased — but had no corresponding entry in the product inventory table. The INNER JOIN silently excluded them because its condition could not be satisfied.</p>
+
+    <div class="code-snippet">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — diagnosing missing records with LEFT JOIN</span><span class="code-tag ok">✓ correct join type</span></div>
+      <pre><span class="cmt">-- LEFT JOIN preserves ALL 1,909 website SKUs</span>
+<span class="kw">SELECT DISTINCT</span>
+  website.productSKU   <span class="kw">AS</span> website_SKU,
+  inventory.SKU        <span class="kw">AS</span> inventory_SKU  <span class="cmt">-- will be NULL for missing products</span>
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions_raw`</span> <span class="kw">AS</span> website
+<span class="hl-ok"><span class="kw">LEFT JOIN</span></span> <span class="tbl">`data-to-insights.ecommerce.products`</span> <span class="kw">AS</span> inventory
+  <span class="kw">ON</span> website.productSKU = inventory.SKU;
+<span class="cmt">-- Now filter to expose only the missing ones</span>
+<span class="cmt">-- WHERE inventory.SKU IS NULL → returns 819 rows</span></pre>
+    </div>
+
+    <h3 class="sub-title">What the missing products actually were</h3>
+    <p>Filtering for <code>WHERE inventory.SKU IS NULL</code> after the LEFT JOIN exposed all 819 products that existed on the website but not in the inventory system. This is a legitimate business scenario — not necessarily a data error. Possible explanations include digital products with no physical stock, products discontinued from inventory but still visible in historical order data, or simple gaps in inventory record-keeping. <strong>Crucially, an INNER JOIN would have hidden this gap entirely.</strong></p>
+
+    <div class="insight-box">
+      <p>The default INNER JOIN is often the wrong choice for analytical queries. When your goal is to understand your full dataset — including gaps, mismatches, and missing records — always start with a LEFT JOIN from your primary table and use NULL filtering to expose what's missing. Never let the join type silently decide what you get to see.</p>
+    </div>
+
+    <h3 class="sub-title">Reversing the question: products in inventory but not on the website</h3>
+    <p>I then used a RIGHT JOIN to ask the opposite question — which inventory products had never appeared on the website? Two records surfaced: a USB soundbar marked "in store only" (10 units ordered, 15 in stock), and a new PC gaming speaker with zero orders and no sentiment score. The gaming speaker's absence from web analytics made perfect sense — a brand-new product with no orders or page views yet would generate no analytics events. This is a real pattern in ecommerce data: inventory often gets ahead of web analytics.</p>
+
+    <h3 class="sub-title">The complete picture: FULL JOIN</h3>
+    <p>A FULL JOIN combined both findings into a single query — all 819 website SKUs missing from inventory, plus the 2 inventory products missing from the website, totalling 821 unmatched records across both directions.</p>
+
+    <div class="code-snippet">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — FULL JOIN for complete gap analysis</span></div>
+      <pre><span class="kw">SELECT DISTINCT</span>
+  website.productSKU  <span class="kw">AS</span> website_SKU,
+  inventory.SKU       <span class="kw">AS</span> inventory_SKU
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions_raw`</span> <span class="kw">AS</span> website
+<span class="kw">FULL JOIN</span> <span class="tbl">`data-to-insights.ecommerce.products`</span> <span class="kw">AS</span> inventory
+  <span class="kw">ON</span> website.productSKU = inventory.SKU
+<span class="kw">WHERE</span> website.productSKU <span class="kw">IS NULL</span>
+   <span class="kw">OR</span> inventory.SKU <span class="kw">IS NULL</span>;
+<span class="cmt">-- Returns 821: 819 missing from inventory + 2 missing from website</span></pre>
+    </div>
+
+    <div class="math-box">
+      <div class="math-line">819 website SKUs with no inventory record (LEFT JOIN gaps)</div>
+      <div class="math-line">+ 2 inventory SKUs with no website record (RIGHT JOIN gaps)</div>
+      <div class="math-line green">= 821 total mismatches revealed by FULL JOIN ✓</div>
+      <div class="math-caption">LEFT JOIN + RIGHT JOIN = FULL JOIN — the complete picture of cross-table gaps</div>
+    </div>
+  </section>
+
+  <!-- TASK 6 PITFALL 3 -->
+  <section>
+    <h2 class="section-title">Pitfall 3 — The Unintentional Cross Join</h2>
+    <p>The final and most explosive pitfall involved a CROSS JOIN — the join type that requires no matching key at all, combining every row in one table with every row in another. Used correctly, a CROSS JOIN is a clean way to apply a single lookup value (like a discount percentage) uniformly across an entire dataset. Used carelessly, it multiplies your output by whatever the size of the lookup table happens to be — including rows you didn't expect to be there.</p>
+
+    <h3 class="sub-title">The setup: a discount table</h3>
+    <p>I created a simple one-row table containing a 5% site-wide discount rate and cross-joined it against all products in the Clearance category. With one discount row and 82 clearance products, the result was exactly 82 rows — correct and expected.</p>
+
+    <div class="code-snippet">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — creating the discount table</span></div>
+      <pre><span class="kw">CREATE OR REPLACE TABLE</span> ecommerce.site_wide_promotion <span class="kw">AS</span>
+<span class="kw">SELECT</span> <span class="num">.05</span> <span class="kw">AS</span> discount;
+
+<span class="cmt">-- CROSS JOIN: no ON condition needed</span>
+<span class="cmt">-- 82 clearance products × 1 discount row = 82 rows ✓</span>
+<span class="kw">SELECT DISTINCT</span>
+  productSKU,
+  v2ProductCategory,
+  discount
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions_raw`</span> <span class="kw">AS</span> website
+<span class="kw">CROSS JOIN</span> ecommerce.site_wide_promotion
+<span class="kw">WHERE</span> v2ProductCategory <span class="kw">LIKE</span> <span class="str">'%Clearance%'</span>;</pre>
+    </div>
+
+    <h3 class="sub-title">The moment it breaks</h3>
+    <p>I then inserted two additional discount rows into the promotion table (0.04 and 0.03), bringing the total to three rows. Rerunning the exact same query — without changing a single character — now returned 246 rows instead of 82.</p>
+
+    <div class="math-box">
+      <div class="math-line">82 clearance products × 1 discount row = 82 rows ✓</div>
+      <div class="math-line red">82 clearance products × 3 discount rows = 246 rows ✕</div>
+      <div class="math-caption">The query didn't change. The data did. The CROSS JOIN silently tripled the output.</div>
+    </div>
+
+    <div class="warn-box"><strong>The danger of CROSS JOIN:</strong> The query itself gives no indication anything is wrong. The result set looks like product data. The numbers look like discount rates. Only someone who already knew the expected row count would catch the error — and in a production pipeline consuming this output downstream, the triple-counting could propagate silently through every dependent report.</div>
+
+    <h3 class="sub-title">The broader lesson</h3>
+    <p>This is not a problem limited to explicit CROSS JOINs. Any join on an N:N key relationship produces the same effect — an implicit cross join where every matching row in one table pairs with every matching row in the other. The fix is the same in both cases: <strong>know the cardinality of your data before you join</strong>. Verify that lookup tables contain exactly one row for each key you intend to join on, and add assertions or row-count checks when those tables can change.</p>
+  </section>
+
+  <!-- PITFALL SUMMARY -->
+  <section>
+    <h2 class="section-title">Pitfall Catalogue</h2>
+    <div class="pitfall-trail">
+      <div class="pitfall-trail-header">Four join pitfalls — root causes &amp; solutions</div>
+      <div class="pitfall-row">
+        <div class="pitfall-icon">⚠</div>
+        <div class="pitfall-content">
+          <div class="pitfall-title">Non-unique key causing row multiplication <span class="pitfall-fix">N:N relationship</span></div>
+          <div class="pitfall-detail">Joining website data (3 names per SKU) against inventory (1 row per SKU) silently tripled every stock figure. Stock of 154 reported as 462.</div>
+        </div>
+      </div>
+      <div class="pitfall-row">
+        <div class="pitfall-icon">⚠</div>
+        <div class="pitfall-content">
+          <div class="pitfall-title">INNER JOIN silently drops 819 records <span class="pitfall-fix">wrong join type</span></div>
+          <div class="pitfall-detail">The default INNER JOIN excludes any row whose key doesn't exist in both tables. 43% of website SKUs had no inventory match and vanished from results without warning.</div>
+        </div>
+      </div>
+      <div class="pitfall-row">
+        <div class="pitfall-icon">⚠</div>
+        <div class="pitfall-content">
+          <div class="pitfall-title">Missing records invisible without NULL filtering <span class="pitfall-fix">unread NULLs</span></div>
+          <div class="pitfall-detail">After switching to LEFT JOIN, the missing 819 SKUs appeared as NULL values in the inventory column — but only after explicitly filtering for <code>WHERE inventory.SKU IS NULL</code>. Without that filter, gaps are invisible in the result set.</div>
+        </div>
+      </div>
+      <div class="pitfall-row">
+        <div class="pitfall-icon">⚠</div>
+        <div class="pitfall-content">
+          <div class="pitfall-title">Unintentional cross join triples output after data change <span class="pitfall-fix">lookup table grew</span></div>
+          <div class="pitfall-detail">Adding two rows to a lookup table that was CROSS JOINed against 82 clearance products multiplied the result from 82 to 246 rows. The query was unchanged — the data source was the risk.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY FINDINGS TABLE -->
+  <section>
+    <h2 class="section-title">Key Findings</h2>
+    <table class="findings-table">
+      <thead>
+        <tr><th>Finding</th><th>Detail</th><th>Business Implication</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GGOEGPJC019099 has 3 product names</td>
+          <td>Same SKU recorded as three name variants in website data</td>
+          <td>Any SUM on this SKU after a naive join will triple-count values</td>
+        </tr>
+        <tr>
+          <td>1:N relationship: 1 product → up to 12 SKUs</td>
+          <td>Products have size/colour variants sold as separate SKUs</td>
+          <td>Expected by design — but must be handled in aggregation queries</td>
+        </tr>
+        <tr>
+          <td>819 website SKUs missing from inventory</td>
+          <td>Present in session logs, absent from products table</td>
+          <td>May be digital goods, discontinued products, or inventory gaps</td>
+        </tr>
+        <tr>
+          <td>2 inventory SKUs missing from website</td>
+          <td>In-store-only product and new product with 0 orders</td>
+          <td>New products don't appear in web analytics until first interaction</td>
+        </tr>
+        <tr>
+          <td>Cross join: 82 → 246 rows after table change</td>
+          <td>Discount lookup table grew from 1 to 3 rows</td>
+          <td>Downstream reports consuming this output would silently 3× all figures</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- TAKEAWAYS -->
+  <section>
+    <h2 class="section-title">Key Takeaways</h2>
+    <ul class="takeaway-list">
+      <li>
+        <span class="takeaway-num">1</span>
+        <span><strong>Always verify key cardinality before writing a JOIN.</strong> The most destructive join errors come from assuming a key is unique when it isn't. A quick <code>COUNT(*) vs COUNT(DISTINCT key)</code> check takes seconds and can save hours of downstream debugging.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">2</span>
+        <span><strong>INNER JOIN is almost never the right choice for analytical work.</strong> It silently discards any row without a match in both tables — dropping 819 records (43% of the dataset) without any error or warning. In analysis, gaps in data are often the most important finding. Use LEFT JOIN as your default and let NULL values surface the story.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">3</span>
+        <span><strong>NULL values after a join are data, not noise.</strong> Every NULL in a LEFT JOIN result is a record that failed to match. Filtering for <code>WHERE right_table.key IS NULL</code> turns those NULLs into a precise, actionable list of missing records — a pattern directly applicable to data quality auditing and reconciliation work.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">4</span>
+        <span><strong>Deduplicate before joining, not after.</strong> Using <code>ARRAY_AGG(DISTINCT ... LIMIT 1)</code> or a CTE to reduce a many-to-many key to a one-to-one key before joining prevents row multiplication entirely, rather than trying to correct for it in aggregation after the fact.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">5</span>
+        <span><strong>CROSS JOINs are fragile by design — their output scales with their source tables.</strong> A CROSS JOIN against a lookup table that changes in size will silently change every downstream result. Any pipeline using a CROSS JOIN should either assert that the lookup table has exactly one row, or switch to a scalar subquery or a parameterised value that cannot unexpectedly multiply.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">6</span>
+        <span><strong>LEFT JOIN + RIGHT JOIN = FULL JOIN.</strong> When you need a complete gap analysis across two datasets simultaneously — records missing in either direction — a FULL JOIN with NULL filtering on both sides is the cleanest single-query solution. It avoids running two separate queries and manually combining results.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">7</span>
+        <span><strong>Data gaps have business explanations worth investigating.</strong> The 819 missing inventory SKUs and the 2 missing website SKUs were not simply data errors — they reflected real scenarios (digital products, new catalogue items, in-store-only stock). Good SQL analysis doesn't just surface anomalies; it provides the context to interpret them correctly.</span>
+      </li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Google Cloud BigQuery Lab · GSP412 · Completed 2026</span>
+    <span>Data: Google Merchandise Store Analytics &amp; Inventory Export</span>
+  </footer>
+
+</div>
+</body>
+</html>
