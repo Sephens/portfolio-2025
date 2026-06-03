@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cleaning and Transforming Your Data — Portfolio Writeup</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1a2e; --ink-mid: #3a3a5c; --ink-light: #6b6b8a;
+    --accent: #1a6bb5; --accent-light: #e8f2fc; --accent-dark: #0d3b6e;
+    --gold: #c9963a; --gold-light: #fdf6e8;
+    --red: #b53a1a; --red-light: #fdf0ec;
+    --green: #1a7a3a; --green-light: #edf7f1;
+    --purple: #5a3a9a; --purple-light: #f0ecfd;
+    --teal: #0d6b6b; --teal-light: #e0f5f5;
+    --border: #e2e2ef; --surface: #f8f8fc; --white: #ffffff;
+    --code-bg: #0f1b2d;
+  }
+  html { font-size: 16px; }
+  body { font-family: 'Source Serif 4', Georgia, serif; font-weight: 300; color: var(--ink); background: var(--white); line-height: 1.85; }
+  .page { max-width: 840px; margin: 0 auto; padding: 0 2rem 5rem; }
+
+  .site-header { border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; max-width: 840px; margin: 0 auto; }
+  .site-logo { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink-light); letter-spacing: 0.08em; text-transform: uppercase; }
+  .site-tag { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); background: var(--accent-light); padding: 3px 10px; border-radius: 20px; }
+
+  /* HERO */
+  .hero { padding: 4rem 0 2.5rem; border-bottom: 1px solid var(--border); margin-bottom: 3rem; }
+  .category-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+  .category-label::before { content: ''; display: inline-block; width: 24px; height: 1px; background: var(--accent); }
+  h1.title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 2.8rem; line-height: 1.15; color: var(--ink); margin-bottom: 1.25rem; max-width: 700px; }
+  .subtitle { font-size: 1.15rem; color: var(--ink-mid); font-weight: 300; max-width: 620px; line-height: 1.7; margin-bottom: 2rem; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 1.5rem; font-family: 'DM Mono', monospace; font-size: 12px; }
+  .meta-item { display: flex; flex-direction: column; gap: 3px; }
+  .meta-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-light); }
+  .meta-value { color: var(--ink); font-weight: 500; }
+  .meta-sep { width: 1px; background: var(--border); align-self: stretch; }
+
+  /* TYPOGRAPHY */
+  section { margin-bottom: 3.5rem; }
+  h2.section-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.65rem; color: var(--ink); margin-bottom: 1rem; padding-bottom: 0.65rem; border-bottom: 2px solid var(--ink); }
+  h3.sub-title { font-family: 'Source Serif 4', serif; font-weight: 600; font-size: 1.1rem; color: var(--ink); margin: 2rem 0 0.6rem; }
+  h4.micro-title { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); margin: 1.5rem 0 0.5rem; }
+  p { margin-bottom: 1rem; color: var(--ink-mid); font-size: 1rem; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--ink); font-weight: 600; }
+  em { color: var(--ink-mid); }
+  code { font-family: 'DM Mono', monospace; font-size: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--ink); }
+
+  /* STAT CARDS */
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 1.5rem 0; }
+  .stat-card { border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; text-align: center; }
+  .stat-number { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--accent); line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-light); text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.4; }
+
+  /* PRINCIPLES GRID */
+  .principles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 1.5rem 0; }
+  .principle-card { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .principle-head { padding: 0.65rem 1rem; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; }
+  .principle-head .p-num { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .p-valid   .principle-head { background: #e8f2fc; color: #0d3b6e; } .p-valid   .p-num { background: #1a6bb5; color: #fff; }
+  .p-acc     .principle-head { background: #edf7f1; color: #0d3b1a; } .p-acc     .p-num { background: #1a7a3a; color: #fff; }
+  .p-comp    .principle-head { background: #fff8e8; color: #6b3e0a; } .p-comp    .p-num { background: #c9963a; color: #fff; }
+  .p-cons    .principle-head { background: #f0ecfd; color: #2d1a5e; } .p-cons    .p-num { background: #5a3a9a; color: #fff; }
+  .p-unif    .principle-head { background: var(--teal-light); color: #0a3a3a; } .p-unif    .p-num { background: var(--teal); color: #fff; }
+  .principle-body { padding: 0.85rem 1rem; font-size: 13px; color: var(--ink-mid); line-height: 1.65; background: var(--white); }
+
+  /* TOOLS ROW */
+  .tools-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 1rem 0; }
+  .tool-tag { font-family: 'DM Mono', monospace; font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); color: var(--ink-mid); background: var(--surface); }
+  .tool-tag.primary { background: var(--accent-light); border-color: #b0d4f4; color: var(--accent); }
+
+  /* CODE BLOCKS */
+  .code-block { background: var(--code-bg); border-radius: 8px; overflow: hidden; margin: 1.25rem 0; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .code-lang { font-family: 'DM Mono', monospace; font-size: 11px; color: #64b5f6; letter-spacing: 0.06em; text-transform: uppercase; }
+  .code-label { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 3px; }
+  .lbl-beginner { background: rgba(40,160,80,0.3); color: #7fda9f; }
+  .lbl-intermediate { background: rgba(200,150,0,0.3); color: #ffd580; }
+  .lbl-advanced { background: rgba(160,40,180,0.3); color: #e0a0f8; }
+  pre { font-family: 'DM Mono', monospace; font-size: 12.5px; color: #cdd9f0; padding: 1.25rem 1.5rem; margin: 0; white-space: pre; overflow-x: auto; line-height: 1.75; }
+  .kw { color: #80cbc4; } .fn { color: #f48fb1; } .str { color: #ffcc80; }
+  .cmt { color: #546e7a; font-style: italic; } .tbl { color: #90caf9; }
+  .num { color: #a5d6a7; } .op { color: #ef9a9a; }
+
+  /* CALLOUTS */
+  .insight-box { background: var(--gold-light); border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .insight-box p { color: #7a5a1a; font-style: italic; font-size: 1.02rem; margin: 0; }
+  .note-box { background: var(--accent-light); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 13.5px; color: var(--accent-dark); line-height: 1.7; }
+  .warn-box { background: var(--red-light); border-left: 3px solid var(--red); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 13.5px; color: #7a1a0d; line-height: 1.7; }
+  .tip-box { background: var(--green-light); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 13.5px; color: #0d3b1a; line-height: 1.7; }
+
+  /* COMPARISON TABLE */
+  .compare-table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 13.5px; }
+  .compare-table th { background: var(--ink); color: var(--white); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 10px 14px; text-align: left; font-weight: 500; }
+  .compare-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--ink-mid); vertical-align: top; line-height: 1.55; }
+  .compare-table tr:nth-child(even) td { background: var(--surface); }
+  .compare-table td:first-child { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); font-weight: 500; white-space: nowrap; }
+
+  /* FUNCTION REF */
+  .fn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 1.25rem 0; }
+  .fn-card { border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem; background: var(--surface); }
+  .fn-name { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--accent); margin-bottom: 5px; }
+  .fn-desc { font-size: 13px; color: var(--ink-mid); line-height: 1.55; }
+
+  /* TAKEAWAYS */
+  .takeaway-list { list-style: none; margin: 1rem 0; }
+  .takeaway-list li { display: flex; gap: 12px; align-items: flex-start; padding: 0.8rem 0; border-bottom: 1px solid var(--border); font-size: 15px; color: var(--ink-mid); line-height: 1.65; }
+  .takeaway-list li:last-child { border-bottom: none; }
+  .takeaway-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--white); background: var(--accent); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+
+  /* PIPELINE VISUAL */
+  .pipeline { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 1.25rem 0; }
+  .pipe-step { background: var(--accent-light); border: 1px solid #b0d4f4; color: var(--accent-dark); font-family: 'DM Mono', monospace; font-size: 12px; padding: 6px 14px; border-radius: 20px; white-space: nowrap; }
+  .pipe-arrow { color: var(--ink-light); font-size: 16px; }
+
+  /* LEVEL BADGE */
+  .level-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 3px; vertical-align: middle; margin-left: 8px; }
+  .lb-b { background: #edf7f1; color: var(--green); border: 1px solid #a8dfc0; }
+  .lb-i { background: #fff8e8; color: #8a5a00; border: 1px solid #f0c870; }
+  .lb-a { background: #f0ecfd; color: var(--purple); border: 1px solid #c8b4f4; }
+
+  footer { border-top: 1px solid var(--border); padding: 2rem 0 1rem; margin-top: 3rem; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-light); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+
+  @media(max-width:600px) {
+    h1.title { font-size: 2rem; }
+    .stat-row { grid-template-columns: 1fr; }
+    .meta-sep { display: none; }
+    .site-header { padding: 1rem; }
+    .pipeline { gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="site-logo">Portfolio · Data Analytics</span>
+  <span class="site-tag">Google Cloud — Module 3</span>
+</header>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="category-label">Data Quality · SQL Cleaning · GCP ETL Tools</div>
+    <h1 class="title">Cleaning and Transforming Your Data</h1>
+    <p class="subtitle">A comprehensive study of the five principles of dataset integrity, every SQL technique for cleaning and transforming messy data in BigQuery, and a deep-dive comparison of Google Cloud's ETL tool ecosystem — from beginner concepts to expert patterns.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Platform</span><span class="meta-value">Google BigQuery</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Module</span><span class="meta-value">Module 3</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Course</span><span class="meta-value">Google Cloud Data Analytics</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Level</span><span class="meta-value">Beginner → Expert</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Focus</span><span class="meta-value">Data Quality & Transformation</span></div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section>
+    <h2 class="section-title">Overview</h2>
+    <p>Before a single visualisation is built, before a machine learning model sees its first training example, before a business decision is made from data — the data itself must be trustworthy. This module confronts that foundational reality head-on. It establishes a rigorous framework for thinking about data quality, equips you with a comprehensive SQL toolkit for fixing it, and maps out the Google Cloud ecosystem of tools for when SQL alone isn't enough.</p>
+    <p>The central principle is deceptively simple: <strong>garbage in, garbage out</strong>. High-quality insights are only possible when they emerge from high-quality data. This module shows you exactly what "high quality" means — and how to get there.</p>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-number">5</div>
+        <div class="stat-label">Core data integrity principles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">20+</div>
+        <div class="stat-label">SQL cleaning techniques covered</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">5</div>
+        <div class="stat-label">GCP ETL tools compared</div>
+      </div>
+    </div>
+
+    <div class="tools-row">
+      <span class="tool-tag primary">Google BigQuery</span>
+      <span class="tool-tag primary">Standard SQL</span>
+      <span class="tool-tag">COALESCE / IFNULL / NULLIF</span>
+      <span class="tool-tag">CAST / FORMAT</span>
+      <span class="tool-tag">REGEXP_REPLACE</span>
+      <span class="tool-tag">TRIM / LOWER / UPPER</span>
+      <span class="tool-tag">DATE / DATETIME functions</span>
+      <span class="tool-tag">CASE WHEN</span>
+      <span class="tool-tag">ROW_NUMBER() deduplication</span>
+      <span class="tool-tag">Cloud Data Fusion</span>
+      <span class="tool-tag">Dataflow (Apache Beam)</span>
+      <span class="tool-tag">Dataprep</span>
+      <span class="tool-tag">Dataproc</span>
+    </div>
+  </section>
+
+  <!-- PART 1: 5 PRINCIPLES -->
+  <section>
+    <h2 class="section-title">Part 1 — The Five Principles of Dataset Integrity</h2>
+    <p>High-quality datasets conform to five strict rules. Each represents a different dimension of data trustworthiness. Understanding all five — and recognising which one is violated in a given dataset — is the first skill of any serious data practitioner.</p>
+
+    <div class="principles-grid">
+      <div class="principle-card p-valid">
+        <div class="principle-head"><span class="p-num">1</span>Validity</div>
+        <div class="principle-body">Data conforms to defined business rules and structural constraints — correct data types, allowed value ranges, required fields, and format patterns.</div>
+      </div>
+      <div class="principle-card p-acc">
+        <div class="principle-head"><span class="p-num">2</span>Accuracy</div>
+        <div class="principle-body">Data matches a real-world source of truth. A value can be structurally valid (correct type, correct range) yet still be factually wrong.</div>
+      </div>
+      <div class="principle-card p-comp">
+        <div class="principle-head"><span class="p-num">3</span>Completeness</div>
+        <div class="principle-body">No required data is missing. You are seeing the whole picture — no rows filtered, no fields truncated, no subsets masquerading as totals.</div>
+      </div>
+      <div class="principle-card p-cons">
+        <div class="principle-head"><span class="p-num">4</span>Consistency</div>
+        <div class="principle-body">The same fact is represented the same way across all systems. No two data sources contradict each other for the same entity.</div>
+      </div>
+      <div class="principle-card p-unif">
+        <div class="principle-head"><span class="p-num">5</span>Uniformity</div>
+        <div class="principle-body">All data uses the same units, formats, and standards throughout. Mixing imperial and metric, or different date formats, breaks comparability.</div>
+      </div>
+    </div>
+
+    <!-- VALIDITY -->
+    <h3 class="sub-title">Principle 1: Validity — Does the data conform to the rules?</h3>
+    <p>Validity is about structural correctness. A value is valid if it satisfies every constraint defined for its field. These constraints fall into eight categories:</p>
+    <ul style="list-style:none;display:grid;gap:6px;margin:1rem 0;">
+      <li style="display:flex;gap:10px;font-size:14px;color:var(--ink-mid);"><strong style="min-width:200px;color:var(--ink);">Data-type constraints</strong> An age field must contain integers, not strings like "old".</li>
+      <li style="display:flex;gap:10px;font-size:14px;color:var(--ink-mid);"><strong style="min-width:200px;color:var(--ink);">Range constraints</strong> A single die roll must be 1–6. A two-dice roll must be 2–12. A value of 1 is invalid for two dice.</li>
+      <li style="display:flex;gap:10px;font-size:14px;color:var(--ink-mid);"><strong style="min-width:200px;color:var(--ink);">Mandatory constraints</strong> Customer ID and email fields cannot be NULL.</li>
+      <li style="display:flex;gap:10px;font-size:14px;color:var(--ink-mid);"><strong style="min-width:200px;color:var(--ink);">Set-membership constraints</strong> A country_code field must contain only valid ISO 3166 codes.</li>
+      <li style="display:flex;gap:10px;font-size:14px;color:var(--ink-mid);"><strong style="min-width:200px;color:var(--ink);">Foreign-key constraints</strong> An order's customer_id must reference a real customer record.</li>
+      <li style="display:flex;gap:10px;font-size:14px;color:var(--ink-mid);"><strong style="min-width:200px;color:var(--ink);">Regex patterns</strong> An email field must match <code>[a-z]+@[a-z]+\.[a-z]+</code>.</li>
+      <li style="display:flex;gap:10px;font-size:14px;color:var(--ink-mid);"><strong style="min-width:200px;color:var(--ink);">Cross-field validation</strong> A ship_date cannot be earlier than an order_date for the same record.</li>
+      <li style="display:flex;gap:10px;font-size:14px;color:var(--ink-mid);"><strong style="min-width:200px;color:var(--ink);">Unique constraints</strong> No two customers should share the same phone number, licence plate, or mailing address.</li>
+    </ul>
+    <div class="insight-box"><p>Validity failures are most common in legacy systems and spreadsheet-based data capture, where there was no software enforcement of constraints. Modern databases prevent most validity issues at ingestion — but you still need to validate incoming data from external sources.</p></div>
+
+    <!-- ACCURACY -->
+    <h3 class="sub-title">Principle 2: Accuracy — Does the data reflect the real world?</h3>
+    <p>A value can be completely valid — correct type, in range, not null — yet still be factually wrong. A US state field that contains "Hot Dog" is a valid string, but it doesn't match any entry in the known list of 50 US states. <strong>Accuracy requires an external source of truth to validate against.</strong></p>
+    <p>This makes accuracy the hardest principle to enforce through SQL alone. It typically requires a JOIN against a reference dataset — a curated list of valid states, countries, product codes, or financial instruments. Without that reference, you can check that a value looks right; you cannot confirm that it <em>is</em> right.</p>
+
+    <div class="note-box"><strong>Important nuance:</strong> Sources of truth can themselves vary. Some datasets include US territories like Puerto Rico and Guam alongside states; others list only the 50 states. Accuracy is always relative to a defined standard — which is why documenting your source of truth is as important as enforcing it.</div>
+
+    <!-- COMPLETENESS -->
+    <h3 class="sub-title">Principle 3: Completeness — Do you have the whole picture?</h3>
+    <p>Completeness is the principle most commonly violated without anyone noticing. We instinctively trust data that arrives in row-and-column format — we assume that if a table exists, it contains everything we need. That assumption is dangerous.</p>
+    <p>Consider being shown two close-up photographs of a city street — a decorative lamp and a clock tower — without context. From those fragments alone, identifying the city is nearly impossible. But zoom out to the full panorama and it is immediately recognisable as London. Incomplete data produces the same distortion: analysis that is technically accurate over the available subset but fundamentally misleading about the whole.</p>
+    <p>Consequences of incomplete data include: biased results that over-represent the sampled segment; patterns that appear meaningful but are artefacts of missing data; and machine learning models that overfit to a fragment rather than generalising across the population.</p>
+
+    <!-- CONSISTENCY -->
+    <h3 class="sub-title">Principle 4: Consistency — Do all systems agree?</h3>
+    <p>Inconsistency occurs when two data items within or across systems contradict each other. Consider: System A records the house at 123 ABC Street as owned by Owner ID 12. System B records Owner ID 12 at a completely different address, and 123 ABC Street as owned by Owner ID 15. Both cannot be right. This is a <strong>referential integrity failure</strong> — and it means the joined view of the data cannot be trusted.</p>
+    <p>Resolving inconsistency is not always possible through SQL. It may require determining which system is the authoritative source, checking which record was most recently updated, or external verification. SQL can surface inconsistencies; it cannot always arbitrate between them.</p>
+
+    <!-- UNIFORMITY -->
+    <h3 class="sub-title">Principle 5: Uniformity — Is everything measured the same way?</h3>
+    <p>Uniformity failures occur when the same dimension is measured in different units across different parts of a system. The consequences can be catastrophic. On November 10, 1999, NASA's <strong>Mars Climate Orbiter</strong> — a $125 million spacecraft — was lost because one engineering team used imperial units (pounds-force seconds) while another used metric (newton-seconds). The mismatch sent the probe on the wrong trajectory and it burned up in the Martian atmosphere.</p>
+    <p>In data, the same principle applies: mixing metric and imperial measurements, mixing date formats (<code>DD/MM/YYYY</code> vs <code>MM/DD/YYYY</code>), or mixing time zones across event logs will silently corrupt every calculation that combines them.</p>
+    <div class="insight-box"><p>Uniformity failures are especially common when data is ingested from multiple geographic regions, legacy systems with different formatting standards, or third-party providers with different conventions. Document the standard before you start; enforce it with SQL functions at ingestion.</p></div>
+
+    <!-- DATASET SHAPE -->
+    <h3 class="sub-title">Dataset Shape and Skew</h3>
+    <p>Beyond the five integrity principles, every dataset has a <strong>shape</strong> (the ratio of rows to columns) and a <strong>skew</strong> (the distribution of values within it). Both affect the reliability of analysis.</p>
+    <p>A <strong>wide-but-short</strong> dataset has many columns but few rows — you have rich attributes but not enough observations to draw statistically sound conclusions. A <strong>tall-but-narrow</strong> dataset has many rows but few columns — plenty of observations, but limited context per observation. The ideal is a dataset with enough columns to capture the phenomenon of interest and enough rows to make defensible inferences.</p>
+    <p><strong>Skew</strong> is the concentration of values. If an international sales dataset shows 95% of orders from one country, you face a choice: is that an accurate reflection of the business, or is it a data collection gap? Skew is not inherently bad — a business genuinely concentrated in one market will show skewed data. The question is always whether the skew reflects objective reality or is an artefact of missing or biased collection.</p>
+    <div class="tip-box"><strong>How to detect skew in BigQuery:</strong> Run a <code>GROUP BY</code> on the suspected dimension and <code>ORDER BY COUNT(*) DESC</code>. If one value dominates dramatically, investigate the collection process before proceeding with analysis.</div>
+  </section>
+
+  <!-- PART 2: SQL CLEANING -->
+  <section>
+    <h2 class="section-title">Part 2 — Cleaning and Transforming Data with SQL</h2>
+    <p>SQL is the primary tool for data cleaning in BigQuery. The following techniques map directly onto the five integrity principles, giving you a concrete, executable response to each type of data quality problem.</p>
+
+    <!-- NULL HANDLING -->
+    <h3 class="sub-title">Handling NULL Values <span class="level-badge lb-b">Beginner</span></h3>
+    <p>NULL in SQL represents the complete absence of a value — it is not zero, not an empty string, not the word "null". It is the absence of data itself. NULL values propagate: any arithmetic operation involving a NULL returns NULL. Any comparison using <code>= NULL</code> returns NULL, not TRUE or FALSE. This is why you must use <code>IS NULL</code> and <code>IS NOT NULL</code>, never <code>= NULL</code>.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — NULL detection</span><span class="code-label lbl-beginner">beginner</span></div>
+      <pre><span class="cmt">-- Find all rows with a missing email address</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.customers`</span>
+<span class="kw">WHERE</span> email <span class="kw">IS NULL</span>;
+
+<span class="cmt">-- Count how many rows have missing values per column</span>
+<span class="kw">SELECT</span>
+  <span class="fn">COUNTIF</span>(email <span class="kw">IS NULL</span>)     <span class="kw">AS</span> missing_email,
+  <span class="fn">COUNTIF</span>(phone <span class="kw">IS NULL</span>)     <span class="kw">AS</span> missing_phone,
+  <span class="fn">COUNTIF</span>(country <span class="kw">IS NULL</span>)   <span class="kw">AS</span> missing_country,
+  <span class="fn">COUNT</span>(*)                    <span class="kw">AS</span> total_rows
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.customers`</span>;</pre>
+    </div>
+
+    <h4 class="micro-title">The NULL-handling function family</h4>
+    <div class="fn-grid">
+      <div class="fn-card">
+        <div class="fn-name">COALESCE(a, b, c, …)</div>
+        <div class="fn-desc">Returns the first non-NULL argument. Accepts any number of arguments. The Swiss Army knife of NULL handling.</div>
+      </div>
+      <div class="fn-card">
+        <div class="fn-name">IFNULL(value, replacement)</div>
+        <div class="fn-desc">Returns <em>value</em> if it is not NULL, otherwise returns <em>replacement</em>. Simpler version of COALESCE for exactly two options.</div>
+      </div>
+      <div class="fn-card">
+        <div class="fn-name">NULLIF(value, match)</div>
+        <div class="fn-desc">Returns NULL if <em>value</em> equals <em>match</em>; otherwise returns <em>value</em>. Use to treat empty strings as NULLs.</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — NULL replacement patterns</span><span class="code-label lbl-beginner">beginner</span></div>
+      <pre><span class="cmt">-- IFNULL: substitute a default when a value is missing</span>
+<span class="kw">SELECT</span>
+  customer_id,
+  <span class="fn">IFNULL</span>(phone, <span class="str">'Not provided'</span>) <span class="kw">AS</span> phone_clean
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.customers`</span>;
+
+<span class="cmt">-- COALESCE: try multiple fallback columns in order</span>
+<span class="kw">SELECT</span>
+  order_id,
+  <span class="fn">COALESCE</span>(delivery_email, billing_email, account_email, <span class="str">'unknown@placeholder.com'</span>)
+    <span class="kw">AS</span> best_contact_email
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.orders`</span>;
+
+<span class="cmt">-- NULLIF: treat blank strings as true NULLs</span>
+<span class="cmt">-- An empty string '' passes IS NOT NULL checks — this fixes that</span>
+<span class="kw">SELECT</span>
+  customer_id,
+  <span class="fn">NULLIF</span>(state, <span class="str">''</span>) <span class="kw">AS</span> state_clean  <span class="cmt">-- blank → NULL</span>
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.customers`</span>;</pre>
+    </div>
+
+    <div class="warn-box"><strong>The blank string trap:</strong> A BigQuery column showing what appears to be an empty value may actually contain an empty string <code>''</code> — not a NULL. These are completely different in SQL. An empty string is a valid data value that will pass <code>IS NOT NULL</code> checks and appear in counts. Use <code>NULLIF(column, '')</code> to convert blank strings to true NULLs, or add <code>AND column != ''</code> to your WHERE clause.</div>
+
+    <!-- DEDUPLICATION -->
+    <h3 class="sub-title">Removing Duplicate Records <span class="level-badge lb-i">Intermediate</span></h3>
+    <p>Duplicate rows silently inflate every metric — totals, averages, counts, conversion rates. There are two main approaches to deduplication in BigQuery: identifying duplicates with <code>GROUP BY</code> + <code>HAVING</code> (for detection), and using <code>ROW_NUMBER()</code> window function (for surgical removal, keeping the best version of each duplicate).</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — finding and removing duplicates</span><span class="code-label lbl-intermediate">intermediate</span></div>
+      <pre><span class="cmt">-- STEP 1: Detect duplicates</span>
+<span class="kw">SELECT</span>
+  customer_id,
+  email,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> duplicate_count
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.customers`</span>
+<span class="kw">GROUP BY</span> customer_id, email
+<span class="kw">HAVING</span> duplicate_count > <span class="num">1</span>;
+
+<span class="cmt">-- STEP 2: Keep only the most recently updated version</span>
+<span class="cmt">-- ROW_NUMBER() assigns 1 to the "best" row in each duplicate group</span>
+<span class="kw">WITH</span> ranked_customers <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    *,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+      <span class="kw">PARTITION BY</span> customer_id        <span class="cmt">-- group duplicates by key</span>
+      <span class="kw">ORDER BY</span>     updated_at <span class="kw">DESC</span>   <span class="cmt">-- most recent first</span>
+    ) <span class="kw">AS</span> row_num
+  <span class="kw">FROM</span> <span class="tbl">`project.dataset.customers`</span>
+)
+<span class="kw">SELECT</span> * <span class="kw">EXCEPT</span>(row_num)
+<span class="kw">FROM</span>   ranked_customers
+<span class="kw">WHERE</span>  row_num = <span class="num">1</span>;   <span class="cmt">-- keep only the best row per customer</span></pre>
+    </div>
+
+    <div class="tip-box"><strong>When to use which approach:</strong> Use <code>GROUP BY + HAVING</code> to audit and report on duplicates. Use <code>ROW_NUMBER()</code> when you need to preserve one record per group and have a clear ranking criterion (most recent, highest value, etc.). Never blindly delete duplicates without understanding which version is canonical.</div>
+
+    <!-- CASE WHEN VALIDATION -->
+    <h3 class="sub-title">Conditional Validation with CASE WHEN <span class="level-badge lb-beginner lb-b">Beginner</span></h3>
+    <p><code>CASE WHEN</code> is SQL's conditional branching construct — equivalent to if/else in programming. In data cleaning, it is used to classify, flag, recode, and correct values based on rules. It is one of the most versatile tools in the SQL cleaning toolkit.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — CASE WHEN for validation and recoding</span><span class="code-label lbl-beginner">beginner</span></div>
+      <pre><span class="cmt">-- Flag records that fail a range validation check</span>
+<span class="kw">SELECT</span>
+  order_id,
+  quantity,
+  unit_price,
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> quantity <span class="op">&lt;</span> <span class="num">0</span>        <span class="kw">THEN</span> <span class="str">'Invalid: negative quantity'</span>
+    <span class="kw">WHEN</span> unit_price <span class="op">&lt;=</span> <span class="num">0</span>    <span class="kw">THEN</span> <span class="str">'Invalid: zero or negative price'</span>
+    <span class="kw">WHEN</span> quantity <span class="op">&gt;</span> <span class="num">10000</span>   <span class="kw">THEN</span> <span class="str">'Suspect: unusually large order'</span>
+    <span class="kw">ELSE</span>                          <span class="str">'Valid'</span>
+  <span class="kw">END</span> <span class="kw">AS</span> validation_status
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.orders`</span>;
+
+<span class="cmt">-- Recode inconsistent category labels into a standard set</span>
+<span class="kw">SELECT</span>
+  product_id,
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> <span class="fn">LOWER</span>(category) <span class="kw">IN</span> (<span class="str">'electronics'</span>, <span class="str">'electronic'</span>, <span class="str">'electr.'</span>) <span class="kw">THEN</span> <span class="str">'Electronics'</span>
+    <span class="kw">WHEN</span> <span class="fn">LOWER</span>(category) <span class="kw">IN</span> (<span class="str">'clothing'</span>, <span class="str">'apparel'</span>, <span class="str">'clothes'</span>)   <span class="kw">THEN</span> <span class="str">'Apparel'</span>
+    <span class="kw">WHEN</span> category <span class="kw">IS NULL</span>                                         <span class="kw">THEN</span> <span class="str">'Uncategorised'</span>
+    <span class="kw">ELSE</span> category
+  <span class="kw">END</span> <span class="kw">AS</span> category_clean
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.products`</span>;</pre>
+    </div>
+
+    <!-- STRING CLEANING -->
+    <h3 class="sub-title">String Cleaning Functions <span class="level-badge lb-i">Intermediate</span></h3>
+    <p>Inconsistent string formatting — mixed case, leading/trailing spaces, special characters, encoding artefacts — is one of the most common sources of data quality failures. A customer named "John Smith" and "john smith" and " John Smith " are the same person but will appear as three distinct records in a GROUP BY. The following functions solve this:</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — string standardisation</span><span class="code-label lbl-intermediate">intermediate</span></div>
+      <pre><span class="cmt">-- TRIM removes leading and trailing whitespace</span>
+<span class="cmt">-- LOWER standardises case for comparison</span>
+<span class="cmt">-- REPLACE swaps out known bad characters</span>
+<span class="kw">SELECT</span>
+  customer_id,
+  <span class="fn">TRIM</span>(<span class="fn">LOWER</span>(first_name))              <span class="kw">AS</span> first_name_clean,
+  <span class="fn">TRIM</span>(<span class="fn">LOWER</span>(last_name))               <span class="kw">AS</span> last_name_clean,
+  <span class="fn">REPLACE</span>(phone, <span class="str">'-'</span>, <span class="str">''</span>)             <span class="kw">AS</span> phone_no_dashes,
+  <span class="fn">REGEXP_REPLACE</span>(phone, <span class="str">r'[^0-9]'</span>, <span class="str">''</span>) <span class="kw">AS</span> phone_digits_only
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.customers`</span>;</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — REGEXP_REPLACE for pattern-based cleaning</span><span class="code-label lbl-intermediate">intermediate</span></div>
+      <pre><span class="cmt">-- Remove all non-alphanumeric characters from a product SKU field</span>
+<span class="cmt">-- Pattern r'[^A-Z0-9]' matches anything that is NOT A-Z or 0-9</span>
+<span class="kw">SELECT</span>
+  product_id,
+  productSKU,
+  <span class="fn">REGEXP_REPLACE</span>(productSKU, <span class="str">r'[^A-Z0-9]'</span>, <span class="str">''</span>) <span class="kw">AS</span> sku_clean
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.products`</span>;
+
+<span class="cmt">-- Standardise US phone numbers to (XXX) XXX-XXXX format</span>
+<span class="cmt">-- First strip all non-digits, then reformat</span>
+<span class="kw">SELECT</span>
+  customer_id,
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> <span class="fn">REGEXP_CONTAINS</span>(
+      <span class="fn">REGEXP_REPLACE</span>(phone, <span class="str">r'[^0-9]'</span>, <span class="str">''</span>),
+      <span class="str">r'^\d{10}$'</span>                    <span class="cmt">-- exactly 10 digits</span>
+    ) <span class="kw">THEN</span>
+      <span class="fn">CONCAT</span>(
+        <span class="str">'('</span>, <span class="fn">SUBSTR</span>(<span class="fn">REGEXP_REPLACE</span>(phone, <span class="str">r'[^0-9]'</span>, <span class="str">''</span>), <span class="num">1</span>, <span class="num">3</span>), <span class="str">') '</span>,
+             <span class="fn">SUBSTR</span>(<span class="fn">REGEXP_REPLACE</span>(phone, <span class="str">r'[^0-9]'</span>, <span class="str">''</span>), <span class="num">4</span>, <span class="num">3</span>), <span class="str">'-'</span>,
+             <span class="fn">SUBSTR</span>(<span class="fn">REGEXP_REPLACE</span>(phone, <span class="str">r'[^0-9]'</span>, <span class="str">''</span>), <span class="num">7</span>, <span class="num">4</span>)
+      )
+    <span class="kw">ELSE</span> <span class="kw">NULL</span>                         <span class="cmt">-- invalid phone → NULL</span>
+  <span class="kw">END</span> <span class="kw">AS</span> phone_formatted
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.customers`</span>;</pre>
+    </div>
+
+    <!-- TYPE CASTING -->
+    <h3 class="sub-title">Type Casting and Format Standardisation <span class="level-badge lb-i">Intermediate</span></h3>
+    <p>Data ingested from external sources often arrives with incorrect types — dates stored as strings, numbers stored as text, booleans stored as 0/1 integers. Operating on wrong types produces silent errors or incorrect results. <code>CAST</code> converts between types explicitly; <code>SAFE_CAST</code> returns NULL instead of throwing an error when conversion fails.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — CAST and SAFE_CAST</span><span class="code-label lbl-intermediate">intermediate</span></div>
+      <pre><span class="cmt">-- CAST: convert string dates and string numbers to correct types</span>
+<span class="kw">SELECT</span>
+  order_id,
+  <span class="fn">CAST</span>(order_date_string <span class="kw">AS</span> DATE)              <span class="kw">AS</span> order_date,
+  <span class="fn">CAST</span>(revenue_string    <span class="kw">AS</span> FLOAT64)           <span class="kw">AS</span> revenue,
+  <span class="fn">CAST</span>(quantity_string   <span class="kw">AS</span> INT64)             <span class="kw">AS</span> quantity
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.raw_orders`</span>;
+
+<span class="cmt">-- SAFE_CAST: returns NULL instead of failing on bad values</span>
+<span class="cmt">-- Use this when you expect some values may not convert cleanly</span>
+<span class="kw">SELECT</span>
+  record_id,
+  <span class="fn">SAFE_CAST</span>(price_field <span class="kw">AS</span> FLOAT64) <span class="kw">AS</span> price_clean,
+  <span class="cmt">-- If price_field = 'N/A' or 'pending', SAFE_CAST returns NULL</span>
+  <span class="cmt">-- CAST would throw an error</span>
+  <span class="fn">COALESCE</span>(<span class="fn">SAFE_CAST</span>(price_field <span class="kw">AS</span> FLOAT64), <span class="num">0.0</span>) <span class="kw">AS</span> price_with_default
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.raw_prices`</span>;</pre>
+    </div>
+
+    <!-- DATE/TIME -->
+    <h3 class="sub-title">Date and Time Standardisation <span class="level-badge lb-i">Intermediate</span></h3>
+    <p>Date and time inconsistencies are among the most common cleaning tasks. Different source systems use different formats (<code>DD/MM/YYYY</code> vs <code>MM-DD-YY</code>), different time zones (UTC vs local), or Unix epoch timestamps (seconds since 1 January 1970). BigQuery has a rich set of date/time functions to normalise all of these.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — date/time cleaning and normalisation</span><span class="code-label lbl-intermediate">intermediate</span></div>
+      <pre><span class="cmt">-- Parse a string date in a non-standard format into a DATE type</span>
+<span class="kw">SELECT</span>
+  <span class="fn">PARSE_DATE</span>(<span class="str">'%d/%m/%Y'</span>, date_string)  <span class="kw">AS</span> parsed_date
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.raw_events`</span>;
+
+<span class="cmt">-- Convert UTC timestamps to Nairobi local time (EAT = UTC+3)</span>
+<span class="kw">SELECT</span>
+  event_id,
+  event_timestamp,
+  <span class="fn">DATETIME</span>(event_timestamp, <span class="str">'Africa/Nairobi'</span>) <span class="kw">AS</span> event_local_time
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.events`</span>;
+
+<span class="cmt">-- Convert Unix epoch (seconds since 1970-01-01) to readable TIMESTAMP</span>
+<span class="kw">SELECT</span>
+  user_id,
+  created_at_epoch,
+  <span class="fn">TIMESTAMP_SECONDS</span>(created_at_epoch) <span class="kw">AS</span> created_at_readable
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.users`</span>;
+
+<span class="cmt">-- Extract components from a date for grouping and filtering</span>
+<span class="kw">SELECT</span>
+  <span class="fn">EXTRACT</span>(<span class="kw">YEAR</span>  <span class="kw">FROM</span> order_date) <span class="kw">AS</span> order_year,
+  <span class="fn">EXTRACT</span>(<span class="kw">MONTH</span> <span class="kw">FROM</span> order_date) <span class="kw">AS</span> order_month,
+  <span class="fn">EXTRACT</span>(<span class="kw">DAYOFWEEK</span> <span class="kw">FROM</span> order_date) <span class="kw">AS</span> day_of_week,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> orders
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.orders`</span>
+<span class="kw">GROUP BY</span> <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>
+<span class="kw">ORDER BY</span> <span class="num">1</span>, <span class="num">2</span>;</pre>
+    </div>
+
+    <!-- ACCURACY WITH JOINS -->
+    <h3 class="sub-title">Validating Accuracy with Reference Joins <span class="level-badge lb-i">Intermediate</span></h3>
+    <p>Accuracy validation requires comparing your data against a trusted reference dataset. The cleanest SQL pattern for this is a LEFT JOIN against the reference table, then filtering for NULLs to expose values that don't match any valid entry — the same NULL-filtering pattern used in join pitfall analysis, applied here for data quality.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — accuracy validation via LEFT JOIN</span><span class="code-label lbl-intermediate">intermediate</span></div>
+      <pre><span class="cmt">-- Validate that all country_codes in orders match a known reference list</span>
+<span class="kw">SELECT</span>
+  o.order_id,
+  o.country_code,
+  <span class="cmt">-- If ref.country_code is NULL, the value doesn't exist in the reference</span>
+  <span class="kw">CASE</span> <span class="kw">WHEN</span> ref.country_code <span class="kw">IS NULL</span> <span class="kw">THEN</span> <span class="str">'INVALID'</span> <span class="kw">ELSE</span> <span class="str">'VALID'</span> <span class="kw">END</span> <span class="kw">AS</span> validity_flag
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.orders`</span> o
+<span class="kw">LEFT JOIN</span> <span class="tbl">`project.reference.valid_country_codes`</span> ref
+  <span class="kw">ON</span> o.country_code = ref.country_code
+<span class="kw">WHERE</span> ref.country_code <span class="kw">IS NULL</span>;  <span class="cmt">-- show only invalid entries</span>
+
+<span class="cmt">-- Alternatively: use a subquery with the IN operator</span>
+<span class="kw">SELECT</span> order_id, state
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.orders`</span>
+<span class="kw">WHERE</span> state <span class="kw">NOT IN</span> (
+  <span class="kw">SELECT</span> state_code
+  <span class="kw">FROM</span> <span class="tbl">`project.reference.us_states`</span>
+);</pre>
+    </div>
+
+    <!-- ENRICHMENT / COMPLETENESS -->
+    <h3 class="sub-title">Enriching Data for Completeness <span class="level-badge lb-i">Intermediate</span></h3>
+    <p>Completeness is not just about fixing what's missing — it's also about augmenting your dataset with additional sources to get a fuller picture. This is the exact same JOIN and UNION pattern used in exploratory analysis, applied here with a data quality goal: adding context that makes your dataset more complete.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — enrichment via JOIN and UNION</span><span class="code-label lbl-intermediate">intermediate</span></div>
+      <pre><span class="cmt">-- Enrich orders with customer demographics from a separate system</span>
+<span class="kw">SELECT</span>
+  o.order_id,
+  o.revenue,
+  o.order_date,
+  c.customer_segment,    <span class="cmt">-- added from CRM</span>
+  c.country,             <span class="cmt">-- added from CRM</span>
+  c.age_band             <span class="cmt">-- added from CRM</span>
+<span class="kw">FROM</span> <span class="tbl">`project.dataset.orders`</span>        o
+<span class="kw">LEFT JOIN</span> <span class="tbl">`project.crm.customers`</span>    c
+  <span class="kw">ON</span> o.customer_id = c.customer_id;
+
+<span class="cmt">-- Combine multi-year datasets via UNION ALL for temporal completeness</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">`project.weather.readings_2023`</span>
+<span class="kw">UNION ALL</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">`project.weather.readings_2024`</span>
+<span class="kw">UNION ALL</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">`project.weather.readings_2025`</span>;</pre>
+    </div>
+
+    <!-- ADVANCED: CONSISTENCY -->
+    <h3 class="sub-title">Cross-System Consistency Checks <span class="level-badge lb-a">Advanced</span></h3>
+    <p>Detecting consistency failures requires querying two systems simultaneously and looking for contradictions. The most powerful pattern is a FULL JOIN on the shared key, then using CASE expressions to flag where the two systems disagree.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — cross-system consistency validation</span><span class="code-label lbl-advanced">advanced</span></div>
+      <pre><span class="cmt">-- Compare customer addresses between CRM and billing system</span>
+<span class="cmt">-- Flag any record where the two systems disagree</span>
+<span class="kw">SELECT</span>
+  <span class="fn">COALESCE</span>(crm.customer_id, billing.customer_id) <span class="kw">AS</span> customer_id,
+  crm.address                  <span class="kw">AS</span> crm_address,
+  billing.address              <span class="kw">AS</span> billing_address,
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> crm.customer_id <span class="kw">IS NULL</span>     <span class="kw">THEN</span> <span class="str">'Missing from CRM'</span>
+    <span class="kw">WHEN</span> billing.customer_id <span class="kw">IS NULL</span> <span class="kw">THEN</span> <span class="str">'Missing from Billing'</span>
+    <span class="kw">WHEN</span> crm.address != billing.address <span class="kw">THEN</span> <span class="str">'Address Mismatch'</span>
+    <span class="kw">ELSE</span>                               <span class="str">'Consistent'</span>
+  <span class="kw">END</span> <span class="kw">AS</span> consistency_status
+<span class="kw">FROM</span> <span class="tbl">`project.crm.customers`</span>         crm
+<span class="kw">FULL JOIN</span> <span class="tbl">`project.billing.customers`</span>  billing
+  <span class="kw">ON</span> crm.customer_id = billing.customer_id
+<span class="kw">WHERE</span>
+  crm.address != billing.address      <span class="cmt">-- mismatches</span>
+  <span class="kw">OR</span> crm.customer_id <span class="kw">IS NULL</span>          <span class="cmt">-- missing from CRM</span>
+  <span class="kw">OR</span> billing.customer_id <span class="kw">IS NULL</span>;     <span class="cmt">-- missing from billing</span></pre>
+    </div>
+
+    <!-- ADVANCED: FULL CLEANING PIPELINE -->
+    <h3 class="sub-title">A Production-Ready Cleaning Pipeline with CTEs <span class="level-badge lb-a">Advanced</span></h3>
+    <p>In production, cleaning steps are almost never applied in a single query. They are built as a staged pipeline — each CTE handles one concern, and the final SELECT produces the clean, enriched, validated output. This pattern is readable, testable, and repeatable when new dirty data arrives.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — full multi-stage cleaning pipeline</span><span class="code-label lbl-advanced">advanced</span></div>
+      <pre><span class="cmt">-- Stage 1: Fix types, blank strings, and format issues</span>
+<span class="kw">WITH</span> stage_1_type_fix <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    customer_id,
+    <span class="fn">TRIM</span>(<span class="fn">LOWER</span>(email))                            <span class="kw">AS</span> email,
+    <span class="fn">NULLIF</span>(<span class="fn">TRIM</span>(phone), <span class="str">''</span>)                       <span class="kw">AS</span> phone,
+    <span class="fn">SAFE_CAST</span>(signup_date_str <span class="kw">AS</span> DATE)             <span class="kw">AS</span> signup_date,
+    <span class="fn">SAFE_CAST</span>(lifetime_value_str <span class="kw">AS</span> FLOAT64)       <span class="kw">AS</span> lifetime_value,
+    <span class="fn">REGEXP_REPLACE</span>(country_code, <span class="str">r'[^A-Z]'</span>, <span class="str">''</span>)  <span class="kw">AS</span> country_code
+  <span class="kw">FROM</span> <span class="tbl">`project.raw.customers`</span>
+),
+
+<span class="cmt">-- Stage 2: Apply business-rule validations</span>
+stage_2_validated <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    *,
+    <span class="kw">CASE</span>
+      <span class="kw">WHEN</span> email <span class="kw">IS NULL</span>                           <span class="kw">THEN</span> <span class="str">'FAIL: missing email'</span>
+      <span class="kw">WHEN</span> <span class="op">NOT</span> <span class="fn">REGEXP_CONTAINS</span>(email, <span class="str">r'@.+\..+'</span>) <span class="kw">THEN</span> <span class="str">'FAIL: invalid email format'</span>
+      <span class="kw">WHEN</span> signup_date > <span class="fn">CURRENT_DATE</span>()            <span class="kw">THEN</span> <span class="str">'FAIL: future signup date'</span>
+      <span class="kw">WHEN</span> lifetime_value <span class="op">&lt;</span> <span class="num">0</span>                      <span class="kw">THEN</span> <span class="str">'FAIL: negative value'</span>
+      <span class="kw">ELSE</span>                                               <span class="str">'PASS'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> validation_status
+  <span class="kw">FROM</span> stage_1_type_fix
+),
+
+<span class="cmt">-- Stage 3: Deduplicate — keep the most recently created record per email</span>
+stage_3_deduplicated <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    *,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+      <span class="kw">PARTITION BY</span> email
+      <span class="kw">ORDER BY</span>     signup_date <span class="kw">DESC</span>
+    ) <span class="kw">AS</span> rn
+  <span class="kw">FROM</span> stage_2_validated
+  <span class="kw">WHERE</span> validation_status = <span class="str">'PASS'</span>
+),
+
+<span class="cmt">-- Stage 4: Enrich with country reference data</span>
+stage_4_enriched <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    d.* <span class="kw">EXCEPT</span>(rn),
+    ref.country_name,
+    ref.region,
+    ref.currency_code
+  <span class="kw">FROM</span>      stage_3_deduplicated          d
+  <span class="kw">LEFT JOIN</span> <span class="tbl">`project.reference.countries`</span> ref
+    <span class="kw">ON</span> d.country_code = ref.iso_code
+  <span class="kw">WHERE</span> d.rn = <span class="num">1</span>
+)
+
+<span class="cmt">-- Final output: clean, validated, deduplicated, enriched</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> stage_4_enriched;</pre>
+    </div>
+
+    <div class="insight-box"><p>A multi-stage CTE pipeline like this is the gold standard for production data cleaning. Each stage has a single responsibility. Failures are easy to isolate — comment out downstream stages to inspect any intermediate result. And because it's a SELECT (not a DELETE), your raw data is never touched. The logic is repeatable every time new dirty data arrives.</p></div>
+  </section>
+
+  <!-- PART 3: GCP TOOLS -->
+  <section>
+    <h2 class="section-title">Part 3 — Google Cloud ETL Tools Beyond SQL</h2>
+    <p>While SQL in BigQuery handles the majority of data cleaning tasks, there are scenarios where SQL alone is insufficient — large-scale streaming pipelines, legacy system migrations, complex multi-source orchestrations, or teams without SQL expertise. Google Cloud provides five specialised tools for these scenarios.</p>
+
+    <!-- PIPELINE -->
+    <div class="pipeline">
+      <span class="pipe-step">Raw Sources</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">Extract</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">Transform / Clean</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">Load</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">BigQuery</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">Analysis / ML</span>
+    </div>
+
+    <h3 class="sub-title">Cloud Data Fusion &amp; Wrangler</h3>
+    <p>Cloud Data Fusion is a fully managed, code-free enterprise data integration platform. It provides a drag-and-drop graphical interface for building, deploying, and managing ETL/ELT pipelines — making it accessible to data analysts and business users who may not write code. Its core value is speed: pipelines that would take weeks to build in code can be assembled in hours.</p>
+    <p>Its embedded <strong>Wrangler</strong> tool is particularly powerful for data cleaning. It allows you to load a 10 MB sample of your data, apply transformations interactively using point-and-click operations, preview results instantly, and then scale the same transformation recipe to the full dataset. Wrangler is the right tool when you need to explore and experiment before committing to a transformation logic.</p>
+    <div class="note-box"><strong>Best for:</strong> Teams without strong coding skills; multi-source integration (databases, Cloud Storage, Kafka); pipelines that need enterprise governance, lineage tracking, and metadata management; organisations needing a centralised, monitored data integration platform.</div>
+
+    <h3 class="sub-title">Dataflow (Apache Beam)</h3>
+    <p>Dataflow is Google's fully managed, serverless data processing service for both <strong>stream processing</strong> (real-time) and <strong>batch processing</strong> (scheduled). It is built on the open-source <a href="https://beam.apache.org" style="color:var(--accent)">Apache Beam</a> framework, which means pipelines written for Dataflow can also run on other Beam-compatible runners.</p>
+    <p>The key concept in Dataflow is the <strong>pipeline</strong> — a directed graph of transformations where data flows through a series of stages: read from a source, apply transforms (filter, enrich, aggregate, join), write to a destination. The pipeline model abstracts away distributed computing complexities: sharding, worker coordination, failure recovery, and auto-scaling are all managed automatically.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Apache Beam (Python SDK) — Dataflow pipeline concept</span><span class="code-label lbl-advanced">advanced</span></div>
+      <pre><span class="cmt"># Conceptual example of an Apache Beam pipeline</span>
+<span class="cmt"># This illustrates the logical flow — not BigQuery SQL</span>
+<span class="kw">import</span> apache_beam <span class="kw">as</span> beam
+
+<span class="kw">with</span> beam.Pipeline() <span class="kw">as</span> pipeline:
+    clean_records = (
+        pipeline
+        | <span class="str">'Read'</span>          &gt;&gt; beam.io.ReadFromBigQuery(query=<span class="str">'SELECT * FROM raw.events'</span>)
+        | <span class="str">'Filter Nulls'</span>  &gt;&gt; beam.Filter(<span class="kw">lambda</span> r: r[<span class="str">'user_id'</span>] <span class="kw">is not</span> <span class="kw">None</span>)
+        | <span class="str">'Normalise'</span>    &gt;&gt; beam.Map(<span class="kw">lambda</span> r: {**r, <span class="str">'email'</span>: r[<span class="str">'email'</span>].lower().strip()})
+        | <span class="str">'Write'</span>        &gt;&gt; beam.io.WriteToBigQuery(<span class="str">'project.dataset.clean_events'</span>)
+    )</pre>
+    </div>
+
+    <div class="note-box"><strong>Best for:</strong> Real-time/streaming data (IoT sensors, clickstreams, fraud detection); large-scale batch jobs requiring complex transforms; teams with Python or Java engineering expertise; when you need the maximum flexibility of code-driven transformation logic.</div>
+
+    <h3 class="sub-title">Dataprep (by Trifacta)</h3>
+    <p>Dataprep is a third-party intelligent data wrangling service operated by Trifacta, deeply integrated with Google Cloud. It is UI-based, auto-scales using Dataflow under the hood, and incorporates AI-driven suggestions for transformations. Unlike Wrangler (which is part of a broader pipeline tool), Dataprep is specifically focused on the cleaning and preparation step.</p>
+    <p>Dataprep can ingest data from BigQuery, Cloud Storage, and local files in CSV, JSON, or relational formats. Cleaned data can be sent directly to BigQuery, Cloud Storage, Looker Studio, or Vertex AI — making it a natural step in an end-to-end analytics or ML workflow.</p>
+    <div class="note-box"><strong>Best for:</strong> Analysts who want a visual, AI-assisted interface for exploring and cleaning data; marketing analytics combining data from multiple cross-functional sources; data onboarding from external/third-party providers; preparation steps for ML model training in Vertex AI.</div>
+
+    <h3 class="sub-title">Dataproc</h3>
+    <p>Dataproc is Google Cloud's managed service for running Apache Spark, Apache Hadoop, Apache Flink, and 30+ other open-source big data frameworks. It is the tool of choice when your organisation already has investment in Spark or Hadoop — either in terms of existing job code, engineering expertise, or data architecture dependencies.</p>
+    <p>Dataproc creates managed clusters that can be spun up in 90 seconds, scaled dynamically, and shut down when not in use — avoiding the cost of always-on infrastructure. It integrates natively with BigQuery, Cloud Storage, and Cloud Bigtable, allowing Spark jobs to read and write to these services directly.</p>
+    <div class="note-box"><strong>Best for:</strong> Organisations with existing Spark/Hadoop expertise or job dependencies; large-scale ETL workloads at petabyte scale; data lake modernisation; ML feature engineering at scale; teams that want hands-on DevOps control over their processing cluster.</div>
+
+    <!-- COMPARISON TABLE -->
+    <h3 class="sub-title">When to Use Which Tool</h3>
+    <table class="compare-table">
+      <thead>
+        <tr><th>Tool</th><th>Interface</th><th>Best for</th><th>Requires</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>BigQuery SQL</td>
+          <td>SQL in console or API</td>
+          <td>Ad-hoc cleaning, validation queries, in-place transformation of data already in BigQuery</td>
+          <td>SQL knowledge</td>
+        </tr>
+        <tr>
+          <td>Cloud Data Fusion</td>
+          <td>Visual drag-and-drop</td>
+          <td>Multi-source enterprise ETL with governance, lineage, and metadata management</td>
+          <td>Minimal coding; enterprise budget</td>
+        </tr>
+        <tr>
+          <td>Dataflow</td>
+          <td>Code (Python / Java)</td>
+          <td>Real-time streaming and large-scale batch processing; maximum flexibility</td>
+          <td>Apache Beam expertise</td>
+        </tr>
+        <tr>
+          <td>Dataprep</td>
+          <td>Visual / AI-assisted</td>
+          <td>Analyst-led data wrangling and preparation for analytics or ML</td>
+          <td>No code required</td>
+        </tr>
+        <tr>
+          <td>Dataproc</td>
+          <td>Code (Spark/Hadoop)</td>
+          <td>Existing Spark/Hadoop workloads; petabyte-scale ETL; open-source ecosystem</td>
+          <td>Spark or Hadoop expertise</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- KEY TAKEAWAYS -->
+  <section>
+    <h2 class="section-title">Key Takeaways</h2>
+    <ul class="takeaway-list">
+      <li>
+        <span class="takeaway-num">1</span>
+        <span><strong>Data quality is not a pre-processing step — it is the foundation of every analysis.</strong> The most sophisticated SQL query, the most beautiful visualisation, and the most accurate machine learning model are all worthless if built on data that violates the five integrity principles. Invest in cleaning before you invest in analysis.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">2</span>
+        <span><strong>NULL and empty string are not the same thing — ever.</strong> An empty string passes <code>IS NOT NULL</code>, appears in counts, and shows up in GROUP BY results. Always use <code>NULLIF(column, '')</code> to convert blanks to true NULLs, or add <code>AND column != ''</code> to filter both simultaneously.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">3</span>
+        <span><strong>COALESCE is the most versatile NULL-handling function.</strong> It accepts any number of arguments and returns the first non-NULL value — making it ideal for implementing fallback chains across multiple potential source columns. Master it early.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">4</span>
+        <span><strong>Use SAFE_CAST instead of CAST when ingesting from external sources.</strong> External data will sometimes have values that can't be cast — text in a numeric field, invalid dates. SAFE_CAST returns NULL on failure; CAST throws a hard error that breaks the entire query.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">5</span>
+        <span><strong>Multi-stage CTE pipelines are the gold standard for production cleaning.</strong> Each CTE has one responsibility: type fixing, validation, deduplication, enrichment. This makes pipelines debuggable (inspect any intermediate stage), readable (self-documenting), and repeatable (just re-run the query on new data).</span>
+      </li>
+      <li>
+        <span class="takeaway-num">6</span>
+        <span><strong>Skew is not always a problem — but it always requires investigation.</strong> A dataset where 90% of records come from one country may reflect the true business reality. Or it may reflect a broken data collection process. The answer determines whether you proceed or escalate. Never assume.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">7</span>
+        <span><strong>The right Google Cloud ETL tool depends on your team's skills and your data's characteristics.</strong> SQL for in-BigQuery transformations; Data Fusion or Dataprep for visual/no-code pipelines; Dataflow for real-time streaming or maximum flexibility; Dataproc if your team already lives in Spark or Hadoop. There is no universally correct answer — only the correct answer for your context.</span>
+      </li>
+      <li>
+        <span class="takeaway-num">8</span>
+        <span><strong>Data cleaning logic must be repeatable, not one-off.</strong> Dirty data is not a one-time problem — it arrives continuously from imperfect source systems. Cleaning logic written as SQL CTEs or pipeline recipes can be scheduled, automated, and applied to every new batch of incoming data without manual intervention.</span>
+      </li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Google Cloud Data Analytics · Module 3 · Cleaning and Transforming Data · 2026</span>
+    <span>Platforms: BigQuery · Cloud Data Fusion · Dataflow · Dataprep · Dataproc</span>
+  </footer>
+
+</div>
+</body>
+</html>

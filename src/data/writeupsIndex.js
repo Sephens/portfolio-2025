@@ -73,7 +73,27 @@ const writeups = [
   accentBg: "#e8f2fc",
   isPublished: true,
   isFeatured: false,
-}
+},
+
+{
+  id: "WR-004",
+  title: "Cleaning and Transforming Your Data",
+  category: "Data Engineering",
+  tags: ["BigQuery", "SQL", "Data Quality", "ETL", "Google Cloud", "Data Cleaning"],
+  abstract:
+    "A comprehensive study of the five data integrity principles — validity, accuracy, completeness, consistency, and uniformity — alongside every essential SQL cleaning technique in BigQuery and a comparison of Google Cloud's ETL tool ecosystem.",
+  highlights: [
+    "20+ SQL techniques from NULL handling and SAFE_CAST to production-grade multi-stage CTE pipelines",
+    "Five data quality dimensions explained with real-world analogies including the $125M NASA Mars Orbiter failure",
+    "Comparative guide to Cloud Data Fusion, Dataflow, Dataprep, and Dataproc — when to use each",
+  ],
+  href: "/writeups/Data_Cleaning_Transforming.html",
+  readTime: "12 min read",
+  accent: "#1a6bb5",
+  accentBg: "#e8f2fc",
+  isPublished: true,
+  isFeatured: false,
+},
 
   /* ── Add future writeups below ──────────────────────────────────
   {
