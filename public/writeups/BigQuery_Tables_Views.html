@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Permanent Tables & Access-Controlled Views in BigQuery — Portfolio Writeup</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#1a1a2e;--ink-mid:#3a3a5c;--ink-light:#6b6b8a;--accent:#1a6bb5;--accent-light:#e8f2fc;--accent-dark:#0d3b6e;--gold:#c9963a;--gold-light:#fdf6e8;--red:#b53a1a;--red-light:#fdf0ec;--green:#1a7a3a;--green-light:#edf7f1;--purple:#5a3a9a;--purple-light:#f0ecfd;--teal:#0d6b6b;--teal-light:#e0f5f5;--border:#e2e2ef;--surface:#f8f8fc;--white:#ffffff;--code-bg:#0f1b2d}
+html{font-size:16px}
+body{font-family:'Source Serif 4',Georgia,serif;font-weight:300;color:var(--ink);background:var(--white);line-height:1.85}
+.page{max-width:840px;margin:0 auto;padding:0 2rem 5rem}
+.site-header{border-bottom:1px solid var(--border);padding:1.25rem 2rem;display:flex;align-items:center;justify-content:space-between;max-width:840px;margin:0 auto}
+.site-logo{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink-light);letter-spacing:.08em;text-transform:uppercase}
+.site-tag{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);background:var(--accent-light);padding:3px 10px;border-radius:20px}
+.hero{padding:4rem 0 2.5rem;border-bottom:1px solid var(--border);margin-bottom:3rem}
+.category-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:1.25rem;display:flex;align-items:center;gap:8px}
+.category-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--accent)}
+h1.title{font-family:'Playfair Display',serif;font-weight:700;font-size:2.75rem;line-height:1.15;color:var(--ink);margin-bottom:1.25rem;max-width:700px}
+.subtitle{font-size:1.12rem;color:var(--ink-mid);font-weight:300;max-width:620px;line-height:1.75;margin-bottom:2rem}
+.meta-row{display:flex;flex-wrap:wrap;gap:1.5rem;font-family:'DM Mono',monospace;font-size:12px}
+.meta-item{display:flex;flex-direction:column;gap:3px}
+.meta-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-light)}
+.meta-value{color:var(--ink);font-weight:500}
+.meta-sep{width:1px;background:var(--border);align-self:stretch}
+section{margin-bottom:3.5rem}
+h2.section-title{font-family:'Playfair Display',serif;font-weight:700;font-size:1.6rem;color:var(--ink);margin-bottom:1rem;padding-bottom:.65rem;border-bottom:2px solid var(--ink)}
+h3.sub-title{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.08rem;color:var(--ink);margin:1.85rem 0 .55rem}
+p{margin-bottom:1rem;color:var(--ink-mid);font-size:1rem}
+p:last-child{margin-bottom:0}
+strong{color:var(--ink);font-weight:600}
+code{font-family:'DM Mono',monospace;font-size:12px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--ink)}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:1.5rem 0}
+.stat-card{border:1px solid var(--border);border-radius:8px;padding:1.25rem;text-align:center}
+.stat-number{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--accent);line-height:1;margin-bottom:6px}
+.stat-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);text-transform:uppercase;letter-spacing:.08em;line-height:1.4}
+.tools-row{display:flex;flex-wrap:wrap;gap:8px;margin:1rem 0}
+.tool-tag{font-family:'DM Mono',monospace;font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);color:var(--ink-mid);background:var(--surface)}
+.tool-tag.primary{background:var(--accent-light);border-color:#b0d4f4;color:var(--accent)}
+.code-block{background:var(--code-bg);border-radius:8px;overflow:hidden;margin:1.25rem 0}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08)}
+.code-lang{font-family:'DM Mono',monospace;font-size:11px;color:#64b5f6;letter-spacing:.06em;text-transform:uppercase}
+.code-tag{font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:3px}
+.ct-ok{background:rgba(40,160,80,.35);color:#7fda9f}
+.ct-info{background:rgba(40,120,200,.35);color:#90caf9}
+.ct-warn{background:rgba(200,150,0,.35);color:#ffd580}
+pre{font-family:'DM Mono',monospace;font-size:12.5px;color:#cdd9f0;padding:1.25rem 1.5rem;margin:0;white-space:pre;overflow-x:auto;line-height:1.75}
+.kw{color:#80cbc4}.fn{color:#f48fb1}.str{color:#ffcc80}.cmt{color:#546e7a;font-style:italic}.tbl{color:#90caf9}.num{color:#a5d6a7}.kv{color:#ef9a9a}
+.insight-box{background:var(--gold-light);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:1.25rem 1.5rem;margin:1.5rem 0}
+.insight-box p{color:#7a5a1a;font-style:italic;font-size:1.02rem;margin:0}
+.note-box{background:var(--accent-light);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin:1rem 0;font-size:13.5px;color:var(--accent-dark);line-height:1.7}
+.warn-box{background:var(--red-light);border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin:1rem 0;font-size:13.5px;color:#7a1a0d;line-height:1.7}
+.tip-box{background:var(--green-light);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin:1rem 0;font-size:13.5px;color:#0d3b1a;line-height:1.7}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:1.25rem 0}
+.compare-card{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.compare-head{padding:.65rem 1rem;font-family:'DM Mono',monospace;font-size:12px;font-weight:500}
+.ch-table{background:var(--accent-light);color:var(--accent-dark)}
+.ch-view{background:var(--purple-light);color:var(--purple)}
+.compare-body{padding:.85rem 1rem;font-size:13.5px;color:var(--ink-mid);line-height:1.65;background:var(--white)}
+.error-trail{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:1.25rem 0}
+.error-trail-head{background:var(--ink);color:var(--white);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px}
+.error-row{display:flex;align-items:flex-start;border-bottom:1px solid var(--border)}
+.error-row:last-child{border-bottom:none}
+.err-icon{flex:0 0 36px;display:flex;align-items:center;justify-content:center;padding:14px 0;background:var(--surface);border-right:1px solid var(--border);font-size:14px}
+.err-body{padding:10px 14px;flex:1}
+.err-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.err-detail{font-size:12.5px;color:var(--ink-light);line-height:1.6}
+.err-fix{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;background:var(--green-light);color:var(--green);border:1px solid #a8dfc0;border-radius:4px;padding:1px 6px;margin-left:8px;vertical-align:middle}
+.err-rule{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;background:var(--purple-light);color:var(--purple);border:1px solid #c8b4f4;border-radius:4px;padding:1px 6px;margin-left:8px;vertical-align:middle}
+.rules-table{width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:13.5px}
+.rules-table th{background:var(--ink);color:var(--white);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;text-align:left}
+.rules-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--ink-mid);vertical-align:top;line-height:1.55}
+.rules-table tr:nth-child(even) td{background:var(--surface)}
+.rules-table td:first-child{font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);font-weight:500;white-space:nowrap}
+.findings-table{width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:13.5px}
+.findings-table th{background:var(--ink);color:var(--white);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;text-align:left}
+.findings-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--ink-mid);vertical-align:top;line-height:1.55}
+.findings-table tr:nth-child(even) td{background:var(--surface)}
+.findings-table td:first-child{color:var(--ink);font-weight:500}
+.security-layers{display:flex;flex-direction:column;gap:8px;margin:1.25rem 0}
+.sec-layer{display:flex;align-items:flex-start;gap:12px;padding:.85rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--surface)}
+.sec-badge{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0;font-weight:500}
+.sb-1{background:var(--teal-light);color:var(--teal);border:1px solid #8ad4d4}
+.sb-2{background:var(--accent-light);color:var(--accent);border:1px solid #b0d4f4}
+.sb-3{background:var(--purple-light);color:var(--purple);border:1px solid #c8b4f4}
+.sb-4{background:var(--gold-light);color:var(--gold);border:1px solid #f0c870}
+.sec-desc{font-size:13.5px;color:var(--ink-mid);line-height:1.6}
+.sec-name{font-weight:600;color:var(--ink);margin-right:6px}
+.takeaway-list{list-style:none;margin:1rem 0}
+.takeaway-list li{display:flex;gap:12px;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--border);font-size:15px;color:var(--ink-mid);line-height:1.65}
+.takeaway-list li:last-child{border-bottom:none}
+.takeaway-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--white);background:var(--accent);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+footer{border-top:1px solid var(--border);padding:2rem 0 1rem;margin-top:3rem;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-light);display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+@media(max-width:600px){h1.title{font-size:2rem}.stat-row,.compare-grid{grid-template-columns:1fr}.meta-sep{display:none}.site-header{padding:1rem}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <span class="site-logo">Portfolio · Data Engineering</span>
+  <span class="site-tag">Score: 100 / 100</span>
+</header>
+<div class="page">
+  <div class="hero">
+    <div class="category-label">BigQuery · Table Design · Access Control · Views</div>
+    <h1 class="title">Creating Permanent Tables and Access-Controlled Views in BigQuery</h1>
+    <p class="subtitle">A comprehensive walkthrough of BigQuery's table creation rules, schema design principles, view lifecycle management, and enterprise-grade row-level access control — from debugging broken CREATE TABLE statements to building SESSION_USER-gated views with expiry timestamps.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Platform</span><span class="meta-value">Google BigQuery</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Lab ID</span><span class="meta-value">GSP410</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Score</span><span class="meta-value">100 / 100</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Level</span><span class="meta-value">Introductory</span></div>
+      <div class="meta-sep"></div>
+      <div class="meta-item"><span class="meta-label">Duration</span><span class="meta-value">35 minutes</span></div>
+    </div>
+  </div>
+
+  <section>
+    <h2 class="section-title">Overview</h2>
+    <p>In production data environments, ad-hoc queries are only the beginning. The real infrastructure of a data organisation consists of permanent tables that persist and serve reporting workloads, and views that wrap complex logic into reusable, access-controlled interfaces. This lab moved well beyond writing queries — it focused on the architecture of how data is stored, exposed, and secured inside BigQuery.</p>
+    <p>Working against the Google Merchandise Store's ecommerce dataset, I diagnosed six progressively broken <code>CREATE TABLE</code> statements, built a production-grade revenue reporting table with a formal schema definition, created views with metadata labels and expiry timestamps, and implemented row-level security using BigQuery's <code>SESSION_USER()</code> function — the pattern that underpins enterprise data access control in production environments.</p>
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-number">6</div><div class="stat-label">CREATE TABLE errors diagnosed &amp; resolved</div></div>
+      <div class="stat-card"><div class="stat-number">97</div><div class="stat-label">Revenue transactions in final permanent table</div></div>
+      <div class="stat-card"><div class="stat-number">4</div><div class="stat-label">Access control layers implemented</div></div>
+    </div>
+    <div class="tools-row">
+      <span class="tool-tag primary">Google BigQuery</span>
+      <span class="tool-tag primary">CREATE OR REPLACE TABLE</span>
+      <span class="tool-tag primary">CREATE OR REPLACE VIEW</span>
+      <span class="tool-tag">Schema definition with NOT NULL</span>
+      <span class="tool-tag">SESSION_USER()</span>
+      <span class="tool-tag">REGEXP_EXTRACT</span>
+      <span class="tool-tag">STRING_AGG</span>
+      <span class="tool-tag">CAST / FLOAT64</span>
+      <span class="tool-tag">TIMESTAMP_ADD</span>
+      <span class="tool-tag">Table OPTIONS (labels, expiry)</span>
+      <span class="tool-tag">Row-level access control</span>
+      <span class="tool-tag">View lifecycle management</span>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Permanent Tables vs Views — The Core Distinction</h2>
+    <p>The choice between permanent tables and views is architectural — it determines how data is stored, how fresh it is, and what it costs to query. Understanding this difference is the prerequisite for all subsequent design decisions in BigQuery.</p>
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-head ch-table">Permanent Table</div>
+        <div class="compare-body"><strong>Data physically stored in BigQuery.</strong> Query executes once, rows written to storage. Fast and cost-predictable to query. Does not auto-update — must be explicitly refreshed. Best for: large datasets queried frequently, expensive transformations you don't want to repeat, historical snapshots.</div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-head ch-view">Logical View</div>
+        <div class="compare-body"><strong>Only the SQL query is stored — no data.</strong> Every query executes the underlying SELECT against live source tables. Always reflects current state. Query cost incurred on every access. Best for: always-current reporting, reusable complex logic, row-level security without duplicating data.</div>
+      </div>
+    </div>
+    <div class="insight-box"><p>Use permanent tables when freshness can be traded for performance and cost predictability. Use views when real-time accuracy matters more than query-time cost, or when enforcing row-level security without maintaining separate copies of data for different user groups.</p></div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Task 2 — The Five Rules of CREATE TABLE in BigQuery</h2>
+    <p>BigQuery's <code>CREATE TABLE</code> statement has five governing rules for how column definitions and query statements interact. Violating any of them produces an error — or worse, a query that succeeds but silently returns wrong data.</p>
+    <table class="rules-table">
+      <thead><tr><th>Rule</th><th>Description</th><th>What breaks it</th></tr></thead>
+      <tbody>
+        <tr><td>Rule 1</td><td>Either a column list, a query statement, or both must be present.</td><td>CREATE TABLE with neither a schema definition nor a SELECT clause.</td></tr>
+        <tr><td>Rule 2</td><td>When both are present, BigQuery ignores query names and matches columns by <strong>position</strong>.</td><td>Schema column A in position 1, query column B in position 1 — B's data silently populates A's column. No error.</td></tr>
+        <tr><td>Rule 3</td><td>When only a query is present, BigQuery infers column names and types from the query output.</td><td>Selecting a column without an alias may produce an unexpected inferred name.</td></tr>
+        <tr><td>Rule 4</td><td>Column names must be defined either in the schema or the query statement.</td><td>SELECT without aliases where BigQuery cannot infer a name.</td></tr>
+        <tr><td>Rule 5</td><td>Duplicate column names are not allowed — in the schema definition or query output.</td><td><code>SELECT fullVisitorId, *</code> when <code>*</code> already includes <code>fullVisitorId</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="sub-title">The complete error trail — six broken queries diagnosed</h3>
+    <div class="error-trail">
+      <div class="error-trail-head">Query error catalogue — root cause &amp; resolution for each</div>
+      <div class="error-row">
+        <div class="err-icon" style="color:var(--red)">✕</div>
+        <div class="err-body">
+          <div class="err-title">Query 1 — Duplicate column name <span class="err-rule">Rule 5</span></div>
+          <div class="err-detail"><code>SELECT fullVisitorId, *</code> — since <code>*</code> already includes <code>fullVisitorId</code>, the column appears twice. BigQuery rejects duplicate column names at table creation. Fix: use <code>SELECT *</code> alone, or list columns explicitly without repetition.</div>
+        </div>
+      </div>
+      <div class="error-row">
+        <div class="err-icon" style="color:var(--red)">✕</div>
+        <div class="err-body">
+          <div class="err-title">Query 2 — Schema column count mismatch <span class="err-rule">Rule 2</span></div>
+          <div class="err-detail">A 2-column schema was defined but <code>SELECT *</code> returns 32 columns. BigQuery cannot positionally match 2 schema columns to 32 query columns. Fix: match schema column count exactly to query output, or remove the schema and let BigQuery infer.</div>
+        </div>
+      </div>
+      <div class="error-row">
+        <div class="err-icon" style="color:var(--gold)">⚠</div>
+        <div class="err-body">
+          <div class="err-title">Query 3 — Valid syntax, silently wrong data <span class="err-rule">Rule 2 — most dangerous</span></div>
+          <div class="err-detail">Schema defines <code>channelGrouping</code> in position 2, but the query selects <code>city</code> in position 2. BigQuery silently stores city data in the <code>channelGrouping</code> column. No error. No warning. The table is created and looks correct — but contains fundamentally wrong values.</div>
+        </div>
+      </div>
+      <div class="error-row">
+        <div class="err-icon" style="color:var(--red)">✕</div>
+        <div class="err-body">
+          <div class="err-title">Query 4 — NOT NULL violation at runtime <span class="err-fix">runtime error</span></div>
+          <div class="err-detail"><code>totalTransactionRevenue INT64 NOT NULL</code> passes validation but fails at execution — most visitor sessions have no purchase revenue, so NULL rows are the majority. Fix: remove <code>NOT NULL</code> from the revenue field, reflecting the business reality that it is optional.</div>
+        </div>
+      </div>
+      <div class="error-row">
+        <div class="err-icon" style="color:var(--green)">✓</div>
+        <div class="err-body">
+          <div class="err-title">Query 5 — First correct execution <span class="err-fix">working</span></div>
+          <div class="err-detail"><code>NOT NULL</code> on identifiers (always present), nullable revenue (optional by business logic). Executes successfully and creates the table with all 56,989 session records for 2017-08-01.</div>
+        </div>
+      </div>
+      <div class="error-row">
+        <div class="err-icon" style="color:var(--green)">✓</div>
+        <div class="err-body">
+          <div class="err-title">Query 6 — Production revenue table: all rules correctly applied <span class="err-fix">complete</span></div>
+          <div class="err-detail">Full schema with field descriptions, correct nullability, <code>DISTINCT</code> deduplication, <code>CAST</code> for type conversion, revenue divided by 1,000,000 as <code>FLOAT64</code>, <code>WHERE</code> filter for non-null revenue on a specific date. Returns exactly 97 distinct revenue-generating sessions.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub-title">The production revenue table — final correct query</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — production permanent table</span><span class="code-tag ct-ok">✓ complete</span></div>
+      <pre><span class="kw">CREATE OR REPLACE TABLE</span> ecommerce.revenue_transactions_20170801
+<span class="cmt">-- Explicit schema: types, constraints, and descriptions defined upfront</span>
+(
+  fullVisitorId           STRING  <span class="kv">NOT NULL</span> <span class="kw">OPTIONS</span>(description=<span class="str">"Unique visitor ID"</span>),
+  visitId                 STRING  <span class="kv">NOT NULL</span> <span class="kw">OPTIONS</span>(description=<span class="str">"Session ID — not globally unique"</span>),
+  channelGrouping         STRING  <span class="kv">NOT NULL</span> <span class="kw">OPTIONS</span>(description=<span class="str">"Acquisition channel"</span>),
+  totalTransactionRevenue FLOAT64          <span class="kw">OPTIONS</span>(description=<span class="str">"Transaction revenue in USD"</span>)
+  <span class="cmt">-- nullable: not all visitors complete a purchase</span>
+)
+<span class="kw">OPTIONS</span>(description=<span class="str">"Revenue transactions for 08/01/2017"</span>)
+<span class="kw">AS</span>
+<span class="kw">SELECT DISTINCT</span>
+  fullVisitorId,
+  <span class="fn">CAST</span>(visitId <span class="kw">AS</span> STRING)       <span class="kw">AS</span> visitId,       <span class="cmt">-- INT64 → STRING for consistent key type</span>
+  channelGrouping,
+  totalTransactionRevenue / <span class="num">1000000</span> <span class="kw">AS</span> totalTransactionRevenue  <span class="cmt">-- micro-units → USD</span>
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions_raw`</span>
+<span class="kw">WHERE</span>
+  date = <span class="str">'20170801'</span>
+  <span class="kw">AND</span> totalTransactionRevenue <span class="kw">IS NOT NULL</span>;
+<span class="cmt">-- Result: 97 revenue transactions</span></pre>
+    </div>
+    <div class="warn-box"><strong>Stale data problem:</strong> Once created, a permanent table contains only the data ingested at creation time. Upstream changes are never automatically reflected. Pair permanent tables with BigQuery Scheduled Queries or Dataflow pipeline refresh jobs to keep them current.</div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Task 3 — Creating and Managing Views</h2>
+    <p>Views solve the stale data problem. Because a view stores only the SQL query — not the data — every execution runs against live source tables, always returning the current state. The tradeoff: each access triggers the full underlying query and incurs query cost.</p>
+
+    <h3 class="sub-title">View creation modes</h3>
+    <div class="tip-box"><strong>Naming convention:</strong> BigQuery has no visual indicator distinguishing tables from views in the Explorer panel. Always use a consistent prefix — <code>vw_</code> prefix or <code>_view</code> suffix — to make the distinction immediately visible in any dataset listing, query, or documentation.</div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — three CREATE VIEW modes</span><span class="code-tag ct-info">reference</span></div>
+      <pre><span class="kw">CREATE VIEW</span> ecommerce.vw_name <span class="kw">AS</span> <span class="kw">SELECT</span> ...;
+<span class="cmt">-- Creates only if view does NOT exist. Errors if it does.</span>
+
+<span class="kw">CREATE OR REPLACE VIEW</span> ecommerce.vw_name <span class="kw">AS</span> <span class="kw">SELECT</span> ...;
+<span class="cmt">-- Creates or overwrites. Idempotent. Correct default for production.</span>
+
+<span class="kw">CREATE VIEW IF NOT EXISTS</span> ecommerce.vw_name <span class="kw">AS</span> <span class="kw">SELECT</span> ...;
+<span class="cmt">-- Creates if absent; silently skips if exists. No error either way.</span></pre>
+    </div>
+
+    <h3 class="sub-title">Views with metadata — labels, descriptions, and expiry</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — fraud detection view with full metadata</span><span class="code-tag ct-ok">✓ production pattern</span></div>
+      <pre><span class="kw">CREATE OR REPLACE VIEW</span> ecommerce.vw_large_transactions
+<span class="kw">OPTIONS</span>(
+  description          = <span class="str">"large transactions for review — orders over $1,000 USD"</span>,
+  labels               = [(<span class="str">'org_unit'</span>, <span class="str">'loss_prevention'</span>)],
+  expiration_timestamp = <span class="fn">TIMESTAMP_ADD</span>(<span class="fn">CURRENT_TIMESTAMP</span>(), <span class="kw">INTERVAL</span> <span class="num">90</span> DAY)
+  <span class="cmt">-- auto-expires: prevents sensitive views persisting indefinitely</span>
+)
+<span class="kw">AS</span>
+<span class="kw">SELECT DISTINCT</span>
+  date, fullVisitorId, visitId, channelGrouping,
+  totalTransactionRevenue / <span class="num">1000000</span>  <span class="kw">AS</span> revenue,
+  currencyCode,
+  <span class="fn">STRING_AGG</span>(<span class="kw">DISTINCT</span> v2ProductName <span class="kw">ORDER BY</span> v2ProductName <span class="kw">LIMIT</span> <span class="num">10</span>)
+    <span class="kw">AS</span> products_ordered  <span class="cmt">-- collapses multiple product rows into one sorted string</span>
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions_raw`</span>
+<span class="kw">WHERE</span>
+  (totalTransactionRevenue / <span class="num">1000000</span>) >= <span class="num">1000</span>  <span class="cmt">-- must repeat expression — alias not yet defined</span>
+  <span class="kw">AND</span> currencyCode = <span class="str">'USD'</span>
+  <span class="kw">AND</span> date >= <span class="str">'20170101'</span>
+<span class="kw">GROUP BY</span> <span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>   <span class="cmt">-- required when using STRING_AGG</span>
+<span class="kw">ORDER BY</span> date <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">10</span>;</pre>
+    </div>
+    <div class="note-box"><strong>Why WHERE repeats the division:</strong> SQL's execution order — FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY — means WHERE runs before SELECT. The alias <code>revenue</code> doesn't exist yet when WHERE evaluates. You must always repeat the full expression.</div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Task 4 — Row-Level Access Control with SESSION_USER()</h2>
+    <p>The most technically sophisticated task: implementing domain-based row-level access control inside a view definition. <code>SESSION_USER()</code> returns the email address of the currently authenticated user at query time. Combined with <code>REGEXP_EXTRACT</code> to parse their domain and an <code>IN</code> filter to allowlist approved domains, it creates a view that returns different rows to different users — no separate table, no per-user IAM role required.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">BigQuery Standard SQL — complete access-controlled view with expiry</span><span class="code-tag ct-ok">✓ enterprise pattern</span></div>
+      <pre><span class="kw">CREATE OR REPLACE VIEW</span> ecommerce.vw_large_transactions
+<span class="kw">OPTIONS</span>(
+  description          = <span class="str">"large transactions for review"</span>,
+  labels               = [(<span class="str">'org_unit'</span>, <span class="str">'loss_prevention'</span>)],
+  expiration_timestamp = <span class="fn">TIMESTAMP_ADD</span>(<span class="fn">CURRENT_TIMESTAMP</span>(), <span class="kw">INTERVAL</span> <span class="num">90</span> DAY)
+)
+<span class="kw">AS</span>
+<span class="kw">SELECT DISTINCT</span>
+  <span class="fn">SESSION_USER</span>()                              <span class="kw">AS</span> viewer_ldap,
+  <span class="fn">REGEXP_EXTRACT</span>(<span class="fn">SESSION_USER</span>(), <span class="str">r'@(.+)'</span>)  <span class="kw">AS</span> domain,
+  date, fullVisitorId, visitId, channelGrouping,
+  totalTransactionRevenue / <span class="num">1000000</span>           <span class="kw">AS</span> totalTransactionRevenue,
+  currencyCode,
+  <span class="fn">STRING_AGG</span>(<span class="kw">DISTINCT</span> v2ProductName <span class="kw">ORDER BY</span> v2ProductName <span class="kw">LIMIT</span> <span class="num">10</span>) <span class="kw">AS</span> products_ordered
+<span class="kw">FROM</span> <span class="tbl">`data-to-insights.ecommerce.all_sessions_raw`</span>
+<span class="kw">WHERE</span>
+  (totalTransactionRevenue / <span class="num">1000000</span>) > <span class="num">1000</span>
+  <span class="kw">AND</span> currencyCode = <span class="str">'USD'</span>
+  <span class="cmt">-- DOMAIN ALLOWLIST: users outside approved domains see zero rows</span>
+  <span class="kw">AND</span> <span class="fn">REGEXP_EXTRACT</span>(<span class="fn">SESSION_USER</span>(), <span class="str">r'@(.+)'</span>) <span class="kw">IN</span> (<span class="str">'qwiklabs.net'</span>)
+  <span class="cmt">-- IN ('') → zero rows for ALL users — emergency kill switch</span>
+<span class="kw">GROUP BY</span> <span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>,<span class="num">7</span>,<span class="num">8</span>
+<span class="kw">ORDER BY</span> date <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">10</span>;</pre>
+    </div>
+
+    <h3 class="sub-title">BigQuery's full access control hierarchy</h3>
+    <div class="security-layers">
+      <div class="sec-layer"><span class="sec-badge sb-1">Project Level</span><div class="sec-desc"><span class="sec-name">IAM Roles</span>Broadest scope. <code>roles/bigquery.dataViewer</code> grants access to all datasets in a project. Best for trusted team-wide platform access. Managed via Google Cloud IAM.</div></div>
+      <div class="sec-layer"><span class="sec-badge sb-2">Dataset Level</span><div class="sec-desc"><span class="sec-name">Dataset IAM</span>Controls access to all tables and views within a specific dataset. Ideal for separating restricted raw data from curated reporting datasets with broader access.</div></div>
+      <div class="sec-layer"><span class="sec-badge sb-3">View Level</span><div class="sec-desc"><span class="sec-name">Authorized Views</span>Expose a curated subset of a restricted dataset without granting direct table access. The view holds its own IAM permissions separate from the underlying tables.</div></div>
+      <div class="sec-layer"><span class="sec-badge sb-4">Row Level</span><div class="sec-desc"><span class="sec-name">SESSION_USER() + Row Access Policies</span>Finest granularity. SESSION_USER() inside views filters rows based on caller identity at query time. BigQuery's native Row Access Policies (GA since 2021) achieve the same directly on tables using <code>CREATE ROW ACCESS POLICY</code> DDL — the recommended modern production approach.</div></div>
+    </div>
+    <div class="insight-box"><p>The SESSION_USER() pattern in this lab is the conceptual foundation for BigQuery's production Row Access Policies. Modern implementations attach policies directly to the base table — making security enforcement invisible to downstream views and impossible to circumvent by querying the source table directly.</p></div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Key Findings</h2>
+    <table class="findings-table">
+      <thead><tr><th>Finding</th><th>Detail</th><th>Production Implication</th></tr></thead>
+      <tbody>
+        <tr><td>Rule 2 produces silent wrong data</td><td>Schema + query positional mismatch populates channelGrouping with city data — no error, wrong values.</td><td>Always verify column alignment when using both schema and query. Prefer naming-only schemas or naming-only queries.</td></tr>
+        <tr><td>NOT NULL is a runtime data quality gate</td><td>NOT NULL on totalTransactionRevenue fails at execution when NULL revenue rows arrive from upstream.</td><td>Apply NOT NULL deliberately on required identifiers only. Never on optional metrics or nullable business fields.</td></tr>
+        <tr><td>Permanent tables go stale immediately</td><td>97 transactions reflect source data at creation time — upstream changes invisible until table rebuilt.</td><td>Pair permanent tables with scheduled refresh jobs or use views for always-current data.</td></tr>
+        <tr><td>97 revenue transactions on 2017-08-01</td><td>Filtering non-null revenue + DISTINCT by fullVisitorId + visitId returned exactly 97 distinct sessions.</td><td>DISTINCT before writing is critical — without it, repeated page event rows inflate session and revenue counts.</td></tr>
+        <tr><td>Largest fraud-review transaction: $1,002.78</td><td>Visitor 8945917216741229076 placed the highest-value order meeting the $1,000+ threshold.</td><td>The fraud view correctly surfaces high-value orders. Domain filtering ensures only loss prevention team sees this data.</td></tr>
+        <tr><td>Empty IN() list = zero-row kill switch</td><td>Setting <code>IN('')</code> returned zero rows for all users — effective emergency access revocation.</td><td>In production, BigQuery Row Access Policies provide a more robust and auditable alternative.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2 class="section-title">Key Takeaways</h2>
+    <ul class="takeaway-list">
+      <li><span class="takeaway-num">1</span><span><strong>BigQuery matches schema columns to query output by position, not by name.</strong> When both a schema and a query statement are present, query column names are completely ignored. A positional mismatch silently populates wrong columns — one of the most dangerous failure modes because it produces no error.</span></li>
+      <li><span class="takeaway-num">2</span><span><strong>NOT NULL is a data quality enforcement gate, not just documentation.</strong> It creates a hard enforcement point that rejects upstream data missing a required field at write time rather than silently storing NULL. Use it on fields where a NULL would make the row meaningless.</span></li>
+      <li><span class="takeaway-num">3</span><span><strong>Permanent tables and views solve different problems.</strong> Tables: fast, cost-predictable queries on static data. Views: always-current data at the cost of re-executing the full query on every access. Choose based on whether freshness or performance matters more for each use case.</span></li>
+      <li><span class="takeaway-num">4</span><span><strong>CREATE OR REPLACE VIEW is the correct default for production pipelines.</strong> It is idempotent — safe to run repeatedly in automated deployment scripts and scheduled jobs without risk of failure if the view already exists.</span></li>
+      <li><span class="takeaway-num">5</span><span><strong>WHERE clauses cannot reference aliased columns defined in SELECT.</strong> SQL's execution order means WHERE runs before SELECT. Always repeat the full expression — the alias defined in SELECT does not exist yet when WHERE is evaluated.</span></li>
+      <li><span class="takeaway-num">6</span><span><strong>SESSION_USER() enables row-level security baked directly into view definitions.</strong> By filtering rows based on the authenticated caller's domain at query time, one view returns different results to different users without separate tables, datasets, or per-user IAM configurations.</span></li>
+      <li><span class="takeaway-num">7</span><span><strong>View expiration timestamps prevent sensitive data persisting indefinitely.</strong> Adding <code>expiration_timestamp</code> to view OPTIONS ensures it self-destructs after the retention window — essential security hygiene for views exposing sensitive financial or personal data.</span></li>
+      <li><span class="takeaway-num">8</span><span><strong>Labels are infrastructure metadata, not UI decoration.</strong> Labels on views and tables enable programmatic filtering in Cloud Console, cost attribution in billing exports, and automated governance audits across an entire GCP project.</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Google Cloud BigQuery Lab · GSP410 · Score: 100/100 · Completed 2026</span>
+    <span>Data: Google Merchandise Store Analytics Export</span>
+  </footer>
+</div>
+</body>
+</html>

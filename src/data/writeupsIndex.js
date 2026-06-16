@@ -95,6 +95,26 @@ const writeups = [
   isFeatured: false,
 },
 
+{
+  id: "WR-006",
+  title: "Creating Permanent Tables and Access-Controlled Views in BigQuery",
+  category: "Data Engineering",
+  tags: ["BigQuery", "SQL", "Google Cloud", "Access Control", "Data Architecture"],
+  abstract:
+    "Diagnosing six broken CREATE TABLE statements, building a production-grade revenue reporting table with formal schema constraints, and implementing SESSION_USER-gated views with expiry timestamps and domain-based row-level access control.",
+  highlights: [
+    "Six CREATE TABLE errors diagnosed — including Rule 2's silent positional column mismatch, the most dangerous failure mode",
+    "97-transaction revenue table built with NOT NULL enforcement, CAST type conversion, and DISTINCT deduplication",
+    "Domain-based row-level security via SESSION_USER() with 90-day view expiry — the foundation of BigQuery Row Access Policies",
+  ],
+  href: "/writeups/BigQuery_Tables_Views.html",
+  readTime: "10 min read",
+  accent: "#1a6bb5",
+  accentBg: "#e8f2fc",
+  isPublished: true,
+  isFeatured: false,
+}
+
   /* ── Add future writeups below ──────────────────────────────────
   {
     id: "WR-002",
